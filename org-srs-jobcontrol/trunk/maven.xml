@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project default="jar">
+<postGoal name="xdoc:register-reports">
+  <attainGoal name="maven-checkstyle-plugin:deregister"/>  
+  <attainGoal name="maven-license-plugin:deregister"/>
+</postGoal>
+</project>
