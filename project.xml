@@ -5,12 +5,12 @@
    <groupId>glast</groupId>
    <currentVersion>0.4</currentVersion>
    <shortDescription>Glast Job Control</shortDescription>
-   <url>http://glast-ground.slac.stanford.edu/docs/${pom.artifactId}</url>
+   <url>http://glast-ground.slac.stanford.edu/docs/${pom.artifactId}/</url>
    <name>Glast Job Control</name>
    <package>org.glast.jobcontrol</package>
    <inceptionYear>2005</inceptionYear>
    <siteAddress>glast-java.slac.stanford.edu</siteAddress>
-   <siteDirectory>//nfs/slac/g/glast/ground/docs/${pom.artifactId}</siteDirectory>
+   <siteDirectory>/nfs/slac/g/glast/ground/docs/${pom.artifactId}</siteDirectory>
    <repository>
       <developerConnection>scm:cvs:ext:${maven.username}@glast-java.slac.stanford.edu:/cvs/java:${pom.artifactId}</developerConnection>
       <url>http://www-glast.stanford.edu/cgi-bin/viewcvs/${pom.artifactId}/?root=java</url>
