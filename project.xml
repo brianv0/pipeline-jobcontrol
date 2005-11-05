@@ -26,6 +26,14 @@
          <version>5.0.18</version>
          <type>jar</type>
       </dependency>
+      <!-- Needed by cruisecontrol -->
+      <dependency>
+         <groupId>maven</groupId>
+         <artifactId>maven-scm-plugin</artifactId>
+         <version>1.5</version>
+         <type>plugin</type>
+         <url>http://www.ibiblio.org/maven/maven/plugins/</url>
+      </dependency>
    </dependencies>
    <build>
       <sourceDirectory>src/java</sourceDirectory>
