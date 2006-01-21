@@ -35,6 +35,12 @@
       <type>java.lang.String</type>
     </attribute>
     <attribute>
+      <name>envVariables</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <type>java.util.HashMap</type>
+    </attribute>
+    <attribute>
       <name>time</name>
       <required>false</required>
       <rtexprvalue>true</rtexprvalue>
