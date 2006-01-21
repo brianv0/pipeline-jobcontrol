@@ -15,7 +15,7 @@ import javax.servlet.jsp.tagext.SimpleTagSupport;
 /**
  *
  * @author tonyj
- * @version $Id: Submit.java,v 1.1 2005-11-04 23:56:10 tonyj Exp $
+ * @version $Id: Submit.java,v 1.2 2006-01-21 23:34:49 igor Exp $
  */
 
 public class Submit extends SimpleTagSupport implements DynamicAttributes
@@ -26,24 +26,24 @@ public class Submit extends SimpleTagSupport implements DynamicAttributes
    private int time = 90;
    private int memory = 0;
    private String extraOptions;
-   
+
    private Map<String,String> env = new HashMap<String,String>();
    private Map<String,String> files = new HashMap<String,String>();
-   
+
    /**Called by the container to invoke this tag.
     * The implementation of this method is provided by the tag library developer,
     * and handles all tag processing, body iteration, etc.
     */
    public void doTag() throws JspException
    {
-      
+
       JspWriter out=getJspContext().getOut();
-      
+
       try
       {
          JspFragment fragment = getJspBody();
          if (fragment != null) fragment.invoke(null);
-         
+
          Job job = new Job();
          job.setFiles(files);
          job.setCommand(command);
@@ -51,7 +51,7 @@ public class Submit extends SimpleTagSupport implements DynamicAttributes
          job.setMaxCPU(time);
          if (memory != 0) job.setMaxMemory(memory);
          if (extraOptions != null) job.setExtraOptions(extraOptions);
-         
+
          job.setEnv(env);
          JobControlClient client = new JobControlClient();
          int id = client.submit(job);
@@ -82,6 +82,12 @@ public class Submit extends SimpleTagSupport implements DynamicAttributes
    {
       this.extraOptions = value;
    }
+
+   public void setEnvVariables(HashMap<String,String> envVariables)
+   {
+       env.putAll(envVariables);
+   }
+
    public void setTime(int value)
    {
       this.time = value;
