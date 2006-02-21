@@ -12,6 +12,7 @@ import java.rmi.server.ServerNotActiveException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -73,20 +74,29 @@ class JobControlService implements JobControl
    {
       String command = job.getCommand();
       if (command == null || command.length() == 0) throw new JobSubmissionException("Missing command");
-      StringBuffer bsub = new StringBuffer(SUBMIT_COMMAND);
-      if (job.getLogFile() != null) bsub.append(" -o "+job.getLogFile());
-      else bsub.append(" -o %J.log");
-      if (job.getMaxCPU() != 0) bsub.append(" -c "+convertToMinutes(job.getMaxCPU()));
-      if (job.getMaxMemory() != 0) bsub.append(" -M "+job.getMaxMemory());
-      if (job.getExtraOptions() != null) bsub.append(" "+job.getExtraOptions());
-      bsub.append(" "+command);
+      StringBuilder bsub = new StringBuilder(SUBMIT_COMMAND);
+      if (job.getLogFile() == null) { bsub.append(" -o %J.log"); }
+      else { bsub.append(" -o ").append(job.getLogFile()); }
+      if (job.getMaxCPU() != 0) { bsub.append(" -c ").append(convertToMinutes(job.getMaxCPU())); }
+      if (job.getMaxMemory() != 0) { bsub.append(" -M ").append(job.getMaxMemory()); }
+      if (!job.getRunAfter().isEmpty())
+      {
+         bsub.append(" -w ");
+         for (Iterator iter = job.getRunAfter().iterator(); iter.hasNext() ; )
+         {
+            bsub.append("ended(").append(iter.next()).append(')');
+            if (iter.hasNext()) bsub.append("&&");
+         }
+      }
+      if (job.getExtraOptions() != null) { bsub.append(' ').append(job.getExtraOptions()); }
+      bsub.append(' ').append(command);
       
       try
       {
          List<String> commands = new ArrayList<String>(Arrays.asList(bsub.toString().split("\\s+")));
          if (job.getArguments() != null)
          {
-            for (String arg : job.getArguments()) commands.add("\""+arg+"\"");
+            for (String arg : job.getArguments()) { commands.add("\""+arg+"\""); }
          }
          ProcessBuilder builder = new ProcessBuilder(commands);
          if (job.getEnv() != null)
