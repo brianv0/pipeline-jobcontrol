@@ -3,9 +3,12 @@ package org.glast.jobcontrol;
 import java.util.List;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * This is the object that gets sent across the wire to the server which
@@ -19,6 +22,7 @@ public class Job implements Serializable
    private Map<String,String> files = new HashMap<String,String>();
    private Map<String,String> env = new HashMap<String,String>();
    private List<String> arguments = new ArrayList<String>();
+   private Set<Integer> runAfter;
    private Date start;
    private Priority priority = Priority.NORMAL;
    private String command;
@@ -164,5 +168,20 @@ public class Job implements Serializable
    public void setExtraOptions(String options)
    {
       this.extraOptions = options;
+   }
+   /**
+    * Force this job to run after the specified job has completed.
+    * This method can be called multiple times to force the job to run
+    * after a set of other jobs.
+    */
+   public void addRunAfter(int jobID)
+   {
+      if (runAfter == null) runAfter = new HashSet<Integer>();
+      runAfter.add(jobID);
+   }
+   
+   public Set<Integer> getRunAfter()
+   {
+      return runAfter == null ? Collections.EMPTY_SET : runAfter;
    }
 }
