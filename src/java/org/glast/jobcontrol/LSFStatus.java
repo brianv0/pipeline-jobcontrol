@@ -19,7 +19,7 @@ import java.util.regex.Pattern;/**
 class LSFStatus
 {
    private final static long CACHE_TIME = 60*1000; // Needed to avoid excessive calls to bjobs
-   private final static String STATUS_COMMAND = "/usr/local/bin/bjobs -W -a -p -u glast";
+   private final static String STATUS_COMMAND = "/usr/local/bin/bjobs -W -a -p -u";
    private final static Pattern pattern = Pattern.compile("(\\d+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(.*)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\d+)\\s+(\\d+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s*");
    private final static Pattern timePattern = Pattern.compile("(\\d+):(\\d+):(\\d+).(\\d+)");
    private final static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss");
@@ -37,7 +37,8 @@ class LSFStatus
    {
       try
       {
-         List<String> commands = new ArrayList<String>(Arrays.asList(STATUS_COMMAND.split("\\s+")));
+         String command = STATUS_COMMAND + " " + System.getProperty("user.name");
+         List<String> commands = new ArrayList<String>(Arrays.asList(command.split("\\s+")));
          ProcessBuilder builder = new ProcessBuilder();
          builder.redirectErrorStream(true);
          builder.command(commands);

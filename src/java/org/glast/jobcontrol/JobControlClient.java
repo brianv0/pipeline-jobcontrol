@@ -11,11 +11,20 @@ import java.rmi.registry.Registry;
  */
 public class JobControlClient
 {
+   private String user;
+   public JobControlClient()
+   {
+      this("glast");
+   }
+   public JobControlClient(String user)
+   {
+      this.user = user;
+   }
    private JobControl getJobControl() throws NotBoundException, RemoteException
    {
       // FixMe: This should not be hardwired
       Registry registry = LocateRegistry.getRegistry("glast-jobcontrol01.slac.stanford.edu");
-      return (JobControl) registry.lookup("JobControl");
+      return (JobControl) registry.lookup("JobControl-"+user);
    }
     /**
      * Submit a job.
