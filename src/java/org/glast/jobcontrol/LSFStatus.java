@@ -19,11 +19,11 @@ import java.util.regex.Pattern;/**
 class LSFStatus
 {
    private final static long CACHE_TIME = 60*1000; // Needed to avoid excessive calls to bjobs
-   private final static String STATUS_COMMAND = "/usr/local/bin/bjobs -W -a -p -u glastdpf";
+   private final static String STATUS_COMMAND = "/usr/local/bin/bjobs -W -a -p -u glast";
    private final static Pattern pattern = Pattern.compile("(\\d+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(.*)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\d+)\\s+(\\d+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s*");
    private final static Pattern timePattern = Pattern.compile("(\\d+):(\\d+):(\\d+).(\\d+)");
    private final static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss");
-   private Logger logger = Logger.getLogger("org.freehep.jobcontrol.LSFStatus");
+   private final static Logger logger = Logger.getLogger("org.glast.jobcontrol.LSFStatus");
    
    private Map<Integer,JobStatus> map;
    private long timeStamp;
@@ -33,7 +33,7 @@ class LSFStatus
    {
    }
    
-   private void updateStatus() throws NoSuchJobException
+   private void updateStatus() throws JobControlException
    {
       try
       {
@@ -46,12 +46,12 @@ class LSFStatus
          process.waitFor();
          output.join();
          int rc = process.exitValue();
-         if (rc != 0) throw new NoSuchJobException("Process failed rc="+rc);
+         if (rc != 0) throw new JobControlException("Process failed, rc="+rc);
          
          if (output.getStatus() != null) throw output.getStatus();
          
          List<String> result = output.getResult();
-         if (result.size() == 0) throw new NoSuchJobException("Unexpected output length "+result.size());
+         if (result.size() == 0) throw new JobControlException("Unexpected output length "+result.size());
          logger.info("Status returned "+result.size()+" lines");
          
          Map<Integer,JobStatus> map = new HashMap<Integer,JobStatus>();
@@ -104,11 +104,11 @@ class LSFStatus
       }
       catch (IOException x)
       {
-         throw new NoSuchJobException("IOException during job submission",x);
+         throw new JobControlException("IOException during job submission",x);
       }
       catch (InterruptedException x)
       {
-         throw new NoSuchJobException("Job submission interrupted",x);
+         throw new JobControlException("Job submission interrupted",x);
       }
    }
    private Date toDate(String date) throws ParseException
@@ -134,19 +134,21 @@ class LSFStatus
    }
    private JobStatus.Status toStatus(String status)
    {
-      if      (status.equals("DONE")) return JobStatus.Status.DONE;
-      else if (status.equals("RUN"))  return JobStatus.Status.RUNNING;
-      else if (status.equals("PEND")) return JobStatus.Status.PENDING;
-      else if (status.equals("WAIT")) return JobStatus.Status.WAITING;
-      else if (status.contains("SUSP")) return JobStatus.Status.SUSPENDED;
+      if      ("DONE".equals(status)) return JobStatus.Status.DONE;
+      else if ("RUN".equals(status))  return JobStatus.Status.RUNNING;
+      else if ("PEND".equals(status)) return JobStatus.Status.PENDING;
+      else if ("WAIT".equals(status)) return JobStatus.Status.WAITING;
+      else if ("SUSP".contains(status)) return JobStatus.Status.SUSPENDED;
       else return JobStatus.Status.UNKNOWN;
    }
-   Map<Integer, JobStatus> getStatus() throws NoSuchJobException
+   Map<Integer, JobStatus> getStatus() throws JobControlException
    {
       synchronized (this)
       {
          long now = System.currentTimeMillis();
-         if (now-timeStamp > CACHE_TIME) updateStatus();
+         boolean updateNeeded = now-timeStamp > CACHE_TIME;
+         logger.fine("status: now="+now+" timeStamp="+timeStamp+" cache="+CACHE_TIME+" update needed: "+updateNeeded);
+         if (updateNeeded) updateStatus();
       }
       return map;
    }

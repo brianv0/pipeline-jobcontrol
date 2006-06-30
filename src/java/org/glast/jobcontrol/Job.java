@@ -33,6 +33,7 @@ public class Job implements Serializable
    private String logFile;
    private int maxMemory;
    private String extraOptions;
+   private String name;
    
    static final long serialVersionUID = -362830341176400263L;
    
@@ -183,5 +184,20 @@ public class Job implements Serializable
    public Set<Integer> getRunAfter()
    {
       return runAfter == null ? Collections.EMPTY_SET : runAfter;
+   }
+   /**
+    * Returns the job name, or <code>null</code> if it is not explicitly set.
+    */
+   public String getName()
+   {
+      return name;
+   }
+   /**
+    * Sets the name of the submitted job. If not set (or set to <code>null</code>) the job
+    * name will be set arbitrarily by the job submission system.
+    */
+   public void setName(String name)
+   {
+      this.name = name;
    }
 }
