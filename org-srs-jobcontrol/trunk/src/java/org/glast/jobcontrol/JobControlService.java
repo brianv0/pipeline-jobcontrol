@@ -22,22 +22,22 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- *
+ * The main class for the job control server.
  * @author Tony Johnson
  */
 class JobControlService implements JobControl
 {
    private final static String SUBMIT_COMMAND = "/usr/local/bin/bsub";
+   private final static String KILL_COMMAND = "/usr/local/bin/bkill";
    private final static Pattern pattern = Pattern.compile("Job <(\\d+)>");
-   private Logger logger = Logger.getLogger("org.freehep.jobcontrol");
-   private LSFStatus lsfStatus = new LSFStatus();
+   private final static Logger logger = Logger.getLogger("org.glast.jobcontrol");
+   private final LSFStatus lsfStatus = new LSFStatus();
    
    private JobControlService()
    {
    }
    public static void main(String[] args) throws RemoteException
    {
-      
       JobControlService service = new JobControlService();
       JobControl stub = (JobControl) UnicastRemoteObject.exportObject(service, 0);
       
@@ -47,7 +47,7 @@ class JobControlService implements JobControl
       service.logger.info("Server ready");
    }
    
-   public int submit(Job job) throws JobSubmissionException
+   public int submit(Job job) throws JobSubmissionException, JobControlException
    {
       try
       {
@@ -62,15 +62,20 @@ class JobControlService implements JobControl
       catch (ServerNotActiveException t)
       {
          logger.log(Level.SEVERE,"Unexpected error",t);
-         throw new JobSubmissionException("Unexpected error",t);
+         throw new JobControlException("Unexpected error",t);
       }
       catch (JobSubmissionException t)
       {
          logger.log(Level.SEVERE,"job submission failed",t);
          throw t;
       }
+      catch (JobControlException t)
+      {
+         logger.log(Level.SEVERE,"job submission failed",t);
+         throw t;
+      }
    }
-   private int submitInternal(Job job) throws JobSubmissionException
+   private int submitInternal(Job job) throws JobSubmissionException, JobControlException
    {
       String command = job.getCommand();
       if (command == null || command.length() == 0) throw new JobSubmissionException("Missing command");
@@ -79,6 +84,7 @@ class JobControlService implements JobControl
       else { bsub.append(" -o ").append(job.getLogFile()); }
       if (job.getMaxCPU() != 0) { bsub.append(" -c ").append(convertToMinutes(job.getMaxCPU())); }
       if (job.getMaxMemory() != 0) { bsub.append(" -M ").append(job.getMaxMemory()); }
+      if (job.getName() != null) { bsub.append(" -J ").append(job.getName()); }
       if (!job.getRunAfter().isEmpty())
       {
          bsub.append(" -w ");
@@ -110,9 +116,9 @@ class JobControlService implements JobControl
             if (!dir.exists())
             {
                boolean rc = dir.mkdirs();
-               if (!rc) throw new IOException("Could not create working directory "+dir);
+               if (!rc) throw new JobSubmissionException("Could not create working directory "+dir);
             }
-            else if (!dir.isDirectory()) throw new IOException("Working directory is not a directory "+dir);
+            else if (!dir.isDirectory()) throw new JobSubmissionException("Working directory is not a directory "+dir);
             builder.directory(dir);
             
             // Create any files send with the job
@@ -123,7 +129,7 @@ class JobControlService implements JobControl
                for (Map.Entry<String,String> entry : files.entrySet())
                {
                   File file = new File(dir,entry.getKey());
-                  if (file.exists()) throw new SecurityException("File "+file+" already exists");
+                  if (file.exists()) throw new JobSubmissionException("File "+file+" already exists, not replaced");
                   PrintWriter writer = new PrintWriter(new FileWriter(file));
                   writer.print(entry.getValue());
                   writer.close();
@@ -136,27 +142,27 @@ class JobControlService implements JobControl
          process.waitFor();
          output.join();
          int rc = process.exitValue();
-         if (rc != 0) throw new JobSubmissionException("Process failed rc="+rc);
+         if (rc != 0) throw new JobControlException("Process failed rc="+rc);
          
          if (output.getStatus() != null) throw output.getStatus();
          
          List<String> result = output.getResult();
-         if (result.size() == 0) throw new JobSubmissionException("Unexpected output length "+result.size());
+         if (result.size() == 0) throw new JobControlException("Unexpected output length "+result.size());
          for (String line : result)
          {
             Matcher matcher = pattern.matcher(line);
             boolean ok = matcher.find();
             if (ok) return Integer.parseInt(matcher.group(1));
          }
-         throw new JobSubmissionException("Could not find job number in output");
+         throw new JobControlException("Could not find job number in output");
       }
       catch (IOException x)
       {
-         throw new JobSubmissionException("IOException during job submission",x);
+         throw new JobControlException("IOException during job submission",x);
       }
       catch (InterruptedException x)
       {
-         throw new JobSubmissionException("Job submission interrupted",x);
+         throw new JobControlException("Job submission interrupted",x);
       }
    }
    private int convertToMinutes(int seconds)
@@ -167,12 +173,12 @@ class JobControlService implements JobControl
    {
       if (!ip.startsWith("134.79") && !ip.startsWith("198.129")) throw new SecurityException();
    }
-   public JobStatus status(int jobID) throws NoSuchJobException
+   public JobStatus status(int jobID) throws NoSuchJobException, JobControlException
    {
-      String ip;
       try
       {
-         ip = RemoteServer.getClientHost();
+         String ip = RemoteServer.getClientHost();
+         logger.info("status: "+jobID+" from "+ip);
          checkPermission(ip);
          
          Map<Integer,JobStatus> statii = lsfStatus.getStatus();
@@ -183,13 +189,72 @@ class JobControlService implements JobControl
       catch (ServerNotActiveException t)
       {
          logger.log(Level.SEVERE,"Unexpected error",t);
-         throw new NoSuchJobException("Unexpected error",t);
+         throw new JobControlException("Unexpected error",t);
       }
       catch (NoSuchJobException t)
       {
          logger.log(Level.SEVERE,"job status failed",t);
          throw t;
       }
-      
+      catch (JobControlException t)
+      {
+         logger.log(Level.SEVERE,"job status failed",t);
+         throw t;
+      }         
+   }
+
+   public void cancel(int jobID) throws NoSuchJobException, JobControlException
+   {
+      try
+      {
+         String ip = RemoteServer.getClientHost();
+         logger.info("killing: "+jobID+" from "+ip);
+         checkPermission(ip);
+         
+         cancelInternal(jobID);
+         logger.fine("job "+jobID+" cancelled");
+      }
+      catch (ServerNotActiveException t)
+      {
+         logger.log(Level.SEVERE,"Unexpected error",t);
+         throw new JobControlException("Unexpected error",t);
+      }
+      catch (NoSuchJobException t)
+      {
+         logger.log(Level.SEVERE,"job cancellation failed",t);
+         throw t;
+      }
+      catch (JobControlException t)
+      {
+         logger.log(Level.SEVERE,"job cancellation failed",t);
+         throw t;
+      }      
+   }
+   private void cancelInternal(int jobID) throws NoSuchJobException, JobControlException
+   {
+      try
+      {
+         List<String> commands = new ArrayList<String>();
+         commands.add(KILL_COMMAND);
+         commands.add(String.valueOf(jobID));
+         ProcessBuilder builder = new ProcessBuilder();
+         builder.redirectErrorStream(true);
+         builder.command(commands);
+         Process process = builder.start();
+         OutputProcessor output = new OutputProcessor(process.getInputStream(),logger);
+         process.waitFor();
+         output.join();
+         int rc = process.exitValue();
+         if (rc == 255) throw new NoSuchJobException("No such job, id="+jobID);
+         else if (rc != 0) throw new JobControlException("Command failed rc="+rc);         
+      }
+      catch (IOException x)
+      {
+         throw new JobControlException("IOException while killing job "+jobID,x);
+      }
+      catch (InterruptedException x)
+      {
+         throw new JobControlException("InterruptedException while killing job "+jobID,x);         
+      }   
    }
 }

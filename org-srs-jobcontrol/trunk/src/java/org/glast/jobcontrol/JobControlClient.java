@@ -14,7 +14,7 @@ public class JobControlClient
    private JobControl getJobControl() throws NotBoundException, RemoteException
    {
       // FixMe: This should not be hardwired
-      Registry registry = LocateRegistry.getRegistry("glast03.slac.stanford.edu");
+      Registry registry = LocateRegistry.getRegistry("glast-jobcontrol01.slac.stanford.edu");
       return (JobControl) registry.lookup("JobControl");
    }
     /**
@@ -23,7 +23,7 @@ public class JobControlClient
      * @throws glast.jobcontrol.JobSubmissionException Thrown if an error occurs during job submission
      * @return The job ID
      */
-   public int submit(Job job) throws JobSubmissionException
+   public int submit(Job job) throws JobSubmissionException, JobControlException
    {
       try
       {
@@ -31,11 +31,11 @@ public class JobControlClient
       }
       catch (NotBoundException x)
       {
-         throw new JobSubmissionException("Remote Exception during job submission",x);
+         throw new JobControlException("Server not running during job submission",x);
       }
       catch (RemoteException x)
       {
-         throw new JobSubmissionException("Remote Exception during job submission",x.getCause());
+         throw new JobControlException("Remote Exception during job submission",x.getCause());
       }
    }
     /**
@@ -44,7 +44,7 @@ public class JobControlClient
      * @throws glast.jobcontrol.NoSuchJobException Thrown if the specified ID is unknown, or if any other error occurs.
      * @return The jobs status
      */
-   public JobStatus status(int jobID) throws NoSuchJobException
+   public JobStatus status(int jobID) throws NoSuchJobException, JobControlException
    {
       try
       {
@@ -52,11 +52,29 @@ public class JobControlClient
       }
       catch (NotBoundException x)
       {
-         throw new NoSuchJobException("Remote Exception getting job status",x);
+         throw new JobControlException("Server not running while getting job status",x);
       }
       catch (RemoteException x)
       {
-         throw new NoSuchJobException("Remote Exception getting job status",x.getCause());
+         throw new JobControlException("Remote Exception getting job status",x.getCause());
       }
+   }
+   /**
+    * Cancels a job. If the job is already running it will be killed.
+    */
+   public void cancel(int jobID) throws NoSuchJobException, JobControlException
+   {
+      try
+      {
+         getJobControl().cancel(jobID);
+      }
+      catch (NotBoundException x)
+      {
+         throw new JobControlException("Server not running while killing job",x);
+      }
+      catch (RemoteException x)
+      {
+         throw new JobControlException("Remote Exception killing job",x.getCause());
+      }      
    }
 }

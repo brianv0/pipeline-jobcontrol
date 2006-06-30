@@ -1,7 +1,7 @@
 package org.glast.jobcontrol;
 
 /**
- * Thrown if an error occurs during job submission.
+ * Thrown if a permanent error occurs during job submission.
  * @author Tony Johnson
  */
 public class JobSubmissionException extends Exception

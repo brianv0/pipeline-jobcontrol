@@ -2,6 +2,7 @@ package org.glast.jobcontrol.demo;
 
 import org.glast.jobcontrol.Job;
 import org.glast.jobcontrol.JobControlClient;
+import org.glast.jobcontrol.JobControlException;
 import org.glast.jobcontrol.JobSubmissionException;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -18,7 +19,7 @@ public class JobControlTest2
    /**
     * @param args the command line arguments
     */
-   public static void main(String[] args) throws JobSubmissionException, IOException
+   public static void main(String[] args) throws JobSubmissionException, IOException, JobControlException
    {
       BufferedReader reader  = new BufferedReader(new InputStreamReader(JobControlTest2.class.getResourceAsStream("run.csh")));
       StringBuffer script = new StringBuffer();
@@ -39,12 +40,13 @@ public class JobControlTest2
       job.setWorkingDirectory("/nfs/farm/g/glast/u13/DataServer/xxx");
       Map<String,String> env = new HashMap<String,String>();
       env.put("email","tonyj@slac.stanford.edu");
-      env.put("dir","xxx");
-      env.put("task","allGamma-GR-v5r0p2");
-      env.put("tcut","CalEnergySum<100000");
-      env.put("runStart","");
-      env.put("runEnd","");
+      env.put("PRUNE_TASK","ChickenLittle-GR-v7r3p24");
+      env.put("PRUNE_DATATYPE","merit");
+      env.put("PRUNE_TCUT","EvtEventId < 10000");
+      env.put("PRUNE_OUTFILE","outfile");
+      env.put("PRUNE_DEBUG","true");
       job.setEnv(env);
+      job.setName("Test2");
       JobControlClient client = new JobControlClient();
       int id = client.submit(job);
       System.out.println("Job "+id+" submitted");

@@ -2,6 +2,7 @@ package org.glast.jobcontrol.demo;
 
 import org.glast.jobcontrol.Job;
 import org.glast.jobcontrol.JobControlClient;
+import org.glast.jobcontrol.JobControlException;
 import org.glast.jobcontrol.JobSubmissionException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,7 +18,7 @@ public class JobControlTest
    /**
     * @param args the command line arguments
     */
-   public static void main(String[] args) throws JobSubmissionException
+   public static void main(String[] args) throws JobSubmissionException, JobControlException
    {
       if (args.length < 1) usage();
       String command = args[0];
