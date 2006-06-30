@@ -26,7 +26,6 @@ public class Job implements Serializable
    private Date start;
    private Priority priority = Priority.NORMAL;
    private String command;
-   private String user;
    private int maxCPU;
    private String architecture;
    private String currentDirectory;
@@ -95,16 +94,6 @@ public class Job implements Serializable
    public void setCommand(String command)
    {
       this.command = command;
-   }
-   
-   public String getUser()
-   {
-      return user;
-   }
-   
-   public void setUser(String user)
-   {
-      this.user = user;
    }
    
    public int getMaxCPU()

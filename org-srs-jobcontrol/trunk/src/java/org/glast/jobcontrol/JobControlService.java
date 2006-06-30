@@ -41,10 +41,11 @@ class JobControlService implements JobControl
       JobControlService service = new JobControlService();
       JobControl stub = (JobControl) UnicastRemoteObject.exportObject(service, 0);
       
+      String user = System.getProperty("user.name");
       // Bind the remote object's stub in the registry
       Registry registry = LocateRegistry.getRegistry();
-      registry.rebind("JobControl", stub);
-      service.logger.info("Server ready");
+      registry.rebind("JobControl-"+user, stub);
+      service.logger.info("Server ready, user "+user);
    }
    
    public int submit(Job job) throws JobSubmissionException, JobControlException
