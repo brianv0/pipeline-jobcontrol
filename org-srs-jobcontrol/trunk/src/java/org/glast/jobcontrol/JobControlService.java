@@ -82,10 +82,10 @@ class JobControlService implements JobControl
       if (command == null || command.length() == 0) throw new JobSubmissionException("Missing command");
       StringBuilder bsub = new StringBuilder(SUBMIT_COMMAND);
       if (job.getLogFile() == null) { bsub.append(" -o %J.log"); }
-      else { bsub.append(" -o ").append(job.getLogFile()); }
+      else { bsub.append(" -o ").append(sanitize(job.getLogFile())); }
       if (job.getMaxCPU() != 0) { bsub.append(" -c ").append(convertToMinutes(job.getMaxCPU())); }
       if (job.getMaxMemory() != 0) { bsub.append(" -M ").append(job.getMaxMemory()); }
-      if (job.getName() != null) { bsub.append(" -J ").append(job.getName()); }
+      if (job.getName() != null) { bsub.append(" -J ").append(sanitize(job.getName())).append(" ");  }
       if (!job.getRunAfter().isEmpty())
       {
          bsub.append(" -w ");
@@ -165,6 +165,10 @@ class JobControlService implements JobControl
       {
          throw new JobControlException("Job submission interrupted",x);
       }
+   }
+   private String sanitize(String option)
+   {
+      return option.replaceAll("\\s+","_");
    }
    private int convertToMinutes(int seconds)
    {
