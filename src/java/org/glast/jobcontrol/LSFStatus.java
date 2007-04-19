@@ -139,6 +139,7 @@ class LSFStatus
       else if ("RUN".equals(status))  return JobStatus.Status.RUNNING;
       else if ("PEND".equals(status)) return JobStatus.Status.PENDING;
       else if ("WAIT".equals(status)) return JobStatus.Status.WAITING;
+      else if ("EXIT".equals(status)) return JobStatus.Status.FAILED;
       else if ("SUSP".contains(status)) return JobStatus.Status.SUSPENDED;
       else return JobStatus.Status.UNKNOWN;
    }

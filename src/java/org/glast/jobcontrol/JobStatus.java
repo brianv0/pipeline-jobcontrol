@@ -8,7 +8,7 @@ import java.util.Date;
  */
 public interface JobStatus
 {
-    public enum Status { DONE, PENDING, RUNNING, WAITING, SUSPENDED, UNKNOWN };
+    public enum Status { DONE, PENDING, RUNNING, WAITING, SUSPENDED, FAILED, UNKNOWN };
     String getComment();
     int getCpuUsed();
     Date getEnded();

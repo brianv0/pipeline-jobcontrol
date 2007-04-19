@@ -11,19 +11,26 @@ import java.rmi.registry.Registry;
  */
 public class JobControlClient
 {
-   private String user;
+   private final String user;
+   private final String host; 
+   
    public JobControlClient()
    {
-      this("glast");
+      this(null);
    }
    public JobControlClient(String user)
    {
-      this.user = user;
+     this(user,null);
+   }
+   public JobControlClient(String user, String host)
+   {
+      this.user = user == null ? "glast" : user;
+      this.host = host == null ? "glast-jobcontrol01.slac.stanford.edu" : host;
    }
    private JobControl getJobControl() throws NotBoundException, RemoteException
    {
-      // FixMe: This should not be hardwired
-      Registry registry = LocateRegistry.getRegistry("glast-jobcontrol01.slac.stanford.edu");
+      
+      Registry registry = LocateRegistry.getRegistry(host);
       return (JobControl) registry.lookup("JobControl-"+user);
    }
     /**
