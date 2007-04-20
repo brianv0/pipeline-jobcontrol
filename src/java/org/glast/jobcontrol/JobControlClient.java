@@ -21,7 +21,11 @@ public class JobControlClient
    }
    public JobControlClient(String user)
    {
-     this(user,null,1099);
+     this(user,null);
+   }
+   public JobControlClient(String user, String host)
+   {
+      this(user,host,1099);
    }
    public JobControlClient(String user, String host, int port)
    {

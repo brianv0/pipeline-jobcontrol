@@ -5,9 +5,7 @@ import org.glast.jobcontrol.JobControlClient;
 import org.glast.jobcontrol.JobControlException;
 import org.glast.jobcontrol.JobSubmissionException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  *

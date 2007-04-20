@@ -47,7 +47,7 @@ public class JobControlTest2
       env.put("PRUNE_DEBUG","true");
       job.setEnv(env);
       job.setName("Test2");
-      JobControlClient client = new JobControlClient();
+      JobControlClient client = new JobControlClient("glastpro","ccsvli09.in2p3.fr");
       int id = client.submit(job);
       System.out.println("Job "+id+" submitted");
    }
