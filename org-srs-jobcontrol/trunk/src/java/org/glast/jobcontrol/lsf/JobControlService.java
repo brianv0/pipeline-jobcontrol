@@ -1,4 +1,4 @@
-package org.glast.jobcontrol;
+package org.glast.jobcontrol.lsf;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -20,6 +20,7 @@ import java.util.logging.Logger;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.glast.jobcontrol.*;
 
 /**
  * The main class for the job control server.
