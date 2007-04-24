@@ -1,5 +1,6 @@
-package org.glast.jobcontrol;
+package org.glast.jobcontrol.lsf;
 
+import org.glast.jobcontrol.*;
 import org.glast.jobcontrol.JobStatus.Status;
 import java.io.Serializable;
 import java.util.Date;

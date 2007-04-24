@@ -1,4 +1,4 @@
-package org.glast.jobcontrol;
+package org.glast.jobcontrol.lsf;
 
 import java.io.IOException;
 import java.text.ParseException;
@@ -16,6 +16,7 @@ import java.util.regex.Pattern;/**
  * Keeps track of job status
  * @author tonyj
  */
+import org.glast.jobcontrol.*;
 class LSFStatus
 {
    private final static long CACHE_TIME = 60*1000; // Needed to avoid excessive calls to bjobs

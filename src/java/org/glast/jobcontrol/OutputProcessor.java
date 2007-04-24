@@ -12,14 +12,14 @@ import java.util.logging.Logger;
  *
  * @author Tony Johnson
  */
-class OutputProcessor extends Thread
+public class OutputProcessor extends Thread
 {
    private BufferedReader reader;
    private List<String> result = new ArrayList<String>();
    private IOException status;
    private Logger logger;
    
-   OutputProcessor(InputStream in, Logger logger)
+   public OutputProcessor(InputStream in, Logger logger)
    {
       this.logger = logger;
       reader = new BufferedReader(new InputStreamReader(in));
@@ -42,11 +42,11 @@ class OutputProcessor extends Thread
          status = x;
       }
    }
-   List<String> getResult()
+   public List<String> getResult()
    {
       return result;
    }
-   IOException getStatus()
+   public IOException getStatus()
    {
       return status;
    }
