@@ -9,11 +9,11 @@ import javax.servlet.jsp.tagext.SimpleTagSupport;
 /**
  *
  * @author tonyj
- * @version $Id: Status.java,v 1.1 2005-11-04 23:56:10 tonyj Exp $
+ * @version $Id: Status.java,v 1.2 2007-05-14 20:43:17 tonyj Exp $
  */
 public class Status extends SimpleTagSupport
 {
-   private int id;
+   private String id;
    private String var;
    
    public void doTag() throws JspException
@@ -39,7 +39,7 @@ public class Status extends SimpleTagSupport
    {
       this.var = value;
    }
-   public void setId(int id)
+   public void setId(String id)
    {
       this.id = id;
    }

@@ -26,7 +26,7 @@ class LSFStatus
    private final static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss");
    private final static Logger logger = Logger.getLogger("org.glast.jobcontrol.LSFStatus");
    
-   private Map<Integer,JobStatus> map;
+   private Map<String,JobStatus> map;
    private long timeStamp;
    
    /** Creates a new instance of LSFStatus */
@@ -56,7 +56,7 @@ class LSFStatus
          if (result.size() == 0) throw new JobControlException("Unexpected output length "+result.size());
          logger.info("Status returned "+result.size()+" lines");
          
-         Map<Integer,JobStatus> map = new HashMap<Integer,JobStatus>();
+         Map<String,JobStatus> map = new HashMap<String,JobStatus>();
          
          for (int i=0; i<result.size(); i++)
          {
@@ -66,7 +66,7 @@ class LSFStatus
                try
                {
                   LSFJobStatus stat = new LSFJobStatus();
-                  int id = Integer.parseInt(match.group(1));
+                  String id = match.group(1);
                   stat.setId(id);
                   stat.setUser(match.group(2));
                   stat.setStatus(toStatus(match.group(3)));
@@ -144,7 +144,7 @@ class LSFStatus
       else if ("SUSP".contains(status)) return JobStatus.Status.SUSPENDED;
       else return JobStatus.Status.UNKNOWN;
    }
-   Map<Integer, JobStatus> getStatus() throws JobControlException
+   Map<String, JobStatus> getStatus() throws JobControlException
    {
       synchronized (this)
       {

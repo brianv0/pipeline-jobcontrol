@@ -13,7 +13,7 @@ public interface JobStatus
     int getCpuUsed();
     Date getEnded();
     String getHost();
-    int getId();
+    String getId();
     int getMemoryUsed();
     String getQueue();
     Date getStarted();
