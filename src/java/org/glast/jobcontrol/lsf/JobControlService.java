@@ -45,11 +45,11 @@ class JobControlService implements JobControl
       String user = System.getProperty("user.name");
       // Bind the remote object's stub in the registry
       Registry registry = LocateRegistry.getRegistry();
-      registry.rebind("JobControl-"+user, stub);
+      registry.rebind("JobControlService-"+user, stub);
       service.logger.info("Server ready, user "+user);
    }
    
-   public int submit(Job job) throws JobSubmissionException, JobControlException
+   public String submit(Job job) throws JobSubmissionException, JobControlException
    {
       try
       {
@@ -57,7 +57,7 @@ class JobControlService implements JobControl
          logger.info("submitting: "+job.getCommand()+" from "+ip);
          checkPermission(ip);
          
-         int id = submitInternal(job);
+         String id = submitInternal(job);
          logger.fine("job "+id+" submitted");
          return id;
       }
@@ -77,7 +77,7 @@ class JobControlService implements JobControl
          throw t;
       }
    }
-   private int submitInternal(Job job) throws JobSubmissionException, JobControlException
+   private String submitInternal(Job job) throws JobSubmissionException, JobControlException
    {
       String command = job.getCommand();
       if (command == null || command.length() == 0) throw new JobSubmissionException("Missing command");
@@ -154,7 +154,7 @@ class JobControlService implements JobControl
          {
             Matcher matcher = pattern.matcher(line);
             boolean ok = matcher.find();
-            if (ok) return Integer.parseInt(matcher.group(1));
+            if (ok) return matcher.group(1);
          }
          throw new JobControlException("Could not find job number in output");
       }
@@ -179,7 +179,7 @@ class JobControlService implements JobControl
    {
       if (!ip.startsWith("134.79") && !ip.startsWith("198.129")) throw new SecurityException();
    }
-   public JobStatus status(int jobID) throws NoSuchJobException, JobControlException
+   public JobStatus status(String jobID) throws NoSuchJobException, JobControlException
    {
       try
       {
@@ -187,7 +187,7 @@ class JobControlService implements JobControl
          logger.info("status: "+jobID+" from "+ip);
          checkPermission(ip);
          
-         Map<Integer,JobStatus> statii = lsfStatus.getStatus();
+         Map<String,JobStatus> statii = lsfStatus.getStatus();
          JobStatus result = statii.get(jobID);
          if (result == null) throw new NoSuchJobException("Job id "+jobID);
          return result;
@@ -209,7 +209,7 @@ class JobControlService implements JobControl
       }         
    }
 
-   public void cancel(int jobID) throws NoSuchJobException, JobControlException
+   public void cancel(String jobID) throws NoSuchJobException, JobControlException
    {
       try
       {
@@ -236,13 +236,13 @@ class JobControlService implements JobControl
          throw t;
       }      
    }
-   private void cancelInternal(int jobID) throws NoSuchJobException, JobControlException
+   private void cancelInternal(String jobID) throws NoSuchJobException, JobControlException
    {
       try
       {
          List<String> commands = new ArrayList<String>();
          commands.add(KILL_COMMAND);
-         commands.add(String.valueOf(jobID));
+         commands.add(jobID);
          ProcessBuilder builder = new ProcessBuilder();
          builder.redirectErrorStream(true);
          builder.command(commands);

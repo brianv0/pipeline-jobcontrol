@@ -9,7 +9,7 @@ import java.rmi.RemoteException;
  */
 public interface JobControl extends Remote
 {
-   int submit(Job job) throws RemoteException, JobSubmissionException, JobControlException;
-   JobStatus status(int jobID) throws RemoteException, NoSuchJobException, JobControlException;
-   void cancel(int jobID) throws RemoteException, NoSuchJobException, JobControlException;
+   String submit(Job job) throws RemoteException, JobSubmissionException, JobControlException;
+   JobStatus status(String jobID) throws RemoteException, NoSuchJobException, JobControlException;
+   void cancel(String jobID) throws RemoteException, NoSuchJobException, JobControlException;
 }

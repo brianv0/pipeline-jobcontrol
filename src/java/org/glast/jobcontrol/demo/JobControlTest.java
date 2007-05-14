@@ -27,7 +27,7 @@ public class JobControlTest
       job.setCommand(command);
       job.setArguments(arguments);
       JobControlClient client = new JobControlClient();
-      int id = client.submit(job);
+      String id = client.submit(job);
       System.out.println("Job "+id+" submitted");
    }
    private static void usage()

@@ -37,7 +37,7 @@ public class JobControlClient
    {
       
       Registry registry = LocateRegistry.getRegistry(host,port);
-      return (JobControl) registry.lookup("JobControl-"+user);
+      return (JobControl) registry.lookup("JobControlService-"+user);
    }
     /**
      * Submit a job.
@@ -45,7 +45,7 @@ public class JobControlClient
      * @throws glast.jobcontrol.JobSubmissionException Thrown if an error occurs during job submission
      * @return The job ID
      */
-   public int submit(Job job) throws JobSubmissionException, JobControlException
+   public String submit(Job job) throws JobSubmissionException, JobControlException
    {
       try
       {
@@ -66,7 +66,7 @@ public class JobControlClient
      * @throws glast.jobcontrol.NoSuchJobException Thrown if the specified ID is unknown, or if any other error occurs.
      * @return The jobs status
      */
-   public JobStatus status(int jobID) throws NoSuchJobException, JobControlException
+   public JobStatus status(String jobID) throws NoSuchJobException, JobControlException
    {
       try
       {
@@ -84,7 +84,7 @@ public class JobControlClient
    /**
     * Cancels a job. If the job is already running it will be killed.
     */
-   public void cancel(int jobID) throws NoSuchJobException, JobControlException
+   public void cancel(String jobID) throws NoSuchJobException, JobControlException
    {
       try
       {

@@ -49,7 +49,7 @@ public class JobControlTest2
       job.setName("Test2");
       //JobControlClient client = new JobControlClient("glastpro","ccsvli09.in2p3.fr");
       JobControlClient client = new JobControlClient();
-      int id = client.submit(job);
+      String id = client.submit(job);
       System.out.println("Job "+id+" submitted");
    }
    private static void usage()

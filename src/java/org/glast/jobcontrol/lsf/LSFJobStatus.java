@@ -14,7 +14,7 @@ class LSFJobStatus implements Serializable, JobStatus
 {
    static final long serialVersionUID = 6311542340392104385L;
    
-   private int id;
+   private String id;
    private Status status;
    private String host;
    private String queue;
@@ -27,7 +27,7 @@ class LSFJobStatus implements Serializable, JobStatus
    private String comment;
    private String user;
    
-   public int getId()
+   public String getId()
    {
       return id;
    }
@@ -87,7 +87,7 @@ class LSFJobStatus implements Serializable, JobStatus
       return comment;
    }
    
-   void setId(int id)
+   void setId(String id)
    {
       this.id = id;
    }
