@@ -79,7 +79,7 @@
       <name>id</name>
       <required>true</required>
       <rtexprvalue>true</rtexprvalue>
-      <type>int</type>
+      <type>java.lang.String</type>
     </attribute>
   </tag>
 </taglib>
