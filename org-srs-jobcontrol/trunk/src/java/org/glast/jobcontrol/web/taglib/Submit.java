@@ -15,7 +15,7 @@ import javax.servlet.jsp.tagext.SimpleTagSupport;
 /**
  *
  * @author tonyj
- * @version $Id: Submit.java,v 1.2 2006-01-21 23:34:49 igor Exp $
+ * @version $Id: Submit.java,v 1.3 2007-05-14 20:43:17 tonyj Exp $
  */
 
 public class Submit extends SimpleTagSupport implements DynamicAttributes
@@ -54,7 +54,7 @@ public class Submit extends SimpleTagSupport implements DynamicAttributes
 
          job.setEnv(env);
          JobControlClient client = new JobControlClient();
-         int id = client.submit(job);
+         String id = client.submit(job);
          if (var != null) getJspContext().setAttribute(var,id);
       }
       catch (Exception ex)

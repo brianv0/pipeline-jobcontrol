@@ -13,6 +13,7 @@ public class JobControlClient
 {
    private final String user;
    private final String host; 
+   private final String serviceName;
    private final int port;
    
    public JobControlClient()
@@ -29,15 +30,20 @@ public class JobControlClient
    }
    public JobControlClient(String user, String host, int port)
    {
+      this(user,host,port,null);
+   }
+   public JobControlClient(String user, String host, int port, String serviceName)
+   {
       this.user = user == null ? "glast" : user;
       this.host = host == null ? "glast-jobcontrol01.slac.stanford.edu" : host;
       this.port = port;
+      this.serviceName = serviceName == null ? "JobControlService" : serviceName;
    }
    private JobControl getJobControl() throws NotBoundException, RemoteException
    {
       
       Registry registry = LocateRegistry.getRegistry(host,port);
-      return (JobControl) registry.lookup("JobControlService-"+user);
+      return (JobControl) registry.lookup(serviceName+"-"+user);
    }
     /**
      * Submit a job.
