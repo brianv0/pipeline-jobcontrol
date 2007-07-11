@@ -33,6 +33,7 @@ class JobControlService implements JobControl
    private final static Pattern pattern = Pattern.compile("Job <(\\d+)>");
    private final static Logger logger = Logger.getLogger("org.glast.jobcontrol");
    private final LSFStatus lsfStatus = new LSFStatus();
+   private final int[] retryDelays = { 1000, 2000, 4000, 8000, 0 };
    
    private JobControlService()
    {
@@ -115,12 +116,26 @@ class JobControlService implements JobControl
          if (job.getWorkingDirectory() != null)
          {
             File dir = new File(job.getWorkingDirectory());
-            if (!dir.exists())
+            for (int retry : retryDelays)
             {
-               boolean rc = dir.mkdirs();
-               if (!rc) throw new JobSubmissionException("Could not create working directory "+dir);
+               if (!dir.exists())
+               {
+                  // This occasionally fails due to NFS/automount problems, so retry a few times
+                  boolean rc = dir.mkdirs();
+                  if (!rc) 
+                  {
+                     if (retry > 0)
+                     {
+                        Thread.sleep(retry);
+                        continue;
+                     }
+                     else throw new JobSubmissionException("Could not create working directory "+dir);
+                  }
+               }
+               else if (!dir.isDirectory()) throw new JobSubmissionException("Working directory is not a directory "+dir);
+               break;
             }
-            else if (!dir.isDirectory()) throw new JobSubmissionException("Working directory is not a directory "+dir);
+
             builder.directory(dir);
             
             // Create any files send with the job
