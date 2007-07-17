@@ -33,6 +33,7 @@ public class Job implements Serializable
    private int maxMemory;
    private String extraOptions;
    private String name;
+   private String archiveOldWorkingDir;
    
    static final long serialVersionUID = -362830341176400263L;
    
@@ -188,5 +189,15 @@ public class Job implements Serializable
    public void setName(String name)
    {
       this.name = name;
+   }
+   
+   public String getArchiveOldWorkingDir()
+   {
+      return archiveOldWorkingDir;
+   }
+   
+   public void setArchiveOldWorkingDir(String archiveName)
+   {
+      this.archiveOldWorkingDir = archiveName;
    }
 }

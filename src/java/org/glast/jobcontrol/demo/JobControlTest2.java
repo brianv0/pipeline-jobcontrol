@@ -38,6 +38,7 @@ public class JobControlTest2
       job.setFiles(files);
       job.setCommand("csh < run.csh");
       job.setWorkingDirectory("/nfs/farm/g/glast/u13/DataServer/xxx");
+      job.setArchiveOldWorkingDir(String.valueOf(System.currentTimeMillis()));
       Map<String,String> env = new HashMap<String,String>();
       env.put("email","tonyj@slac.stanford.edu");
       env.put("PRUNE_TASK","ChickenLittle-GR-v7r3p24");
