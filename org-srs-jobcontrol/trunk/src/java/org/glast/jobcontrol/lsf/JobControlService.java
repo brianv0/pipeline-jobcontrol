@@ -133,6 +133,25 @@ class JobControlService implements JobControl
                   }
                }
                else if (!dir.isDirectory()) throw new JobSubmissionException("Working directory is not a directory "+dir);
+               else if (job.getArchiveOldWorkingDir() != null)
+               {
+                  File[] oldFiles = dir.listFiles();
+                  if (oldFiles.length > 0)
+                  {
+                     File archiveDir = new File(dir,"archive/"+job.getArchiveOldWorkingDir());
+                     boolean rc = archiveDir.mkdirs();
+                     if (!rc) throw new JobSubmissionException("Could not create archive directory "+archiveDir);
+                     
+                     for (File oldFile : oldFiles)
+                     {
+                        if (!oldFile.getName().equals("archive"))
+                        {
+                           rc = oldFile.renameTo(new File(archiveDir,oldFile.getName()));
+                           if (!rc) throw new JobSubmissionException("Could not move file to archive directory: "+oldFile);
+                        }
+                     }
+                  }
+               }
                break;
             }
 
