@@ -33,7 +33,8 @@ class BQSJobControlService implements JobControl {
     private final static Pattern pattern = Pattern.compile("(\\S+)\\s(\\S+)");
     
     private final static Logger logger = Logger.getLogger("org.glast.jobcontrol");
-    private final BQSStatus bqsStatus = new BQSStatus();
+    private final BQSStatus bqsStatus = new BQSStatus();    
+    private final int[] retryDelays = { 1000, 2000, 4000, 8000, 0 };
     
     private BQSJobControlService() {
     }
@@ -114,13 +115,48 @@ class BQSJobControlService implements JobControl {
                 env.putAll(job.getEnv());
             }
 	    
-            if (job.getWorkingDirectory() != null) {
-                File dir = new File(job.getWorkingDirectory());
-                if (!dir.exists()) {
-                    boolean rc = dir.mkdirs();
-                    if (!rc) throw new JobSubmissionException("Could not create working directory "+dir);
-                } else if (!dir.isDirectory()) throw new JobSubmissionException("Working directory is not a directory "+dir);
-                builder.directory(dir);
+            if (job.getWorkingDirectory() != null)
+            {
+               File dir = new File(job.getWorkingDirectory());
+               for (int retry : retryDelays)
+               {
+                  if (!dir.exists())
+                  {
+                     // This occasionally fails due to NFS/automount problems, so retry a few times
+                     boolean rc = dir.mkdirs();
+                     if (!rc) 
+                     {
+                        if (retry > 0)
+                        {
+                           Thread.sleep(retry);
+                           continue;
+                        }
+                        else throw new JobSubmissionException("Could not create working directory "+dir);
+                     }
+                  }
+                  else if (!dir.isDirectory()) throw new JobSubmissionException("Working directory is not a directory "+dir);
+                  else if (job.getArchiveOldWorkingDir() != null)
+                  {
+                     File[] oldFiles = dir.listFiles();
+                     if (oldFiles.length > 0)
+                     {
+                        File archiveDir = new File(dir,"archive/"+job.getArchiveOldWorkingDir());
+                        boolean rc = archiveDir.mkdirs();
+                        if (!rc) throw new JobSubmissionException("Could not create archive directory "+archiveDir);
+
+                        for (File oldFile : oldFiles)
+                        {
+                           if (!oldFile.getName().equals("archive"))
+                           {
+                              rc = oldFile.renameTo(new File(archiveDir,oldFile.getName()));
+                              if (!rc) throw new JobSubmissionException("Could not move file to archive directory: "+oldFile);
+                           }
+                        }
+                     }
+                  }
+                  break;
+               }
+               builder.directory(dir);
                 
                 // Create any files send with the job
 
