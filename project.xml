@@ -3,7 +3,7 @@
    <pomVersion>3</pomVersion>
    <artifactId>org-glast-jobcontrol</artifactId>
    <groupId>glast</groupId>
-   <currentVersion>1.1</currentVersion>
+   <currentVersion>1.2</currentVersion>
    <shortDescription>Glast Job Control</shortDescription>
    <url>http://glast-ground.slac.stanford.edu/docs/${pom.artifactId}/</url>
    <name>Glast Job Control</name>

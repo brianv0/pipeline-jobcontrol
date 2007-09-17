@@ -144,7 +144,7 @@ class JobControlService implements JobControl
                      
                      for (File oldFile : oldFiles)
                      {
-                        if (!oldFile.getName().equals("archive"))
+                        if (!oldFile.getName().startsWith("archive") || !oldFile.isDirectory())
                         {
                            rc = oldFile.renameTo(new File(archiveDir,oldFile.getName()));
                            if (!rc) throw new JobSubmissionException("Could not move file to archive directory: "+oldFile);
