@@ -12,6 +12,7 @@ import java.rmi.server.ServerNotActiveException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -85,6 +86,7 @@ class BQSJobControlService implements JobControl {
 	
 	if (job.getLogFile() == null) { qsub.append(" -o toto.log"); } 
         else { qsub.append(" -o ").append(sanitize(job.getLogFile())); }
+        qsub.append(" -eo"); // Send stderr to the stdout (the log file)
         if (job.getMaxCPU() != 0) { qsub.append(" -l T=").append(convertToNormalisedSec(job.getMaxCPU())); }
         if (job.getMaxMemory() != 0) { qsub.append(" -l M=").append(job.getMaxMemory()).append( "MB"); }
         if (job.getName() != null) { qsub.append(" -N ").append(sanitize(job.getName())).append(" ");  }
@@ -100,8 +102,16 @@ class BQSJobControlService implements JobControl {
         }*/
         
         if (job.getExtraOptions() != null) { qsub.append(' ').append(job.getExtraOptions()); }
-        qsub.append(' ').append(command);
-
+        // BQS only accepts a script as a argument, not a command
+        // Also BQS does not automatically copy the current working directory to the job
+        //qsub.append(' ').append(command);
+        StringBuilder bqs_script = new StringBuilder();
+        if (job.getWorkingDirectory() != null)
+        {
+           bqs_script.append("cd "+job.getWorkingDirectory()+"\n");
+        }
+        bqs_script.append(command);
+        
 	logger.info("qsub command: " + qsub);
                 
         try {
@@ -161,14 +171,15 @@ class BQSJobControlService implements JobControl {
                 // Create any files send with the job
 
                 Map<String,String> files = job.getFiles();
-                if (files != null) {
-                    for (Map.Entry<String,String> entry : files.entrySet()) {
-                        File file = new File(dir,entry.getKey());
-                        if (file.exists()) throw new JobSubmissionException("File "+file+" already exists, not replaced");
-                        PrintWriter writer = new PrintWriter(new FileWriter(file));
-                        writer.print(entry.getValue());
-                        writer.close();
-                    }
+                if (files == null) files = new HashMap<String,String>();
+                files.put("bqs_script",bqs_script.toString());
+
+                for (Map.Entry<String,String> entry : files.entrySet()) {
+                   File file = new File(dir,entry.getKey());
+                   if (file.exists()) throw new JobSubmissionException("File "+file+" already exists, not replaced");
+                   PrintWriter writer = new PrintWriter(new FileWriter(file));
+                   writer.print(entry.getValue());
+                   writer.close();
                 }
             }
 	    
