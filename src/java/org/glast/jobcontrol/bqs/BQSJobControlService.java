@@ -45,7 +45,7 @@ class BQSJobControlService implements JobControl {
         String user = System.getProperty("user.name");
         // Bind the remote object's stub in the registry
         Registry registry = LocateRegistry.getRegistry();
-        registry.rebind("JobControlService-"+user, stub);
+        registry.rebind("BQSJobControlService-"+user, stub);
         service.logger.info("Server ready, user "+user);
     }
     
