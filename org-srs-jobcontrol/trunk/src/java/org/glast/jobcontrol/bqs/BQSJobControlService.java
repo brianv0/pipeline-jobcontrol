@@ -31,7 +31,7 @@ class BQSJobControlService implements JobControl {
     private final static String SUBMIT_COMMAND = "/usr/local/bin/qsub -l platform=LINUX";
     private final static String KILL_COMMAND = "/usr/local/bin/qdel";
     //private final static Pattern pattern = Pattern.compile("Job <(\\d+)>");
-    private final static Pattern pattern = Pattern.compile("(\\S+)\\s(\\S+)");
+    private final static Pattern pattern = Pattern.compile("job (\\w+) submitted.*");
     
     private final static Logger logger = Logger.getLogger("org.glast.jobcontrol");
     private final BQSStatus bqsStatus = new BQSStatus();    
@@ -217,7 +217,7 @@ class BQSJobControlService implements JobControl {
                 boolean ok = matcher.find();
 
                 //if (ok) return Integer.parseInt(matcher.group(1));
-		if (ok) return matcher.group(2);
+		if (ok) return matcher.group(1);
             }
             throw new JobControlException("Could not find job number in output");
         } catch (IOException x) {
