@@ -89,7 +89,8 @@ class BQSJobControlService implements JobControl {
         qsub.append(" -eo"); // Send stderr to the stdout (the log file)
         if (job.getMaxCPU() != 0) { qsub.append(" -l T=").append(convertToNormalisedSec(job.getMaxCPU())); }
         if (job.getMaxMemory() != 0) { qsub.append(" -l M=").append(job.getMaxMemory()).append( "MB"); }
-        if (job.getName() != null) { qsub.append(" -N ").append(sanitize(job.getName())).append(" ");  }
+        // Ignore the jobname option for BQS, we need BQS to assign a unique name for later query
+        //if (job.getName() != null) { qsub.append(" -N ").append(sanitize(job.getName())).append(" ");  }
 
 	qsub.append(" -V ");
         /**interjob dependencies not managed by BQS in this simple manner:
@@ -115,9 +116,9 @@ class BQSJobControlService implements JobControl {
         StringBuilder bqs_script = new StringBuilder();
         if (job.getWorkingDirectory() != null)
         {
-           bqs_script.append("cd "+job.getWorkingDirectory()+"\n");
+           bqs_script.append("cd ").append(job.getWorkingDirectory()).append('\n');
         }
-        bqs_script.append(command);
+        bqs_script.append(command).append('\n');
         
 	logger.info("qsub command: " + qsub);
                 
