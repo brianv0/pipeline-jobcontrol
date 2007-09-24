@@ -105,6 +105,13 @@ class BQSJobControlService implements JobControl {
         // BQS only accepts a script as a argument, not a command
         // Also BQS does not automatically copy the current working directory to the job
         //qsub.append(' ').append(command);
+        qsub.append(' ');
+        if (job.getWorkingDirectory() != null)
+        {
+           qsub.append(job.getWorkingDirectory()).append('/');
+        }
+        qsub.append("bqs_script");
+        
         StringBuilder bqs_script = new StringBuilder();
         if (job.getWorkingDirectory() != null)
         {
