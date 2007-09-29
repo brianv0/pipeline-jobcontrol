@@ -15,7 +15,7 @@ import javax.servlet.jsp.tagext.SimpleTagSupport;
 /**
  *
  * @author tonyj
- * @version $Id: Submit.java,v 1.3 2007-05-14 20:43:17 tonyj Exp $
+ * @version $Id: Submit.java,v 1.4 2007-09-29 19:09:08 tonyj Exp $
  */
 
 public class Submit extends SimpleTagSupport implements DynamicAttributes
@@ -26,24 +26,25 @@ public class Submit extends SimpleTagSupport implements DynamicAttributes
    private int time = 90;
    private int memory = 0;
    private String extraOptions;
-
+   private String serviceName;
+   private String host;
+   private String user;
+   private int port = 1099;
+   
    private Map<String,String> env = new HashMap<String,String>();
    private Map<String,String> files = new HashMap<String,String>();
-
+   
    /**Called by the container to invoke this tag.
     * The implementation of this method is provided by the tag library developer,
     * and handles all tag processing, body iteration, etc.
     */
    public void doTag() throws JspException
    {
-
-      JspWriter out=getJspContext().getOut();
-
       try
       {
          JspFragment fragment = getJspBody();
          if (fragment != null) fragment.invoke(null);
-
+         
          Job job = new Job();
          job.setFiles(files);
          job.setCommand(command);
@@ -51,9 +52,9 @@ public class Submit extends SimpleTagSupport implements DynamicAttributes
          job.setMaxCPU(time);
          if (memory != 0) job.setMaxMemory(memory);
          if (extraOptions != null) job.setExtraOptions(extraOptions);
-
+         
          job.setEnv(env);
-         JobControlClient client = new JobControlClient();
+         JobControlClient client = new JobControlClient(user, host, port, serviceName);
          String id = client.submit(job);
          if (var != null) getJspContext().setAttribute(var,id);
       }
@@ -82,12 +83,12 @@ public class Submit extends SimpleTagSupport implements DynamicAttributes
    {
       this.extraOptions = value;
    }
-
+   
    public void setEnvVariables(HashMap<String,String> envVariables)
    {
-       env.putAll(envVariables);
+      env.putAll(envVariables);
    }
-
+   
    public void setTime(int value)
    {
       this.time = value;
@@ -99,5 +100,21 @@ public class Submit extends SimpleTagSupport implements DynamicAttributes
    public void setDynamicAttribute(String uri, String name, Object value) throws JspException
    {
       env.put(name, value == null ? "" : value.toString());
+   }
+   public void setHost(String host)
+   {
+      this.host = host;
+   }
+   public void setUser(String user)
+   {
+      this.user = user;
+   }
+   public void setServiceName(String serviceName)
+   {
+      this.serviceName = serviceName;
+   }
+   public void setPort(int port)
+   {
+      this.port = port;
    }
 }
