@@ -20,28 +20,32 @@ import java.util.logging.Logger;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.glast.jobcontrol.*;
+import org.glast.jobcontrol.Job;
+import org.glast.jobcontrol.JobControl;
+import org.glast.jobcontrol.JobControlException;
+import org.glast.jobcontrol.JobStatus;
+import org.glast.jobcontrol.JobSubmissionException;
+import org.glast.jobcontrol.NoSuchJobException;
+import org.glast.jobcontrol.OutputProcessor;
+import org.glast.jobcontrol.common.JobControlService;
 
 /**
  * The main class for the LSF job control server.
  * @author Tony Johnson
  */
-class JobControlService implements JobControl
+class LSFJobControlService extends JobControlService
 {
    private final static String SUBMIT_COMMAND = "/usr/local/bin/bsub";
    private final static String KILL_COMMAND = "/usr/local/bin/bkill";
    private final static Pattern pattern = Pattern.compile("Job <(\\d+)>");
-   private final static Logger logger = Logger.getLogger("org.glast.jobcontrol");
    private final LSFStatus lsfStatus = new LSFStatus();
-   private final int[] retryDelays = { 1000, 2000, 4000, 8000, 0 };
-   private final static Pattern tokenizer = Pattern.compile("\\s*(?:\"([^\"]*)\"|(\\S+))");
    
-   private JobControlService()
+   private LSFJobControlService()
    {
    }
    public static void main(String[] args) throws RemoteException
    {
-      JobControlService service = new JobControlService();
+      LSFJobControlService service = new LSFJobControlService();
       JobControl stub = (JobControl) UnicastRemoteObject.exportObject(service, 0);
       
       String user = System.getProperty("user.name");
@@ -120,10 +124,7 @@ class JobControlService implements JobControl
       bsub.addAll(Arrays.<String>asList(command.split("\\s+")));
       if (job.getArguments() != null)
       {
-         for (String arg : job.getArguments())
-         { 
-            bsub.add("\""+arg+"\""); 
-         }
+         bsub.addAll(job.getArguments());
       }
       String fullCommand = toFullCommand(bsub);
       logger.info("Submit: "+fullCommand);
@@ -212,33 +213,6 @@ class JobControlService implements JobControl
       {
          throw new JobControlException("Job submission interrupted",x);
       }
-   }
-
-   private void archiveOldWorkingDir(final File dir, final String archivePrefix) throws JobSubmissionException
-   {
-      File[] oldFiles = dir.listFiles();
-      if (oldFiles.length > 0)
-      {
-         File archiveDir = new File(dir,"archive/"+archivePrefix);
-         if (!archiveDir.exists())
-         {
-            boolean rc = archiveDir.mkdirs();
-            if (!rc) throw new JobSubmissionException("Could not create archive directory "+archiveDir);
-         }
-         
-         for (File oldFile : oldFiles)
-         {
-            if (!oldFile.getName().startsWith("archive") || !oldFile.isDirectory())
-            {
-               boolean rc = oldFile.renameTo(new File(archiveDir,oldFile.getName()));
-               if (!rc) throw new JobSubmissionException("Could not move file to archive directory: "+oldFile);
-            }
-         }
-      }
-   }
-   private String sanitize(String option)
-   {
-      return option.replaceAll("\\s+","_");
    }
    private int convertToMinutes(int seconds)
    {
@@ -332,29 +306,5 @@ class JobControlService implements JobControl
          throw new JobControlException("InterruptedException while killing job "+jobID,x);
       }
    }
-   
-   private List<String> tokenizeExtraOption(String string)
-   {
-      List<String> result = new ArrayList<String>();
-      Matcher matcher = tokenizer.matcher(string);
-      while (matcher.find())
-      {
-         result.add(matcher.group(2) == null ? matcher.group(1) : matcher.group(2));
-      }
-      return result;
-   }
 
-   private String toFullCommand(List<String> bsub)
-   {
-      StringBuilder builder = new StringBuilder();
-      for (String token : bsub)
-      {
-         if (builder.length()>0) builder.append(' ');
-         boolean needQuotes = token.contains(" ");
-         if (needQuotes) builder.append('"');
-         builder.append(token);
-         if (needQuotes) builder.append('"');
-      }
-      return builder.toString();
-   }
 }
