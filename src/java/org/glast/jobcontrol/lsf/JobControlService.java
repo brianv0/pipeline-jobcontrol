@@ -23,7 +23,7 @@ import java.util.regex.Pattern;
 import org.glast.jobcontrol.*;
 
 /**
- * The main class for the job control server.
+ * The main class for the LSF job control server.
  * @author Tony Johnson
  */
 class JobControlService implements JobControl
@@ -34,6 +34,7 @@ class JobControlService implements JobControl
    private final static Logger logger = Logger.getLogger("org.glast.jobcontrol");
    private final LSFStatus lsfStatus = new LSFStatus();
    private final int[] retryDelays = { 1000, 2000, 4000, 8000, 0 };
+   private final static Pattern tokenizer = Pattern.compile("\\s*(?:\"([^\"]*)\"|(\\S+))");
    
    private JobControlService()
    {
@@ -82,35 +83,60 @@ class JobControlService implements JobControl
    {
       String command = job.getCommand();
       if (command == null || command.length() == 0) throw new JobSubmissionException("Missing command");
-      StringBuilder bsub = new StringBuilder(SUBMIT_COMMAND);
-      if (job.getLogFile() == null) { bsub.append(" -o %J.log"); }
-      else { bsub.append(" -o ").append(sanitize(job.getLogFile())); }
-      if (job.getMaxCPU() != 0) { bsub.append(" -c ").append(convertToMinutes(job.getMaxCPU())); }
-      if (job.getMaxMemory() != 0) { bsub.append(" -M ").append(job.getMaxMemory()); }
-      if (job.getName() != null) { bsub.append(" -J ").append(sanitize(job.getName())).append(" ");  }
+      List<String> bsub = new ArrayList<String>(Arrays.<String>asList(SUBMIT_COMMAND.split("\\s+")));
+      String logFileName = job.getLogFile()==null ? "logFile.log" : sanitize(job.getLogFile());
+      bsub.add("-o"); 
+      bsub.add(logFileName);
+      if (job.getMaxCPU() != 0)
+      { 
+         bsub.add("-c"); 
+         bsub.add(String.valueOf(convertToMinutes(job.getMaxCPU())));
+      }
+      if (job.getMaxMemory() != 0)
+      { 
+         bsub.add("-M"); 
+         bsub.add(String.valueOf(job.getMaxMemory())); 
+      }
+      if (job.getName() != null)
+      { 
+         bsub.add("-J"); 
+         bsub.add(sanitize(job.getName()));  
+      }
       if (!job.getRunAfter().isEmpty())
       {
-         bsub.append(" -w ");
+         bsub.add("-w");
+         StringBuilder condition = new StringBuilder();
          for (Iterator iter = job.getRunAfter().iterator(); iter.hasNext() ; )
          {
-            bsub.append("ended(").append(iter.next()).append(')');
-            if (iter.hasNext()) bsub.append("&&");
+            condition.append("ended(").append(iter.next()).append(')');
+            if (iter.hasNext()) condition.append("&&");
+         }
+         bsub.add(condition.toString());
+      }
+      if (job.getExtraOptions() != null)
+      { 
+         bsub.addAll(tokenizeExtraOption(job.getExtraOptions())); 
+      }
+      bsub.addAll(Arrays.<String>asList(command.split("\\s+")));
+      if (job.getArguments() != null)
+      {
+         for (String arg : job.getArguments())
+         { 
+            bsub.add("\""+arg+"\""); 
          }
       }
-      if (job.getExtraOptions() != null) { bsub.append(' ').append(job.getExtraOptions()); }
-      bsub.append(' ').append(command);
+      String fullCommand = toFullCommand(bsub);
+      logger.info("Submit: "+fullCommand);
       
       try
       {
-         List<String> commands = new ArrayList<String>(Arrays.asList(bsub.toString().split("\\s+")));
-         if (job.getArguments() != null)
-         {
-            for (String arg : job.getArguments()) { commands.add("\""+arg+"\""); }
-         }
-         ProcessBuilder builder = new ProcessBuilder(commands);
+         ProcessBuilder builder = new ProcessBuilder(bsub);
+         Map<String,String> env = builder.environment();
+         
+         env.put("JOBCONTROL_SUBMIT_COMMAND",fullCommand);
+         
          if (job.getEnv() != null)
          {
-            Map<String,String> env = builder.environment();
             env.putAll(job.getEnv());
          }
          if (job.getWorkingDirectory() != null)
@@ -122,7 +148,7 @@ class JobControlService implements JobControl
                {
                   // This occasionally fails due to NFS/automount problems, so retry a few times
                   boolean rc = dir.mkdirs();
-                  if (!rc) 
+                  if (!rc)
                   {
                      if (retry > 0)
                      {
@@ -135,27 +161,13 @@ class JobControlService implements JobControl
                else if (!dir.isDirectory()) throw new JobSubmissionException("Working directory is not a directory "+dir);
                else if (job.getArchiveOldWorkingDir() != null)
                {
-                  File[] oldFiles = dir.listFiles();
-                  if (oldFiles.length > 0)
-                  {
-                     File archiveDir = new File(dir,"archive/"+job.getArchiveOldWorkingDir());
-                     boolean rc = archiveDir.mkdirs();
-                     if (!rc) throw new JobSubmissionException("Could not create archive directory "+archiveDir);
-                     
-                     for (File oldFile : oldFiles)
-                     {
-                        if (!oldFile.getName().startsWith("archive") || !oldFile.isDirectory())
-                        {
-                           rc = oldFile.renameTo(new File(archiveDir,oldFile.getName()));
-                           if (!rc) throw new JobSubmissionException("Could not move file to archive directory: "+oldFile);
-                        }
-                     }
-                  }
+                  archiveOldWorkingDir(dir, job.getArchiveOldWorkingDir());
                }
                break;
             }
-
+            
             builder.directory(dir);
+            env.put("JOBCONTROL_LOGFILE",new File(dir,logFileName).getAbsolutePath());
             
             // Create any files send with the job
             
@@ -201,6 +213,29 @@ class JobControlService implements JobControl
          throw new JobControlException("Job submission interrupted",x);
       }
    }
+
+   private void archiveOldWorkingDir(final File dir, final String archivePrefix) throws JobSubmissionException
+   {
+      File[] oldFiles = dir.listFiles();
+      if (oldFiles.length > 0)
+      {
+         File archiveDir = new File(dir,"archive/"+archivePrefix);
+         if (!archiveDir.exists())
+         {
+            boolean rc = archiveDir.mkdirs();
+            if (!rc) throw new JobSubmissionException("Could not create archive directory "+archiveDir);
+         }
+         
+         for (File oldFile : oldFiles)
+         {
+            if (!oldFile.getName().startsWith("archive") || !oldFile.isDirectory())
+            {
+               boolean rc = oldFile.renameTo(new File(archiveDir,oldFile.getName()));
+               if (!rc) throw new JobSubmissionException("Could not move file to archive directory: "+oldFile);
+            }
+         }
+      }
+   }
    private String sanitize(String option)
    {
       return option.replaceAll("\\s+","_");
@@ -240,9 +275,9 @@ class JobControlService implements JobControl
       {
          logger.log(Level.SEVERE,"job status failed",t);
          throw t;
-      }         
+      }
    }
-
+   
    public void cancel(String jobID) throws NoSuchJobException, JobControlException
    {
       try
@@ -268,7 +303,7 @@ class JobControlService implements JobControl
       {
          logger.log(Level.SEVERE,"job cancellation failed",t);
          throw t;
-      }      
+      }
    }
    private void cancelInternal(String jobID) throws NoSuchJobException, JobControlException
    {
@@ -286,7 +321,7 @@ class JobControlService implements JobControl
          output.join();
          int rc = process.exitValue();
          if (rc == 255) throw new NoSuchJobException("No such job, id="+jobID);
-         else if (rc != 0) throw new JobControlException("Command failed rc="+rc);         
+         else if (rc != 0) throw new JobControlException("Command failed rc="+rc);
       }
       catch (IOException x)
       {
@@ -294,7 +329,32 @@ class JobControlService implements JobControl
       }
       catch (InterruptedException x)
       {
-         throw new JobControlException("InterruptedException while killing job "+jobID,x);         
-      }   
+         throw new JobControlException("InterruptedException while killing job "+jobID,x);
+      }
+   }
+   
+   private List<String> tokenizeExtraOption(String string)
+   {
+      List<String> result = new ArrayList<String>();
+      Matcher matcher = tokenizer.matcher(string);
+      while (matcher.find())
+      {
+         result.add(matcher.group(2) == null ? matcher.group(1) : matcher.group(2));
+      }
+      return result;
+   }
+
+   private String toFullCommand(List<String> bsub)
+   {
+      StringBuilder builder = new StringBuilder();
+      for (String token : bsub)
+      {
+         if (builder.length()>0) builder.append(' ');
+         boolean needQuotes = token.contains(" ");
+         if (needQuotes) builder.append('"');
+         builder.append(token);
+         if (needQuotes) builder.append('"');
+      }
+      return builder.toString();
    }
 }
