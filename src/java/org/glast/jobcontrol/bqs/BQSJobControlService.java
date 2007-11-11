@@ -13,7 +13,6 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -21,21 +20,25 @@ import java.util.logging.Logger;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.glast.jobcontrol.*;
+import org.glast.jobcontrol.Job;
+import org.glast.jobcontrol.JobControl;
+import org.glast.jobcontrol.JobControlException;
+import org.glast.jobcontrol.JobStatus;
+import org.glast.jobcontrol.JobSubmissionException;
+import org.glast.jobcontrol.NoSuchJobException;
+import org.glast.jobcontrol.OutputProcessor;
+import org.glast.jobcontrol.common.JobControlService;
 
 /**
  * The main class for the job control server.
  * @author Tony Johnson
  */
-class BQSJobControlService implements JobControl {
+class BQSJobControlService extends JobControlService {
     private final static String SUBMIT_COMMAND = "/usr/local/bin/qsub -l platform=LINUX";
     private final static String KILL_COMMAND = "/usr/local/bin/qdel";
-    //private final static Pattern pattern = Pattern.compile("Job <(\\d+)>");
     private final static Pattern pattern = Pattern.compile("job (\\w+) submitted.*");
-    
     private final static Logger logger = Logger.getLogger("org.glast.jobcontrol");
     private final BQSStatus bqsStatus = new BQSStatus();    
-    private final int[] retryDelays = { 1000, 2000, 4000, 8000, 0 };
     
     private BQSJobControlService() {
     }
@@ -81,18 +84,25 @@ class BQSJobControlService implements JobControl {
 	logger.info("command:" + command);
 	
         if (command == null || command.length() == 0) throw new JobSubmissionException("Missing command");
-        StringBuilder qsub = new StringBuilder(SUBMIT_COMMAND);
-        //if (job.getLogFile() == null) { qsub.append(" -o %J.log"); } 
-	
-	if (job.getLogFile() == null) { qsub.append(" -o toto.log"); } 
-        else { qsub.append(" -o ").append(sanitize(job.getLogFile())); }
-        qsub.append(" -eo"); // Send stderr to the stdout (the log file)
-        if (job.getMaxCPU() != 0) { qsub.append(" -l T=").append(convertToNormalisedSec(job.getMaxCPU())); }
-        if (job.getMaxMemory() != 0) { qsub.append(" -l M=").append(job.getMaxMemory()).append( "MB"); }
+        List<String> qsub = new ArrayList<String>(Arrays.<String>asList(SUBMIT_COMMAND.split("\\s+")));
+        String logFileName = job.getLogFile()==null ? "logFile.log" : sanitize(job.getLogFile());
+        qsub.add("-o"); 
+        qsub.add(logFileName);
+        qsub.add("-eo"); // Send stderr to the stdout (the log file)
+        if (job.getMaxCPU() != 0) 
+        { 
+           qsub.add("-l");
+           qsub.add("T="+convertToNormalisedSec(job.getMaxCPU()));
+        }
+        if (job.getMaxMemory() != 0) 
+        { 
+           qsub.add("-l");
+           qsub.add("M="+job.getMaxMemory()+" MB");
+        }
         // Ignore the jobname option for BQS, we need BQS to assign a unique name for later query
         //if (job.getName() != null) { qsub.append(" -N ").append(sanitize(job.getName())).append(" ");  }
 
-	qsub.append(" -V ");
+	qsub.add("-V");
         /**interjob dependencies not managed by BQS in this simple manner:
          * if (!job.getRunAfter().isEmpty()) {
             qsub.append(" -w ");
@@ -102,34 +112,39 @@ class BQSJobControlService implements JobControl {
             }
         }*/
         
-        if (job.getExtraOptions() != null) { qsub.append(' ').append(job.getExtraOptions()); }
+        if (job.getExtraOptions() != null)
+        { 
+            qsub.addAll(tokenizeExtraOption(job.getExtraOptions())); 
+        }
         // BQS only accepts a script as a argument, not a command
         // Also BQS does not automatically copy the current working directory to the job
-        //qsub.append(' ').append(command);
-        qsub.append(' ');
+        String bqsCommand = "bqs_script";
         if (job.getWorkingDirectory() != null)
         {
-           qsub.append(job.getWorkingDirectory()).append('/');
+           bqsCommand = job.getWorkingDirectory()+"/"+bqsCommand;
         }
-        qsub.append("bqs_script");
+        qsub.add(bqsCommand);
         
         StringBuilder bqs_script = new StringBuilder();
         if (job.getWorkingDirectory() != null)
         {
            bqs_script.append("cd ").append(job.getWorkingDirectory()).append('\n');
         }
-        bqs_script.append(command).append('\n');
-        
-	logger.info("qsub command: " + qsub);
+        bqs_script.append(command);
+        if (job.getArguments() != null) {
+            for (String arg : job.getArguments()) { bqs_script.append(" \""+arg+"\""); }
+        }
+        bqs_script.append('\n');
+        String fullCommand = toFullCommand(qsub);
+        logger.info("Submit: "+fullCommand);
                 
         try {
-            List<String> commands = new ArrayList<String>(Arrays.asList(qsub.toString().split("\\s+")));
-            if (job.getArguments() != null) {
-                for (String arg : job.getArguments()) { commands.add("\""+arg+"\""); }
-            }
-            ProcessBuilder builder = new ProcessBuilder(commands);
+
+            ProcessBuilder builder = new ProcessBuilder(qsub);
+            Map<String,String> env = builder.environment();
+            env.put("JOBCONTROL_SUBMIT_COMMAND",fullCommand);
+            
             if (job.getEnv() != null) {
-                Map<String,String> env = builder.environment();
                 env.putAll(job.getEnv());
             }
 	    
@@ -155,26 +170,12 @@ class BQSJobControlService implements JobControl {
                   else if (!dir.isDirectory()) throw new JobSubmissionException("Working directory is not a directory "+dir);
                   else if (job.getArchiveOldWorkingDir() != null)
                   {
-                     File[] oldFiles = dir.listFiles();
-                     if (oldFiles.length > 0)
-                     {
-                        File archiveDir = new File(dir,"archive/"+job.getArchiveOldWorkingDir());
-                        boolean rc = archiveDir.mkdirs();
-                        if (!rc) throw new JobSubmissionException("Could not create archive directory "+archiveDir);
-
-                        for (File oldFile : oldFiles)
-                        {
-                           if (!oldFile.getName().startsWith("archive") || !oldFile.isDirectory())
-                           {
-                              rc = oldFile.renameTo(new File(archiveDir,oldFile.getName()));
-                              if (!rc) throw new JobSubmissionException("Could not move file to archive directory: "+oldFile);
-                           }
-                        }
-                     }
+                     archiveOldWorkingDir(dir, job.getArchiveOldWorkingDir());
                   }
                   break;
                }
                builder.directory(dir);
+               env.put("JOBCONTROL_LOGFILE",new File(dir,logFileName).getAbsolutePath());
                 
                 // Create any files send with the job
 
@@ -226,12 +227,7 @@ class BQSJobControlService implements JobControl {
             throw new JobControlException("Job submission interrupted",x);
         }
     }
-    private String sanitize(String option) {
-        return option.replaceAll("\\s+","_");
-    }
-    private int convertToMinutes(int seconds) {
-        return (seconds+59)/60;
-    }
+
     private int convertToNormalisedSec(int seconds) {
         double f = 1.0;
         return (int)f*seconds;
