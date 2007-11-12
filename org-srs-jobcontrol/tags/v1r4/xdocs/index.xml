@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<document>
+    <properties>
+        <title>org.glast.jobcontrol</title>
+    </properties>
+
+    <body>
+        <section name="org.glast.jobcontrol"> 
+            <p>org.glast.jobcontrol is a package for submitting Glast batch jobs. For more information see
+            <a href="http://confluence.slac.stanford.edu//x/JR">documentation in confluence</a>.</p>
+        </section>
+    </body>
+</document>
