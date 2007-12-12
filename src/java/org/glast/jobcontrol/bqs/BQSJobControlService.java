@@ -97,7 +97,7 @@ class BQSJobControlService extends JobControlService {
         if (job.getMaxMemory() != 0) 
         { 
            qsub.add("-l");
-           qsub.add("M="+job.getMaxMemory()+" MB");
+           qsub.add("M="+job.getMaxMemory()+"MB");
         }
         // Ignore the jobname option for BQS, we need BQS to assign a unique name for later query
         //if (job.getName() != null) { qsub.append(" -N ").append(sanitize(job.getName())).append(" ");  }
