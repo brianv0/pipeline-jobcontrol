@@ -22,7 +22,7 @@ class BQSStatus
 {
    private final static long CACHE_TIME = 60*1000; // Needed to avoid excessive calls to bjobs
    //private final static String STATUS_COMMAND = "/usr/local/bin/bjobs -W -a -p -u";
-   private final static String STATUS_COMMAND = "qselect -u glastpro jobname uname status worker worker qtime stime etime cputime cur_mem cur_scratch";
+   private final static String STATUS_COMMAND = "qselect -e -u glastpro jobname uname status worker worker qtime stime etime cputime cur_mem cur_scratch";
    //jobname   uname   status     worker            worker             qtime               stime               etime               cputime     cur_mem     cur_scratch
    //I3432967 clavalle ENDED      ccwl0494.in2p3.fr ccwl0494.in2p3.fr  09/26/2006-15:49:04 09/26/2006-15:53:10 09/26/2006-19:04:56 10300       274         0
    // (\\d+)\\s+(\\S+)\\s+(\\S+)  \\s+(\\S+)        \\s+(\\S+)         \\s+(\\S+)          \\s+(\\S+)          \\s+(\\S+)           \\s+(\\d+) \\s+(\\d+)  \\s+(\\d+)
