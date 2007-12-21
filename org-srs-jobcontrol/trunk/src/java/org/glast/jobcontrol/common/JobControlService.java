@@ -18,13 +18,13 @@ public abstract class JobControlService implements JobControl
    protected static final Logger logger = Logger.getLogger("org.glast.jobcontrol");
    protected final int[] retryDelays = { 1000, 2000, 4000, 8000, 0 };
    protected static final Pattern tokenizer = Pattern.compile("\\s*(?:\"([^\"]*)\"|(\\S+))");
-
+   
    /** Creates a new instance of JobControlService */
    protected JobControlService()
    {
    }
-
-   protected void archiveOldWorkingDir(final File dir, final String archivePrefix) throws JobSubmissionException
+   
+   protected void archiveOldWorkingDir(final File dir, final String archivePrefix, List<Runnable> undoList) throws JobSubmissionException
    {
       File[] oldFiles = dir.listFiles();
       if (oldFiles.length > 0)
@@ -34,25 +34,34 @@ public abstract class JobControlService implements JobControl
          {
             boolean rc = archiveDir.mkdirs();
             if (!rc) throw new JobSubmissionException("Could not create archive directory "+archiveDir);
+            undoList.add(new DeleteFile(archiveDir));
          }
          
-         for(File oldFile : oldFiles)
+         for(final File oldFile : oldFiles)
          {
             if (!oldFile.getName().startsWith("archive") || !oldFile.isDirectory())
             {
-               boolean rc = oldFile.renameTo(new File(archiveDir,oldFile.getName()));
+               final File newFile = new File(archiveDir,oldFile.getName());
+               boolean rc = oldFile.renameTo(newFile);
                if (!rc) throw new JobSubmissionException("Could not move file to archive directory: "+oldFile);
+               undoList.add(new Runnable()
+               {
+                  public void run()
+                  {
+                     newFile.renameTo(oldFile);
+                  }
+               });
             }
          }
       }
    }
-
+   
    protected String sanitize(String option)
    {
       return option.replaceAll("\\s+","_");
    }
-
-
+   
+   
    protected String toFullCommand(List<String> bsub)
    {
       StringBuilder builder = new StringBuilder();
@@ -66,7 +75,7 @@ public abstract class JobControlService implements JobControl
       }
       return builder.toString();
    }
-
+   
    
    protected List<String> tokenizeExtraOption(String string)
    {
@@ -78,5 +87,16 @@ public abstract class JobControlService implements JobControl
       }
       return result;
    }
-   
+   public static class DeleteFile implements Runnable
+   {
+      private File file;
+      public DeleteFile(File file)
+      {
+         this.file = file;
+      }
+      public void run()
+      {
+         file.delete();
+      }
+   }
 }

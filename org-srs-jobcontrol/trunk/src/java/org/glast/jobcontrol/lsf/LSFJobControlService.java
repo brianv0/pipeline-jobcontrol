@@ -12,6 +12,7 @@ import java.rmi.server.ServerNotActiveException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -89,22 +90,22 @@ class LSFJobControlService extends JobControlService
       if (command == null || command.length() == 0) throw new JobSubmissionException("Missing command");
       List<String> bsub = new ArrayList<String>(Arrays.<String>asList(SUBMIT_COMMAND.split("\\s+")));
       String logFileName = job.getLogFile()==null ? "logFile.log" : sanitize(job.getLogFile());
-      bsub.add("-o"); 
+      bsub.add("-o");
       bsub.add(logFileName);
       if (job.getMaxCPU() != 0)
-      { 
-         bsub.add("-c"); 
+      {
+         bsub.add("-c");
          bsub.add(String.valueOf(convertToMinutes(job.getMaxCPU())));
       }
       if (job.getMaxMemory() != 0)
-      { 
-         bsub.add("-M"); 
-         bsub.add(String.valueOf(job.getMaxMemory())); 
+      {
+         bsub.add("-M");
+         bsub.add(String.valueOf(job.getMaxMemory()));
       }
       if (job.getName() != null)
-      { 
-         bsub.add("-J"); 
-         bsub.add(sanitize(job.getName()));  
+      {
+         bsub.add("-J");
+         bsub.add(sanitize(job.getName()));
       }
       if (!job.getRunAfter().isEmpty())
       {
@@ -118,8 +119,8 @@ class LSFJobControlService extends JobControlService
          bsub.add(condition.toString());
       }
       if (job.getExtraOptions() != null)
-      { 
-         bsub.addAll(tokenizeExtraOption(job.getExtraOptions())); 
+      {
+         bsub.addAll(tokenizeExtraOption(job.getExtraOptions()));
       }
       bsub.addAll(Arrays.<String>asList(command.split("\\s+")));
       if (job.getArguments() != null)
@@ -129,6 +130,8 @@ class LSFJobControlService extends JobControlService
       String fullCommand = toFullCommand(bsub);
       logger.info("Submit: "+fullCommand);
       
+      // Things to be undone if the submit fails.
+      List<Runnable> undoList = new ArrayList<Runnable>();
       try
       {
          ProcessBuilder builder = new ProcessBuilder(bsub);
@@ -158,11 +161,15 @@ class LSFJobControlService extends JobControlService
                      }
                      else throw new JobSubmissionException("Could not create working directory "+dir);
                   }
+                  else
+                  {
+                     undoList.add(new DeleteFile(dir));
+                  }
                }
                else if (!dir.isDirectory()) throw new JobSubmissionException("Working directory is not a directory "+dir);
                else if (job.getArchiveOldWorkingDir() != null)
                {
-                  archiveOldWorkingDir(dir, job.getArchiveOldWorkingDir());
+                  archiveOldWorkingDir(dir, job.getArchiveOldWorkingDir(),undoList);
                }
                break;
             }
@@ -180,6 +187,7 @@ class LSFJobControlService extends JobControlService
                   File file = new File(dir,entry.getKey());
                   if (file.exists()) throw new JobSubmissionException("File "+file+" already exists, not replaced");
                   PrintWriter writer = new PrintWriter(new FileWriter(file));
+                  undoList.add(new DeleteFile(file));
                   writer.print(entry.getValue());
                   writer.close();
                }
@@ -201,7 +209,11 @@ class LSFJobControlService extends JobControlService
          {
             Matcher matcher = pattern.matcher(line);
             boolean ok = matcher.find();
-            if (ok) return matcher.group(1);
+            if (ok) 
+            {
+               undoList.clear();
+               return matcher.group(1);
+            }
          }
          throw new JobControlException("Could not find job number in output");
       }
@@ -212,6 +224,11 @@ class LSFJobControlService extends JobControlService
       catch (InterruptedException x)
       {
          throw new JobControlException("Job submission interrupted",x);
+      }
+      finally
+      {
+         Collections.reverse(undoList);
+         for (Runnable undo : undoList) undo.run();
       }
    }
    private int convertToMinutes(int seconds)
@@ -306,5 +323,5 @@ class LSFJobControlService extends JobControlService
          throw new JobControlException("InterruptedException while killing job "+jobID,x);
       }
    }
-
+   
 }

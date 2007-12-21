@@ -12,6 +12,7 @@ import java.rmi.server.ServerNotActiveException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -137,7 +138,9 @@ class BQSJobControlService extends JobControlService {
         bqs_script.append('\n');
         String fullCommand = toFullCommand(qsub);
         logger.info("Submit: "+fullCommand);
-                
+             
+        // Things to be undone if the submit fails.
+        List<Runnable> undoList = new ArrayList<Runnable>();
         try {
 
             ProcessBuilder builder = new ProcessBuilder(qsub);
@@ -166,11 +169,15 @@ class BQSJobControlService extends JobControlService {
                         }
                         else throw new JobSubmissionException("Could not create working directory "+dir);
                      }
+                     else 
+                     {
+                        undoList.add(new DeleteFile(dir));
+                     }
                   }
                   else if (!dir.isDirectory()) throw new JobSubmissionException("Working directory is not a directory "+dir);
                   else if (job.getArchiveOldWorkingDir() != null)
                   {
-                     archiveOldWorkingDir(dir, job.getArchiveOldWorkingDir());
+                     archiveOldWorkingDir(dir, job.getArchiveOldWorkingDir(),undoList);
                   }
                   break;
                }
@@ -187,6 +194,7 @@ class BQSJobControlService extends JobControlService {
                    File file = new File(dir,entry.getKey());
                    if (file.exists()) throw new JobSubmissionException("File "+file+" already exists, not replaced");
                    PrintWriter writer = new PrintWriter(new FileWriter(file));
+                   undoList.add(new DeleteFile(file));
                    writer.print(entry.getValue());
                    writer.close();
                 }
@@ -218,13 +226,20 @@ class BQSJobControlService extends JobControlService {
                 boolean ok = matcher.find();
 
                 //if (ok) return Integer.parseInt(matcher.group(1));
-		if (ok) return matcher.group(1);
+		if (ok)  {
+                   undoList.clear();
+                   return matcher.group(1);
+                }
             }
             throw new JobControlException("Could not find job number in output");
         } catch (IOException x) {
             throw new JobControlException("IOException during job submission",x);
         } catch (InterruptedException x) {
             throw new JobControlException("Job submission interrupted",x);
+        }
+        finally {
+            Collections.reverse(undoList);
+            for (Runnable undo : undoList) undo.run();
         }
     }
 
