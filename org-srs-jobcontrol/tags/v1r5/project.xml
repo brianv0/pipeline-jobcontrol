@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+   <pomVersion>3</pomVersion>
+   <artifactId>org-glast-jobcontrol</artifactId>
+   <groupId>glast</groupId>
+   <currentVersion>1.5</currentVersion>
+   <shortDescription>Glast Job Control</shortDescription>
+   <url>http://glast-ground.slac.stanford.edu/docs/${pom.artifactId}/</url>
+   <name>Glast Job Control</name>
+   <package>org.glast.jobcontrol</package>
+   <inceptionYear>2005</inceptionYear>
+   <siteAddress>glast-java.slac.stanford.edu</siteAddress>
+   <siteDirectory>/nfs/slac/g/glast/ground/docs/${pom.artifactId}</siteDirectory>
+   <repository>
+      <developerConnection>scm:cvs:ext:${maven.username}@glast-java.slac.stanford.edu:/cvs/java:${pom.artifactId}</developerConnection>
+      <url>http://www-glast.stanford.edu/cgi-bin/viewcvs/${pom.artifactId}/?root=java</url>
+   </repository>
+   <dependencies>
+      <dependency>
+         <groupId>tomcat</groupId>
+         <artifactId>servlet-api</artifactId>
+         <version>5.0.18</version>
+         <type>jar</type>
+      </dependency>
+      <dependency>
+         <groupId>tomcat</groupId>
+         <artifactId>jsp-api</artifactId>
+         <version>5.0.18</version>
+         <type>jar</type>
+      </dependency>
+      <!-- Needed by cruisecontrol -->
+      <dependency>
+         <groupId>maven</groupId>
+         <artifactId>maven-scm-plugin</artifactId>
+         <version>1.5</version>
+         <type>plugin</type>
+         <url>http://www.ibiblio.org/maven/maven/plugins/</url>
+      </dependency>
+      <!-- Used for generating tlddocs -->
+      <dependency>
+         <groupId>maven-taglib</groupId>
+         <artifactId>maven-taglib-plugin</artifactId>
+         <version>1.4.1</version>
+         <type>plugin</type>
+         <url>http://maven-taglib.sourceforge.net</url>
+      </dependency>
+   </dependencies>
+   <build>
+      <sourceDirectory>src/java</sourceDirectory>
+      <unitTestSourceDirectory>test</unitTestSourceDirectory>
+      <resources>
+         <resource>
+            <directory>src/resource</directory>
+            <includes>
+               <include>org/glast/jobcontrol/demo/*.csh</include>
+               <include>META-INF/*.tld</include>
+            </includes>
+         </resource>
+      </resources>
+   </build>
+</project>
+
