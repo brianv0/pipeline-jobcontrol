@@ -183,21 +183,7 @@ class BQSJobControlService extends JobControlService {
                }
                builder.directory(dir);
                env.put("JOBCONTROL_LOGFILE",new File(dir,logFileName).getAbsolutePath());
-                
-                // Create any files send with the job
-
-                Map<String,String> files = job.getFiles();
-                if (files == null) files = new HashMap<String,String>();
-                files.put("bqs_script",bqs_script.toString());
-
-                for (Map.Entry<String,String> entry : files.entrySet()) {
-                   File file = new File(dir,entry.getKey());
-                   if (file.exists()) throw new JobSubmissionException("File "+file+" already exists, not replaced");
-                   PrintWriter writer = new PrintWriter(new FileWriter(file));
-                   undoList.add(new DeleteFile(file));
-                   writer.print(entry.getValue());
-                   writer.close();
-                }
+               storeFiles(dir, job.getFiles(), undoList);
             }
 	    
             builder.redirectErrorStream(true);
