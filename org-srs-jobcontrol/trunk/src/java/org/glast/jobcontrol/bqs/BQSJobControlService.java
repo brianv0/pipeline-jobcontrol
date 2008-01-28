@@ -1,9 +1,7 @@
 package org.glast.jobcontrol.bqs;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -13,7 +11,6 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -29,6 +26,7 @@ import org.glast.jobcontrol.JobSubmissionException;
 import org.glast.jobcontrol.NoSuchJobException;
 import org.glast.jobcontrol.OutputProcessor;
 import org.glast.jobcontrol.common.JobControlService;
+import org.glast.jobcontrol.common.JobControlService.DeleteFile;
 
 /**
  * The main class for the job control server.
