@@ -134,7 +134,7 @@ class BQSJobControlService extends JobControlService {
             for (String arg : job.getArguments()) { bqs_script.append(" \""+arg+"\""); }
         }
         bqs_script.append('\n');
-        job.getFiles().put(bqsCommand,bqs_script.toString());
+        job.getFiles().put("bqs_script",bqs_script.toString());
         String fullCommand = toFullCommand(qsub);
         logger.info("Submit: "+fullCommand);
              
