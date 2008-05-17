@@ -191,16 +191,21 @@ class BQSJobControlService extends JobControlService {
 
             process.waitFor();
             output.join();
-
-            int rc = process.exitValue();	    
-	    
-	    logger.info("process.exitValue=" + rc);
-            if (rc != 0) throw new JobControlException("Process failed rc="+rc);
-            
-            if (output.getStatus() != null) throw output.getStatus();
             
             List<String> result = output.getResult();
-	    
+            int rc = process.exitValue();
+            logger.info("process.exitValue=" + rc);
+            if (rc != 0) {
+               StringBuilder message = new StringBuilder("Process failed rc="+rc);
+               if (!result.isEmpty()) message.append(" output was:");
+               for (String line : result)
+               {
+                  message.append('\n').append(line);
+               }
+               throw new JobControlException(message.toString());
+            }
+            
+            if (output.getStatus() != null) throw output.getStatus();
 
             if (result.size() == 0) throw new JobControlException("Unexpected output length "+result.size());
             for (String line : result) {
