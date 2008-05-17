@@ -183,12 +183,21 @@ class LSFJobControlService extends JobControlService
          OutputProcessor output = new OutputProcessor(process.getInputStream(),logger);
          process.waitFor();
          output.join();
+         List<String> result = output.getResult();
          int rc = process.exitValue();
-         if (rc != 0) throw new JobControlException("Process failed rc="+rc);
+         if (rc != 0) 
+         {
+            StringBuilder message = new StringBuilder("Process failed rc="+rc);
+            if (!result.isEmpty()) message.append(" output was:");
+            for (String line : result)
+            {
+               message.append('\n').append(line);
+            }
+            throw new JobControlException(message.toString());
+         }
          
          if (output.getStatus() != null) throw output.getStatus();
-         
-         List<String> result = output.getResult();
+
          if (result.size() == 0) throw new JobControlException("Unexpected output length "+result.size());
          for (String line : result)
          {
