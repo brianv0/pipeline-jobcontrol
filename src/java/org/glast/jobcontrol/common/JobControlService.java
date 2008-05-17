@@ -29,7 +29,7 @@ public abstract class JobControlService implements JobControl, JobControlService
    protected static final Pattern tokenizer = Pattern.compile("\\s*(?:\"([^\"]*)\"|(\\S+))");
    private static final boolean obliterate = Boolean.getBoolean("org.glast.jobcontrol.obliterate");
    private final Date startTime = new Date();
-   protected AtomicInteger nSubmitted;
+   protected AtomicInteger nSubmitted = new AtomicInteger();
    protected long lastSuccessfulJobSubmissionTime;
    protected long lastFailedJobSubmissionTime;
    
