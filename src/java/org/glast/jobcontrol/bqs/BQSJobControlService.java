@@ -15,7 +15,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -40,7 +39,6 @@ class BQSJobControlService extends JobControlService {
     private final static String SUBMIT_COMMAND = System.getProperty("org.glast.jobcontrol.bqs.submitCommand","/usr/local/bin/qsub -l platform=LINUX");
     private final static String KILL_COMMAND = System.getProperty("org.glast.jobcontrol.bqs.killCommand","/usr/local/bin/qdel");
     private final static Pattern pattern = Pattern.compile("job (\\w+) submitted.*");
-    private final static Logger logger = Logger.getLogger("org.glast.jobcontrol");
     private final BQSStatus bqsStatus = new BQSStatus();    
     
     private BQSJobControlService() {
