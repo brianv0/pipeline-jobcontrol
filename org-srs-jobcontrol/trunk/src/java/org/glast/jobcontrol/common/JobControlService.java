@@ -5,25 +5,33 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.glast.jobcontrol.JobControl;
+import org.glast.jobcontrol.JobStatus;
 import org.glast.jobcontrol.JobSubmissionException;
 
 /**
  *
  * @author tonyj
  */
-public abstract class JobControlService implements JobControl
+public abstract class JobControlService implements JobControl, JobControlServiceMBean
 {
    protected static final Logger logger = Logger.getLogger("org.glast.jobcontrol");
    protected final int[] retryDelays = { 1000, 2000, 4000, 8000, 0 };
    protected static final Pattern tokenizer = Pattern.compile("\\s*(?:\"([^\"]*)\"|(\\S+))");
    private static final boolean obliterate = Boolean.getBoolean("org.glast.jobcontrol.obliterate");
+   private final Date startTime = new Date();
+   protected AtomicInteger nSubmitted;
+   protected long lastSuccessfulJobSubmissionTime;
+   protected long lastFailedJobSubmissionTime;
    
    /** Creates a new instance of JobControlService */
    protected JobControlService()
@@ -105,22 +113,22 @@ public abstract class JobControlService implements JobControl
          file.delete();
       }
    }
-
-
+   
+   
    protected void storeFiles(final File dir, final Map<String, String> files, final List<Runnable> undoList) throws JobSubmissionException, IOException
-   { 
+   {
       if (files != null)
       {
          for(Map.Entry<String, String> entry : files.entrySet())
          {
             File file = new File(dir,entry.getKey());
-            if (file.exists()) 
+            if (file.exists())
             {
                if (obliterate)
                {
                   logger.log(Level.WARNING,"File "+file+" obliterated");
                }
-               else 
+               else
                {
                   throw new JobSubmissionException("File "+file+" already exists, not replaced");
                }
@@ -131,5 +139,43 @@ public abstract class JobControlService implements JobControl
             writer.close();
          }
       }
+   }
+   
+   protected Map<String, Integer> computeJobCounts(Map<String,JobStatus> statii)
+   {
+      Map<String,Integer> result = new HashMap<String,Integer>();
+      for (JobStatus status : statii.values())
+      {
+         String stat = status.getStatus().toString();
+         Integer value = result.get(stat);
+         if (value == null)
+         {
+            result.put(stat,Integer.valueOf(1));
+         }
+         else
+         {
+            result.put(stat,Integer.valueOf(value.intValue()+1));
+         }
+      }
+      return result;
+   }
+   public Date getStartTime()
+   {
+      return startTime;
+   }
+   
+   public int getJobSubmissionCount()
+   {
+      return nSubmitted.get();
+   }
+   
+   public Date getLastSuccessfulJobSubmissionTime()
+   {
+      return new Date(lastSuccessfulJobSubmissionTime);
+   }
+   
+   public Date getLastFailedJobSubmissionTime()
+   {
+      return new Date(lastFailedJobSubmissionTime);
    }
 }
