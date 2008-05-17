@@ -2,6 +2,7 @@ package org.glast.jobcontrol.bqs;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -18,6 +19,9 @@ import java.util.logging.Logger;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.management.JMException;
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
 import org.glast.jobcontrol.Job;
 import org.glast.jobcontrol.JobControl;
 import org.glast.jobcontrol.JobControlException;
@@ -41,7 +45,7 @@ class BQSJobControlService extends JobControlService {
     
     private BQSJobControlService() {
     }
-    public static void main(String[] args) throws RemoteException {
+    public static void main(String[] args) throws RemoteException, JMException {
         BQSJobControlService service = new BQSJobControlService();
         JobControl stub = (JobControl) UnicastRemoteObject.exportObject(service, 1098);
         
@@ -50,6 +54,11 @@ class BQSJobControlService extends JobControlService {
         Registry registry = LocateRegistry.getRegistry();
         registry.rebind("BQSJobControlService-"+user, stub);
         service.logger.info("Server ready, user "+user);
+        
+        // Register the JMX bean
+        MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+        ObjectName name = new ObjectName("org.glast.jobcontrol:type=JobControlService");
+        mbs.registerMBean(service, name);
     }
     
     public String submit(Job job) throws JobSubmissionException, JobControlException {
@@ -62,18 +71,23 @@ class BQSJobControlService extends JobControlService {
             
             String jobName = submitInternal(job);
             logger.fine("job "+jobName+" submitted");
-	    
+	    nSubmitted.incrementAndGet();
+            lastSuccessfulJobSubmissionTime = System.currentTimeMillis();
 	    logger.info("END BQS JobControlService submit");
+            
 
             return jobName;
         } catch (ServerNotActiveException t) {
             logger.log(Level.SEVERE,"Unexpected error",t);
+            this.lastFailedJobSubmissionTime = System.currentTimeMillis();
             throw new JobControlException("Unexpected error",t);
         } catch (JobSubmissionException t) {
             logger.log(Level.SEVERE,"job submission failed",t);
+            this.lastFailedJobSubmissionTime = System.currentTimeMillis();
             throw t;
         } catch (JobControlException t) {
             logger.log(Level.SEVERE,"job submission failed",t);
+            this.lastFailedJobSubmissionTime = System.currentTimeMillis();
             throw t;
         }
     }
@@ -307,4 +321,31 @@ class BQSJobControlService extends JobControlService {
             throw new JobControlException("InterruptedException while killing job "+jobID,x);
         }
     }
+   
+   public String getStatus()
+   {
+      try
+      {
+         bqsStatus.getStatus();
+         return "OK";
+      }
+      catch (JobControlException x)
+      {
+         logger.log(Level.SEVERE,"Error getting status",x);
+         return "Bad "+(x.getMessage());
+      }
+   }
+   
+   public Map<String, Integer> getJobCounts()
+   {
+      try
+      {
+         return computeJobCounts(bqsStatus.getStatus());
+      }
+      catch (JobControlException x)
+      {
+         logger.log(Level.SEVERE,"Error getting job counts",x);
+         return null;
+      }
+   }
 }
