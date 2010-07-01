@@ -42,5 +42,13 @@
             </resource>
         </resources>
     </build>
-
+    <dependencies>
+        <dependency>
+            <groupId>javax.mail</groupId>
+            <artifactId>mail</artifactId>
+            <version>1.4.1</version>
+            <type>jar</type>
+        </dependency>
+    </dependencies>
 </project>
+
