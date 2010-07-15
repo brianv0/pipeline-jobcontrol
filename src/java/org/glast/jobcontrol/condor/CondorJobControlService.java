@@ -49,7 +49,7 @@ class CondorJobControlService extends JobControlService {
 
     public static void main(String[] args) throws RemoteException, JMException {
         CondorJobControlService service = new CondorJobControlService();
-        JobControl stub = (JobControl) UnicastRemoteObject.exportObject(service, 0);
+        JobControl stub = (JobControl) UnicastRemoteObject.exportObject(service, 1098);
 
         String user = System.getProperty("user.name");
         // Bind the remote object's stub in the registry
@@ -104,23 +104,23 @@ class CondorJobControlService extends JobControlService {
         submitFile.put("Universe", "Vanilla");
         submitFile.put("should_transfer_files", "IF_NEEDED");
         submitFile.put("when_to_transfer_output", "ON_EXIT");
-        submitFile.put("executable", command);
+        submitFile.put("executable", "condor.commands");
 
 
         Map<String, String> env = new HashMap<String, String>();
         if (job.getEnv() != null) {
             env.putAll(job.getEnv());
         }
-
+	StringBuilder requirements = new StringBuilder();
 
 //        if (job.getMaxCPU() != 0) {
 //            bsub.add("-c");
 //            bsub.add(String.valueOf(convertToMinutes(job.getMaxCPU())));
 //        }
-//        if (job.getMaxMemory() != 0) {
-//            bsub.add("-M");
-//            bsub.add(String.valueOf(job.getMaxMemory()));
-//        }
+        if (job.getMaxMemory() != 0) {
+            if (requirements.size()>0) requirements.append(" && ");
+            requirements.append('Memory>').append(job.getMaxMemory());
+        }
 //        if (job.getName() != null) {
 //            bsub.add("-J");
 //            bsub.add(sanitize(job.getName()));
@@ -139,6 +139,7 @@ class CondorJobControlService extends JobControlService {
 //        if (job.getExtraOptions() != null) {
 //            bsub.addAll(tokenizeExtraOption(job.getExtraOptions()));
 //        }
+	submitFile.put("requirements",requirements.toString());
         String fullCommand = toFullCommand(bsub);
         logger.info("Submit: " + fullCommand);
         env.put("JOBCONTROL_SUBMIT_COMMAND", fullCommand);
@@ -177,21 +178,28 @@ class CondorJobControlService extends JobControlService {
                 // Add the environment to the submit file
                 StringBuilder envValue = new StringBuilder("\"");
                 for (Map.Entry<String, String> entry : env.entrySet()) {
-                    envValue.append(entry.getKey()).append("='").append(entry.getValue()).append("'");
+                    envValue.append(entry.getKey()).append("='").append(entry.getValue()).append("'").append(' ');
                 }
                 envValue.append("\"");
                 submitFile.put("environment", envValue.toString());
-                // Add the arguments to the submit file
+                // Write the command file
+{
+                File file = new File(dir, "condor.commands");
+                PrintWriter writer = new PrintWriter(new FileWriter(file));
+                undoList.add(new DeleteFile(file));
+		writer.println("#!/bin/bash");
+		writer.print(command);
                 if (job.getArguments() != null) {
-
-                    StringBuilder argValue = new StringBuilder("\"");
                     for (String argument : job.getArguments()) {
-                        argValue.append("'").append(argument).append("'");
+                        writer.print(' ');
+			writer.print(argument);	
                     }
-                    argValue.append("\"");
-                    submitFile.put("arguments", argValue.toString());
                 }
-                // Write the submit file
+		writer.close();
+                file.setExecutable(true);
+} 
+               // Write the submit file
+{
                 File file = new File(dir, "condor.submit");
                 PrintWriter writer = new PrintWriter(new FileWriter(file));
                 undoList.add(new DeleteFile(file));
@@ -200,8 +208,10 @@ class CondorJobControlService extends JobControlService {
                     writer.print("=");
                     writer.println(fileLine.getValue());
                 }
+		writer.println("queue");
                 writer.close();
-            }
+} 
+           }
             builder.redirectErrorStream(true);
             Process process = builder.start();
             OutputProcessor output = new OutputProcessor(process.getInputStream(), logger);
