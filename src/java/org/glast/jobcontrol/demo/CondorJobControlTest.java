@@ -22,13 +22,14 @@ public class CondorJobControlTest {
         }
         String command = args[0];
         List<String> arguments = new ArrayList<String>();
-        for (int i = 2; i < args.length; i++) {
+        for (int i = 1; i < args.length; i++) {
             arguments.add(args[i]);
         }
 
         Job job = new Job();
         job.setCommand(command);
         job.setArguments(arguments);
+	job.setWorkingDirectory("users/tjohnson/test");	
         JobControlClient client = new JobControlClient("tjohnson", "smuhpc.smu.edu", 1099, "JobControlService");
         String id = client.submit(job);
         System.out.println("Job " + id + " submitted");
