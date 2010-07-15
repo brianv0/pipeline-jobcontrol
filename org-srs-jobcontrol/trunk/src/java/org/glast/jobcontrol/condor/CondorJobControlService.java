@@ -41,8 +41,9 @@ import org.glast.jobcontrol.common.JobControlService.DeleteFile;
 class CondorJobControlService extends JobControlService {
 
     private final static String SUBMIT_COMMAND = "/usr/local/bin/condor_submit condor.submit";
-    private final static String KILL_COMMAND = "/usr/local/bin/bkill";
+    private final static String KILL_COMMAND = "/usr/local/bin/condor_rm";
     private final static Pattern pattern = Pattern.compile("submitted to cluster (\\d+)\\.");
+    private CondorStatus status = new CondorStatus();
 
     private CondorJobControlService() {
     }
@@ -111,15 +112,17 @@ class CondorJobControlService extends JobControlService {
         if (job.getEnv() != null) {
             env.putAll(job.getEnv());
         }
-	StringBuilder requirements = new StringBuilder();
+        StringBuilder requirements = new StringBuilder();
 
 //        if (job.getMaxCPU() != 0) {
 //            bsub.add("-c");
 //            bsub.add(String.valueOf(convertToMinutes(job.getMaxCPU())));
 //        }
         if (job.getMaxMemory() != 0) {
-            if (requirements.size()>0) requirements.append(" && ");
-            requirements.append('Memory>').append(job.getMaxMemory());
+            if (requirements.length() > 0) {
+                requirements.append(" && ");
+            }
+            requirements.append("Memory>").append(job.getMaxMemory());
         }
 //        if (job.getName() != null) {
 //            bsub.add("-J");
@@ -139,7 +142,7 @@ class CondorJobControlService extends JobControlService {
 //        if (job.getExtraOptions() != null) {
 //            bsub.addAll(tokenizeExtraOption(job.getExtraOptions()));
 //        }
-	submitFile.put("requirements",requirements.toString());
+        submitFile.put("requirements", requirements.toString());
         String fullCommand = toFullCommand(bsub);
         logger.info("Submit: " + fullCommand);
         env.put("JOBCONTROL_SUBMIT_COMMAND", fullCommand);
@@ -149,6 +152,7 @@ class CondorJobControlService extends JobControlService {
         try {
             ProcessBuilder builder = new ProcessBuilder(bsub);
 
+            //FIXME: This does not work if working directory is null
             if (job.getWorkingDirectory() != null) {
                 File dir = new File(job.getWorkingDirectory());
                 for (int retry : retryDelays) {
@@ -183,35 +187,35 @@ class CondorJobControlService extends JobControlService {
                 envValue.append("\"");
                 submitFile.put("environment", envValue.toString());
                 // Write the command file
-{
-                File file = new File(dir, "condor.commands");
-                PrintWriter writer = new PrintWriter(new FileWriter(file));
-                undoList.add(new DeleteFile(file));
-		writer.println("#!/bin/bash");
-		writer.print(command);
-                if (job.getArguments() != null) {
-                    for (String argument : job.getArguments()) {
-                        writer.print(' ');
-			writer.print(argument);	
+                {
+                    File file = new File(dir, "condor.commands");
+                    PrintWriter writer = new PrintWriter(new FileWriter(file));
+                    undoList.add(new DeleteFile(file));
+                    writer.println("#!/bin/bash");
+                    writer.print(command);
+                    if (job.getArguments() != null) {
+                        for (String argument : job.getArguments()) {
+                            writer.print(' ');
+                            writer.print(argument);
+                        }
                     }
+                    writer.close();
+                    file.setExecutable(true);
                 }
-		writer.close();
-                file.setExecutable(true);
-} 
-               // Write the submit file
-{
-                File file = new File(dir, "condor.submit");
-                PrintWriter writer = new PrintWriter(new FileWriter(file));
-                undoList.add(new DeleteFile(file));
-                for (Map.Entry<String, String> fileLine : submitFile.entrySet()) {
-                    writer.print(fileLine.getKey());
-                    writer.print("=");
-                    writer.println(fileLine.getValue());
+                // Write the submit file
+                {
+                    File file = new File(dir, "condor.submit");
+                    PrintWriter writer = new PrintWriter(new FileWriter(file));
+                    undoList.add(new DeleteFile(file));
+                    for (Map.Entry<String, String> fileLine : submitFile.entrySet()) {
+                        writer.print(fileLine.getKey());
+                        writer.print("=");
+                        writer.println(fileLine.getValue());
+                    }
+                    writer.println("queue");
+                    writer.close();
                 }
-		writer.println("queue");
-                writer.close();
-} 
-           }
+            }
             builder.redirectErrorStream(true);
             Process process = builder.start();
             OutputProcessor output = new OutputProcessor(process.getInputStream(), logger);
@@ -259,6 +263,7 @@ class CondorJobControlService extends JobControlService {
     }
 
     private void checkPermission(String ip) throws SecurityException {
+        //FIXME: Do something better
         if (!ip.startsWith("134.79") && !ip.startsWith("198.129")) {
             throw new SecurityException();
         }
@@ -266,21 +271,93 @@ class CondorJobControlService extends JobControlService {
 
     @Override
     public JobStatus status(String jobID) throws NoSuchJobException, JobControlException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        try {
+            String ip = RemoteServer.getClientHost();
+            logger.info("status: " + jobID + " from " + ip);
+            checkPermission(ip);
+
+            Map<String, JobStatus> statii = status.getStatus();
+            JobStatus result = statii.get(jobID);
+            if (result == null) {
+                throw new NoSuchJobException("Job id " + jobID);
+            }
+            return result;
+        } catch (ServerNotActiveException t) {
+            logger.log(Level.SEVERE, "Unexpected error", t);
+            throw new JobControlException("Unexpected error", t);
+        } catch (NoSuchJobException t) {
+            logger.log(Level.SEVERE, "job status failed", t);
+            throw t;
+        } catch (JobControlException t) {
+            logger.log(Level.SEVERE, "job status failed", t);
+            throw t;
+        }
     }
 
     @Override
     public void cancel(String jobID) throws NoSuchJobException, JobControlException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        try {
+            String ip = RemoteServer.getClientHost();
+            logger.info("killing: " + jobID + " from " + ip);
+            checkPermission(ip);
+
+            cancelInternal(jobID);
+            logger.fine("job " + jobID + " cancelled");
+        } catch (ServerNotActiveException t) {
+            logger.log(Level.SEVERE, "Unexpected error", t);
+            throw new JobControlException("Unexpected error", t);
+        } catch (NoSuchJobException t) {
+            logger.log(Level.SEVERE, "job cancellation failed", t);
+            throw t;
+        } catch (JobControlException t) {
+            logger.log(Level.SEVERE, "job cancellation failed", t);
+            throw t;
+        }
+    }
+
+    private void cancelInternal(String jobID) throws NoSuchJobException, JobControlException {
+        try {
+            List<String> commands = new ArrayList<String>();
+            commands.add(KILL_COMMAND);
+            commands.add(jobID);
+            ProcessBuilder builder = new ProcessBuilder();
+            builder.redirectErrorStream(true);
+            builder.command(commands);
+            Process process = builder.start();
+            OutputProcessor output = new OutputProcessor(process.getInputStream(), logger);
+            process.waitFor();
+            output.join();
+            int rc = process.exitValue();
+            if (rc == 1) {
+                throw new NoSuchJobException("No such job, id=" + jobID);
+            } else if (rc != 0) {
+                throw new JobControlException("Command failed rc=" + rc);
+            }
+        } catch (IOException x) {
+            throw new JobControlException("IOException while killing job " + jobID, x);
+        } catch (InterruptedException x) {
+            throw new JobControlException("InterruptedException while killing job " + jobID, x);
+        }
     }
 
     @Override
     public String getStatus() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        try {
+            status.getStatus();
+            return "OK";
+        } catch (JobControlException x) {
+            logger.log(Level.SEVERE, "Error getting status", x);
+            return "Bad " + (x.getMessage());
+        }
     }
 
     @Override
     public Map<String, Integer> getJobCounts() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        try {
+            return computeJobCounts(status.getStatus());
+        } catch (JobControlException x) {
+            logger.log(Level.SEVERE, "Error getting job counts", x);
+            return null;
+        }
     }
 }
