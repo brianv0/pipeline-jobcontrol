@@ -23,8 +23,8 @@ import org.glast.jobcontrol.common.BaseJobStatus;
 class CondorStatus
 {
    private final static long CACHE_TIME = 60*1000; // Needed to avoid excessive calls to condor_q
-   private final static String STATUS_COMMAND = "/usr/local/bin/condor_q -long -format %d- ClusterId -format %s- LastRemoteHost -format %s- JobStatus -format %d- ExitStatus -format %d- CompletionDate -format %d\\n JobStartDate -submitter ";
-   private final static Pattern pattern = Pattern.compile("(\\d+)-(\\S+)-(\\d+)-(\\d+)-(\\d+)-(\\d+)");
+   private final static String STATUS_COMMAND = "/usr/local/bin/condor_q -long -format \\n\\nid=%d ClusterId -format \\nrh=%s RemoteHost -format \\nlrh=%s LastRemoteHost -format \\nstatus=%s JobStatus -format \\nrc=%d ExitStatus -format \\nend=%d CompletionDate -format \\nstart=%d JobStartDate -format \\nsubmit=%d QDate -format \\nuser=%s Owner -format \\ncomment=%s HoldReason -submitter ";
+   private final static Pattern pattern = Pattern.compile("(\\S+)=(\\S+)");
    private final static Logger logger = Logger.getLogger(CondorStatus.class.getName());
    
    private Map<String,JobStatus> map;
@@ -60,6 +60,7 @@ class CondorStatus
          
          Map<String,JobStatus> currentMap = new HashMap<String,JobStatus>();
          
+         BaseJobStatus stat = null;
          for (int i=0; i<result.size(); i++)
          {
             Matcher match = pattern.matcher(result.get(i));
@@ -67,38 +68,49 @@ class CondorStatus
             {
                try
                {
-                  BaseJobStatus stat = new BaseJobStatus();
-                  String id = match.group(1);
-                  stat.setId(id);
-                  stat.setUser(user);
-                  stat.setStatus(toStatus(match.group(3)));
-                  stat.setQueue("unknown");
-                  stat.setHost(match.group(2));
-                  //stat.setSubmitted(toDate(match.group(8)));
-                  stat.setStarted(toDate(match.group(6)));
-                  stat.setEnded(toDate(match.group(5)));
+                  if (stat==null) {
+                     stat = new BaseJobStatus();
+
+                     stat.setQueue("unknown");
+                  }
+                  String key = match.group(1);
+                  String value = match.group(2);
+                  if ("id".equals(key)) {
+                     stat.setId(value);
+                  } else if ("rh".equals(key) || "lrh".equals(key)) {
+                     stat.setHost(value); 
+	          } else if ("status".equals(key)) {		
+                     stat.setStatus(toStatus(value));
+                  } else if ("start".equals(key)) { 
+                     stat.setStarted(toDate(value));
+                  } else if ("end".equals(key)) { 
+                     stat.setEnded(toDate(value));
+                  } else if ("submit".equals(key)) { 
+                     stat.setSubmitted(toDate(value));
+                  } else if ("user".equals(key)) {
+                     stat.setUser(value); 
+                  } else if ("comment".equals(key)) {
+                     stat.setComment(value);
+		  }
+
                   //stat.setCpuUsed(0);
                   //stat.setMemoryUsed(Integer.parseInt(match.group(11)));
                   //stat.setSwapUsed(Integer.parseInt(match.group(12)));
-                  
-//                  StringBuffer comment = null;
-//                  while ((i+1)<result.size() && result.get(i+1).charAt(0) == ' ')
-//                  {
-//                     i++;
-//                     if (comment == null) comment = new StringBuffer();
-//                     else comment.append('\n');
-//                     comment.append(result.get(i).substring(1));
-//                  }
-//                  if (comment != null) stat.setComment(comment.toString());
-                  
-                  currentMap.put(id,stat);
+
+
                }
                catch (ParseException x)
                {
                   x.printStackTrace();
                }
             }
-            //else System.err.println("NoMatch: \""+result.get(i)+"\"");
+            else if (stat != null) {
+               currentMap.put(stat.getId(),stat);
+               stat = null;
+            }
+         }
+         if (stat != null) {
+            currentMap.put(stat.getId(),stat);
          }
          synchronized (this)
          {
@@ -118,7 +130,7 @@ class CondorStatus
    private Date toDate(String date) throws ParseException
    {
       if ("0".equals(date)) return null;
-      return new Date(Long.parseLong(date));
+      return new Date(Long.parseLong(date)*1000);
    }
 //   private int toTime(String date) throws ParseException
 //   {
@@ -134,14 +146,12 @@ class CondorStatus
 //   }
    private JobStatus.Status toStatus(String status)
    {
-//      if      ("DONE".equals(status)) return JobStatus.Status.DONE;
-//      else if ("RUN".equals(status))  return JobStatus.Status.RUNNING;
-//      else if ("PEND".equals(status)) return JobStatus.Status.PENDING;
-//      else if ("WAIT".equals(status)) return JobStatus.Status.WAITING;
-//      else if ("EXIT".equals(status)) return JobStatus.Status.FAILED;
-//      else if ("SUSP".contains(status)) return JobStatus.Status.SUSPENDED;
-//      else
-        return JobStatus.Status.UNKNOWN;
+        if      ("0".equals(status)) return JobStatus.Status.PENDING;
+        else if ("1".equals(status)) return JobStatus.Status.PENDING;
+        else if ("2".equals(status)) return JobStatus.Status.RUNNING;
+        else if ("4".equals(status)) return JobStatus.Status.DONE;
+        else if ("5".equals(status))  return JobStatus.Status.FAILED;
+        else return JobStatus.Status.UNKNOWN;
    }
    Map<String, JobStatus> getStatus() throws JobControlException
    {
