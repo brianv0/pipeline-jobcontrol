@@ -2,7 +2,6 @@ package org.glast.jobcontrol.demo;
 import org.glast.jobcontrol.JobControlClient;
 import org.glast.jobcontrol.JobControlException;
 import org.glast.jobcontrol.JobStatus;
-import org.glast.jobcontrol.JobSubmissionException;
 import org.glast.jobcontrol.NoSuchJobException;
 
 /**
@@ -17,9 +16,9 @@ public class JobStatusTest
    public static void main(String[] args) throws NoSuchJobException, JobControlException
    {
       JobControlClient client = new JobControlClient();
-      JobStatus status = client.status("316983");
+      JobStatus status = client.status(args[0]);
       System.out.println(status);
       
-      client.cancel("316983");
+      //client.cancel("316983");
    }
 }
