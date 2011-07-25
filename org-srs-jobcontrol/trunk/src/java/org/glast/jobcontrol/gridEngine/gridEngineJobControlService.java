@@ -101,14 +101,16 @@ class gridEngineJobControlService extends JobControlService {
         if (command == null || command.length() == 0) throw new JobSubmissionException("Missing command");
         List<String> qsub = new ArrayList<String>(Arrays.<String>asList(SUBMIT_COMMAND.split("\\s+")));
         String logFileName = job.getLogFile()==null ? "logFile.log" : sanitize(job.getLogFile());
+        // eventhough we may not use lyons resources, we still use the protocol, so enable it...
         qsub.add("-l");
         qsub.add("xrootd=1"); // activate use of xrootd
         qsub.add("-l");
         qsub.add("sps=1"); // activate use of sps;
-        qsub.add("-m");
-        qsub.add("e"); // send email at end of jobs
-        qsub.add("-o"); 
-        qsub.add(logFileName);
+        // SZ 2011-07-24: remove email notification - is handled explicitly in the wrapper script
+//        qsub.add("-m");
+//        qsub.add("e"); // send email at end of jobs
+        qsub.add("-o");
+        qsub.add(job.getWorkingDirectory()+"/"+logFileName);// SZ 2011-07-18, GE needs path for logFile
         qsub.add("-j");
         qsub.add("y");// Send stderr to the stdout (the log file)
         if (job.getMaxCPU() != 0) 
