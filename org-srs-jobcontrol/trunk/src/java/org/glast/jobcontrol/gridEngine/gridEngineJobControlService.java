@@ -107,8 +107,8 @@ class gridEngineJobControlService extends JobControlService {
         qsub.add("-l");
         qsub.add("sps=1"); // activate use of sps;
         // SZ 2011-07-24: remove email notification - is handled explicitly in the wrapper script
-//        qsub.add("-m");
-//        qsub.add("e"); // send email at end of jobs
+        qsub.add("-m");
+        qsub.add("n"); // send *NO* email at all!
         qsub.add("-o");
         qsub.add(job.getWorkingDirectory()+"/"+logFileName);// SZ 2011-07-18, GE needs path for logFile
         qsub.add("-j");
