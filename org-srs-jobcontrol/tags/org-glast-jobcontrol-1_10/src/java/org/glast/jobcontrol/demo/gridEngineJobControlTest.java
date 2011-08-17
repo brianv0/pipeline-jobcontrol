@@ -1,0 +1,62 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package org.glast.jobcontrol.demo;
+
+import org.glast.jobcontrol.Job;
+import org.glast.jobcontrol.JobControlClient;
+import org.glast.jobcontrol.JobControlException;
+import org.glast.jobcontrol.JobSubmissionException;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ *
+ * @author zimmer
+ */
+public class gridEngineJobControlTest {
+  /**
+    * @param args the command line arguments
+    */
+   public static void main(String[] args) throws JobSubmissionException, IOException, JobControlException
+   {
+      BufferedReader reader  = new BufferedReader(new InputStreamReader(JobControlTest2.class.getResourceAsStream("hello.csh")));
+      StringBuffer script = new StringBuffer();
+      for (;;)
+      {
+         String line = reader.readLine();
+         if (line == null) break;
+         script.append(line);
+         script.append('\n');
+      }
+      reader.close();
+      Map<String,String> files = new HashMap<String,String>();
+      files.put("hello.csh",script.toString());
+
+      Job job = new Job();
+      job.setFiles(files);
+
+      String workDir = "/sps/glast/Pipeline2/workDir";
+      job.setWorkingDirectory(workDir);
+      job.setCommand("csh < hello.csh");
+      Map<String,String> env = new HashMap<String,String>();
+      env.put("email","zimmer@slac.stanford.edu");
+      job.setEnv(env);
+      job.setName("Test2bis");
+      //JobControlClient client = new JobControlClient("glastpro","ccsvli09.in2p3.fr",1099,"gridEngineJobControlService");
+      JobControlClient client = new JobControlClient("glastpro","ccsvli40.in2p3.fr",1099,"gridEngineJobControlService");
+
+      String id = client.submit(job);
+      System.out.println("Job "+id+" submitted");
+   }
+   private static void usage()
+   {
+      System.out.println("usage: java "+JobStatusTest.class.getName()+"command [args...]");
+      System.exit(0);
+   }
+}    
+
