@@ -12,7 +12,7 @@
     <groupId>glast</groupId>
     <artifactId>org-glast-jobcontrol</artifactId>
     <name>Glast Job Control Library</name>
-    <version>1.10</version>
+    <version>1.11-SNAPSHOT</version>
     <description>Glast Job Control</description>
 
     <repositories>
@@ -32,7 +32,6 @@
         <connection>scm:cvs:pserver:anoncvs@glast-java.slac.stanford.edu:/cvs/java:org-glast-jobcontrol</connection>
         <developerConnection>scm:cvs:ext:@glast-java.slac.stanford.edu:/cvs/java:org-glast-jobcontrol</developerConnection>
         <url>http://www-glast.stanford.edu/cgi-bin/viewcvs/org-glast-jobcontrol/?root=java</url>
-    <tag>org-glast-jobcontrol-1_10</tag>
   </scm>
 
     <build>
