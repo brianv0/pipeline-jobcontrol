@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/m aven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>glast</groupId>
+        <artifactId>org-glast-maven-jar-project</artifactId>
+        <version>2.0</version>
+    </parent>
+
+
+    <groupId>glast</groupId>
+    <artifactId>org-glast-jobcontrol</artifactId>
+    <name>Glast Job Control Library</name>
+    <version>1.11-SNAPSHOT</version>
+    <description>Glast Job Control</description>
+
+    <repositories>
+        <repository>
+            <id>glast-maven2</id>
+            <name>GLAST Maven 2 central repository</name>
+            <url>http://glast-ground.slac.stanford.edu/maven2</url>
+        </repository>
+        <repository>
+            <id>glast-maven2-snapshots</id>
+            <name>GLAST Maven2 central SNAPSHOTS repository</name>
+            <url>http://glast-ground.slac.stanford.edu/maven2/SNAPSHOTS</url>
+        </repository>
+    </repositories>
+
+    <scm>
+        <connection>scm:cvs:pserver:anoncvs@glast-java.slac.stanford.edu:/cvs/java:org-glast-jobcontrol</connection>
+        <developerConnection>scm:cvs:ext:@glast-java.slac.stanford.edu:/cvs/java:org-glast-jobcontrol</developerConnection>
+        <url>http://www-glast.stanford.edu/cgi-bin/viewcvs/org-glast-jobcontrol/?root=java</url>
+  </scm>
+
+    <build>
+        <sourceDirectory>src/java</sourceDirectory>
+        <resources>
+            <resource>
+                <directory>src/resource</directory>
+            </resource>
+        </resources>
+    </build>
+    <dependencies>
+        <dependency>
+            <groupId>javax.mail</groupId>
+            <artifactId>mail</artifactId>
+            <version>1.4.1</version>
+            <type>jar</type>
+        </dependency>
+    </dependencies>
+</project>
+
