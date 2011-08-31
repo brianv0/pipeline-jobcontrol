@@ -29,11 +29,10 @@
         </repository>
     </repositories>
 
-    <!--<scm>
-        <connection>scm:cvs:pserver:anoncvs@glast-java.slac.stanford.edu:/cvs/java:org-glast-jobcontrol</connection>
-        <developerConnection>scm:cvs:ext:@glast-java.slac.stanford.edu:/cvs/java:org-glast-jobcontrol</developerConnection>
-        <url>http://www-glast.stanford.edu/cgi-bin/viewcvs/org-glast-jobcontrol/?root=java</url>
-  </scm>-->
+    <scm>
+        <connection>scm:svn:svn+ssh://svn.slac.stanford.edu/nfs/slac/g/srs/subversion/${artifactId}</connection>
+        <url>http://java.freehep.org/svn/repos/srs/list/${artifactId}</url>
+    </scm>
 
     <build>
         <sourceDirectory>src/java</sourceDirectory>
