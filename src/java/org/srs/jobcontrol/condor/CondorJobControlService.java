@@ -60,7 +60,7 @@ class CondorJobControlService extends JobControlService {
 
         // Register the JMX bean
         MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-        ObjectName name = new ObjectName("org.glast.jobcontrol:type=JobControlService");
+        ObjectName name = new ObjectName("org.srs.jobcontrol:type=JobControlService");
         mbs.registerMBean(service, name);
     }
 

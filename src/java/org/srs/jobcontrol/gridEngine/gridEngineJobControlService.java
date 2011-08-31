@@ -40,8 +40,8 @@ import org.srs.jobcontrol.common.JobControlService.DeleteFile;
  */
 
 class gridEngineJobControlService extends JobControlService {
-    private final static String SUBMIT_COMMAND = System.getProperty("org.glast.jobcontrol.ge.submitCommand","/opt/sge/bin/lx24-amd64/qsub -P P_glast");
-    private final static String KILL_COMMAND = System.getProperty("org.glast.jobcontrol.ge.killCommand","/opt/sge/bin/lx24-amd64/qdel");
+    private final static String SUBMIT_COMMAND = System.getProperty("org.srs.jobcontrol.ge.submitCommand","/opt/sge/bin/lx24-amd64/qsub -P P_glast");
+    private final static String KILL_COMMAND = System.getProperty("org.srs.jobcontrol.ge.killCommand","/opt/sge/bin/lx24-amd64/qdel");
     private final static Pattern pattern = Pattern.compile("Your job (\\w+)*");
     private final gridEngineStatus geStatus = new gridEngineStatus();    
     
@@ -59,7 +59,7 @@ class gridEngineJobControlService extends JobControlService {
         
         // Register the JMX bean
         MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-        ObjectName name = new ObjectName("org.glast.jobcontrol:type=JobControlService");
+        ObjectName name = new ObjectName("org.srs.jobcontrol:type=JobControlService");
         mbs.registerMBean(service, name);
     }
     

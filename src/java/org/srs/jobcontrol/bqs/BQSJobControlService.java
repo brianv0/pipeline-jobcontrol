@@ -36,8 +36,8 @@ import org.srs.jobcontrol.common.JobControlService.DeleteFile;
  * @author Tony Johnson
  */
 class BQSJobControlService extends JobControlService {
-    private final static String SUBMIT_COMMAND = System.getProperty("org.glast.jobcontrol.bqs.submitCommand","/usr/local/bin/qsub -l platform=LINUX");
-    private final static String KILL_COMMAND = System.getProperty("org.glast.jobcontrol.bqs.killCommand","/usr/local/bin/qdel");
+    private final static String SUBMIT_COMMAND = System.getProperty("org.srs.jobcontrol.bqs.submitCommand","/usr/local/bin/qsub -l platform=LINUX");
+    private final static String KILL_COMMAND = System.getProperty("org.srs.jobcontrol.bqs.killCommand","/usr/local/bin/qdel");
     private final static Pattern pattern = Pattern.compile("job (\\w+) submitted.*");
     private final BQSStatus bqsStatus = new BQSStatus();    
     
@@ -55,7 +55,7 @@ class BQSJobControlService extends JobControlService {
         
         // Register the JMX bean
         MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-        ObjectName name = new ObjectName("org.glast.jobcontrol:type=JobControlService");
+        ObjectName name = new ObjectName("org.srs.jobcontrol:type=JobControlService");
         mbs.registerMBean(service, name);
     }
     

@@ -37,7 +37,7 @@ class gridEngineStatus
 
    private final static Pattern timePattern = Pattern.compile("(\\d+):(\\d+):(\\d+).(\\d+)");
    private final static SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy-HH:mm:ss");
-   private final static Logger logger = Logger.getLogger("org.glast.jobcontrol.gridEngineStatus");
+   private final static Logger logger = Logger.getLogger("org.srs.jobcontrol.gridEngineStatus");
    
    private Map<String,JobStatus> map;
    private long timeStamp;

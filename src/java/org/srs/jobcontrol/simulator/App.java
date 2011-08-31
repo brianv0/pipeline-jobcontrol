@@ -36,7 +36,7 @@ public class App implements AppMBean {
 
         MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
         try {
-            mbs.registerMBean(this, new ObjectName("org.glast.jobcontrol.simulator:type=App"));
+            mbs.registerMBean(this, new ObjectName("org.srs.jobcontrol.simulator:type=App"));
         } catch (Exception ex) {
             Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
         }
