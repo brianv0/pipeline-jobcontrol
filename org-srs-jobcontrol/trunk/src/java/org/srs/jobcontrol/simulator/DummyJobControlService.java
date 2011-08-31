@@ -23,7 +23,7 @@ import org.srs.jobcontrol.common.BaseJobStatus;
  */
 public class DummyJobControlService implements JobControl {
 
-    private static final Logger logger = Logger.getLogger("org.glast.jobcontrol.simulator");
+    private static final Logger logger = Logger.getLogger("org.srs.jobcontrol.simulator");
     private Map<String, FakeJob> jobs = Collections.synchronizedMap(new WeakHashMap<String, FakeJob>());
     private static AtomicInteger nextJobId = new AtomicInteger(1);
     private JobExecutor executor;

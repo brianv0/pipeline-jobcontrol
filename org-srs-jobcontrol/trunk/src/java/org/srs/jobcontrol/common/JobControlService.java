@@ -24,10 +24,10 @@ import org.srs.jobcontrol.JobSubmissionException;
  */
 public abstract class JobControlService implements JobControl, JobControlServiceMBean
 {
-   protected static final Logger logger = Logger.getLogger("org.glast.jobcontrol");
+   protected static final Logger logger = Logger.getLogger("org.srs.jobcontrol");
    protected final int[] retryDelays = { 1000, 2000, 4000, 8000, 0 };
    protected static final Pattern tokenizer = Pattern.compile("\\s*(?:\"([^\"]*)\"|(\\S+))");
-   private static final boolean obliterate = Boolean.getBoolean("org.glast.jobcontrol.obliterate");
+   private static final boolean obliterate = Boolean.getBoolean("org.srs.jobcontrol.obliterate");
    private final Date startTime = new Date();
    protected AtomicInteger nSubmitted = new AtomicInteger();
    protected long lastSuccessfulJobSubmissionTime;

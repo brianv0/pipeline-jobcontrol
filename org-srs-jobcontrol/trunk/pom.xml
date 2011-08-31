@@ -12,7 +12,7 @@
     <groupId>srs</groupId>
     <artifactId>org-srs-jobcontrol</artifactId>
     <name>SRS Job Control Library</name>
-    <version>1.11-SNAPSHOT</version>
+    <version>1.12-SNAPSHOT</version>
     <description>Glast Job Control</description>
 
     <repositories>

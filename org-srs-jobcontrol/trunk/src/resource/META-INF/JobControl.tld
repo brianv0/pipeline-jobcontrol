@@ -8,7 +8,7 @@
    <uri>http://glast-ground.slac.stanford.edu/JobControl</uri>
    <tag>
       <name>submit</name>
-      <tag-class>org.glast.jobcontrol.web.taglib.Submit</tag-class>
+      <tag-class>org.srs.jobcontrol.web.taglib.Submit</tag-class>
       <body-content>scriptless</body-content>
       <attribute>
          <name>dir</name>
@@ -80,7 +80,7 @@
    </tag>
    <tag>
       <name>file</name>
-      <tag-class>org.glast.jobcontrol.web.taglib.File</tag-class>
+      <tag-class>org.srs.jobcontrol.web.taglib.File</tag-class>
       <body-content>scriptless</body-content>
       <attribute>
          <name>name</name>
@@ -91,7 +91,7 @@
    </tag>
    <tag>
       <name>status</name>
-      <tag-class>org.glast.jobcontrol.web.taglib.Status</tag-class>
+      <tag-class>org.srs.jobcontrol.web.taglib.Status</tag-class>
       <body-content>empty</body-content>
       <attribute>
          <name>var</name>

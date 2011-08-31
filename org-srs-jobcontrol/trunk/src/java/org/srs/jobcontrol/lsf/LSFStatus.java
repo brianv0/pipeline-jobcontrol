@@ -24,7 +24,7 @@ class LSFStatus
    private final static Pattern pattern = Pattern.compile("(\\d+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(.*)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\d+)\\s+(\\d+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s*");
    private final static Pattern timePattern = Pattern.compile("(\\d+):(\\d+):(\\d+).(\\d+)");
    private final static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss");
-   private final static Logger logger = Logger.getLogger("org.glast.jobcontrol.LSFStatus");
+   private final static Logger logger = Logger.getLogger("org.srs.jobcontrol.LSFStatus");
    
    private Map<String,JobStatus> map;
    private long timeStamp;

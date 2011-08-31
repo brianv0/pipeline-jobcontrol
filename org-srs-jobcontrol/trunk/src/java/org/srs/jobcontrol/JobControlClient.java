@@ -48,7 +48,7 @@ public class JobControlClient
     /**
      * Submit a job.
      * @param job The job to be submitted
-     * @throws glast.jobcontrol.JobSubmissionException Thrown if an error occurs during job submission
+     * @throws org.srs.jobcontrol.JobSubmissionException Thrown if an error occurs during job submission
      * @return The job ID
      */
    public String submit(Job job) throws JobSubmissionException, JobControlException
@@ -69,7 +69,7 @@ public class JobControlClient
     /**
      * Get the status of a job.
      * @param jobID The jobID for which status should be returned
-     * @throws glast.jobcontrol.NoSuchJobException Thrown if the specified ID is unknown, or if any other error occurs.
+     * @throws org.srs.jobcontrol.NoSuchJobException Thrown if the specified ID is unknown, or if any other error occurs.
      * @return The jobs status
      */
    public JobStatus status(String jobID) throws NoSuchJobException, JobControlException
