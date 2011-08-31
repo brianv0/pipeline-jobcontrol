@@ -3,36 +3,37 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>glast</groupId>
-        <artifactId>org-glast-maven-jar-project</artifactId>
-        <version>2.0</version>
+        <groupId>srs</groupId>
+        <artifactId>org-srs-maven-project-jar</artifactId>
+        <version>3.0</version>
     </parent>
 
 
-    <groupId>glast</groupId>
-    <artifactId>org-glast-jobcontrol</artifactId>
-    <name>Glast Job Control Library</name>
+    <groupId>srs</groupId>
+    <artifactId>org-srs-jobcontrol</artifactId>
+    <name>SRS Job Control Library</name>
     <version>1.11-SNAPSHOT</version>
     <description>Glast Job Control</description>
 
     <repositories>
         <repository>
-            <id>glast-maven2</id>
-            <name>GLAST Maven 2 central repository</name>
-            <url>http://glast-ground.slac.stanford.edu/maven2</url>
+            <id>srs-maven2</id>
+            <name>SRS Maven 2 central repository</name>
+            <url>http://srs.slac.stanford.edu/maven2</url>
         </repository>
+        <!-- use the following if you ARE using a snapshot version. -->
         <repository>
-            <id>glast-maven2-snapshots</id>
-            <name>GLAST Maven2 central SNAPSHOTS repository</name>
-            <url>http://glast-ground.slac.stanford.edu/maven2/SNAPSHOTS</url>
+            <id>srs-maven2-snapshots</id>
+            <name>SRS Maven2 central SNAPSHOTS repository</name>
+            <url>http://srs.slac.stanford.edu/maven2/SNAPSHOTS</url>
         </repository>
     </repositories>
 
-    <scm>
+    <!--<scm>
         <connection>scm:cvs:pserver:anoncvs@glast-java.slac.stanford.edu:/cvs/java:org-glast-jobcontrol</connection>
         <developerConnection>scm:cvs:ext:@glast-java.slac.stanford.edu:/cvs/java:org-glast-jobcontrol</developerConnection>
         <url>http://www-glast.stanford.edu/cgi-bin/viewcvs/org-glast-jobcontrol/?root=java</url>
-  </scm>
+  </scm>-->
 
     <build>
         <sourceDirectory>src/java</sourceDirectory>
