@@ -5,15 +5,15 @@
     <parent>
         <groupId>srs</groupId>
         <artifactId>org-srs-maven-project-jar</artifactId>
-        <version>3.0</version>
+        <version>3.1</version>
     </parent>
 
 
     <groupId>srs</groupId>
     <artifactId>org-srs-jobcontrol</artifactId>
     <name>SRS Job Control Library</name>
-    <version>1.12-SNAPSHOT</version>
-    <description>Glast Job Control</description>
+    <version>2.0-SNAPSHOT</version>
+    <description>SRS Job Control</description>
 
     <repositories>
         <repository>
