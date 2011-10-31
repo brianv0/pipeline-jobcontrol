@@ -14,6 +14,7 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.srs.jobcontrol.*;
+import org.srs.jobcontrol.common.BaseJobStatus;
 /**
  * Keeps track of job status
  * @author tonyj
@@ -104,7 +105,7 @@ class BQSStatus
                try
                {
 	         // logger.info("matchFound, matchQueuedFound:" + matchFound + "," + matchQueuedFound);
-                  BQSJobStatus stat = new BQSJobStatus();
+                  BaseJobStatus stat = new BaseJobStatus();
                   String id = match.group(1);
 		  logger.info("id=" + id);
                   stat.setId(id);
@@ -150,7 +151,7 @@ class BQSStatus
 		try
         	{
 	          // logger.info("matchFound, matchQueuedFound:" + matchFound + "," + matchQueuedFound);
-                   BQSJobStatus stat = new BQSJobStatus();
+                   BaseJobStatus stat = new BaseJobStatus();
                    String id = matchQueued.group(1);
 		   logger.info("id=" + id);
                    stat.setId(id);
