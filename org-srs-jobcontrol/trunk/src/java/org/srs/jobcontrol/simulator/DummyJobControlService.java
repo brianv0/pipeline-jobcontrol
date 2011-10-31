@@ -15,7 +15,7 @@ import org.srs.jobcontrol.JobStatus;
 import org.srs.jobcontrol.JobSubmissionException;
 import org.srs.jobcontrol.NoSuchJobException;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.srs.jobcontrol.common.BaseJobStatus;
+import org.srs.jobcontrol.common.CommonJobStatus;
 
 /**
  *
@@ -58,7 +58,7 @@ public class DummyJobControlService implements JobControl {
             throw new NoSuchJobException(id);
         }
         synchronized (job) {
-           BaseJobStatus status = new BaseJobStatus();
+           CommonJobStatus status = new CommonJobStatus();
            status.setComment("");
            status.setHost("dummyHost");
            status.setSubmitted(job.getSubmitted());

@@ -18,7 +18,7 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.srs.jobcontrol.*;
-import org.srs.jobcontrol.common.BaseJobStatus;
+import org.srs.jobcontrol.common.CommonJobStatus;
 /**
  *
  * @author zimmer
@@ -109,7 +109,7 @@ class gridEngineStatus
                try
                {
 	         // logger.info("matchFound, matchQueuedFound:" + matchFound + "," + matchQueuedFound);
-                  BaseJobStatus stat = new BaseJobStatus();
+                  CommonJobStatus stat = new CommonJobStatus();
                   String id = match.group(1);
 		  logger.info("id=" + id);
                   stat.setId(id);
@@ -155,7 +155,7 @@ class gridEngineStatus
 		try
         	{
 	          // logger.info("matchFound, matchQueuedFound:" + matchFound + "," + matchQueuedFound);
-                   BaseJobStatus stat = new BaseJobStatus();
+                   CommonJobStatus stat = new CommonJobStatus();
                    String id = matchQueued.group(1);
 		   logger.info("id=" + id);
                    stat.setId(id);

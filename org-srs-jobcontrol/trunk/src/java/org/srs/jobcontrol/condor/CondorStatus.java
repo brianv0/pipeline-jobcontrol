@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
 import org.srs.jobcontrol.JobControlException;
 import org.srs.jobcontrol.JobStatus;
 import org.srs.jobcontrol.OutputProcessor;
-import org.srs.jobcontrol.common.BaseJobStatus;
+import org.srs.jobcontrol.common.CommonJobStatus;
 
 /**
  * Keeps track of job status
@@ -62,13 +62,13 @@ class CondorStatus {
 
             Map<String, JobStatus> currentMap = new HashMap<String, JobStatus>();
 
-            BaseJobStatus stat = null;
+            CommonJobStatus stat = null;
             for (int i = 0; i < result.size(); i++) {
                 Matcher match = pattern.matcher(result.get(i));
                 if (match.matches()) {
                     try {
                         if (stat == null) {
-                            stat = new BaseJobStatus();
+                            stat = new CommonJobStatus();
 
                             stat.setQueue("unknown");
                         }
