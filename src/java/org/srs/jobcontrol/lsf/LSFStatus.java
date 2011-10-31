@@ -17,7 +17,7 @@ import java.util.regex.Pattern;/**
  * @author tonyj
  */
 import org.srs.jobcontrol.*;
-import org.srs.jobcontrol.common.BaseJobStatus;
+import org.srs.jobcontrol.common.CommonJobStatus;
 class LSFStatus
 {
    private final static long CACHE_TIME = 60*1000; // Needed to avoid excessive calls to bjobs
@@ -66,7 +66,7 @@ class LSFStatus
             {
                try
                {
-                  BaseJobStatus stat = new BaseJobStatus();
+                  CommonJobStatus stat = new CommonJobStatus();
                   String id = match.group(1);
                   stat.setId(id);
                   stat.setUser(match.group(2));

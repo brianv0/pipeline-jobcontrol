@@ -9,7 +9,7 @@ import java.util.Date;
  * Summary of the status of a job.
  * @author tonyj
  */
-public class BaseJobStatus implements Serializable, JobStatus {
+public final class CommonJobStatus implements Serializable, JobStatus {
 
     static final long serialVersionUID = 6311542340392104385L;
     private String id;
