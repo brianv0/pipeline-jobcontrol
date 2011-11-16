@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/m aven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>srs</groupId>
+        <artifactId>org-srs-maven-project-jar</artifactId>
+        <version>3.1</version>
+    </parent>
+
+
+    <groupId>srs</groupId>
+    <artifactId>org-srs-jobcontrol</artifactId>
+    <name>SRS Job Control Library</name>
+    <version>2.0.0</version>
+    <description>SRS Job Control</description>
+
+    <repositories>
+        <repository>
+            <id>srs-maven2</id>
+            <name>SRS Maven 2 central repository</name>
+            <url>http://srs.slac.stanford.edu/maven2</url>
+        </repository>
+        <!-- use the following if you ARE using a snapshot version. -->
+        <repository>
+            <id>srs-maven2-snapshots</id>
+            <name>SRS Maven2 central SNAPSHOTS repository</name>
+            <url>http://srs.slac.stanford.edu/maven2/SNAPSHOTS</url>
+        </repository>
+    </repositories>
+
+    <scm>
+        <connection>scm:svn:file:///nfs/slac/g/srs/subversion/${artifactId}/tags/org-srs-jobcontrol-2.0.0</connection>
+        <url>http://java.freehep.org/svn/repos/srs/list/${artifactId}/tags/org-srs-jobcontrol-2.0.0</url>
+    </scm>
+
+    <build>
+        <sourceDirectory>src/java</sourceDirectory>
+        <resources>
+            <resource>
+                <directory>src/resource</directory>
+            </resource>
+        </resources>
+    </build>
+    <dependencies>
+        <dependency>
+            <groupId>javax.mail</groupId>
+            <artifactId>mail</artifactId>
+            <version>1.4.1</version>
+            <type>jar</type>
+        </dependency>
+    </dependencies>
+</project>
+
