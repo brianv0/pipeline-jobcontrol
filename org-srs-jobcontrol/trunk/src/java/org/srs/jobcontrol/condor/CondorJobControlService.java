@@ -40,8 +40,8 @@ import org.srs.jobcontrol.common.JobControlService.DeleteFile;
  */
 class CondorJobControlService extends JobControlService {
 
-    private final static String SUBMIT_COMMAND = "/usr/local/bin/condor_submit condor.submit";
-    private final static String KILL_COMMAND = "/usr/local/bin/condor_rm";
+    private final static String SUBMIT_COMMAND = "condor_submit condor.submit";
+    private final static String KILL_COMMAND = "condor_rm";
     private final static Pattern pattern = Pattern.compile("submitted to cluster (\\d+)\\.");
     private CondorStatus status = new CondorStatus();
 
