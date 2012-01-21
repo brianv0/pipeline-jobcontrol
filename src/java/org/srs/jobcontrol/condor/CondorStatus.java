@@ -23,7 +23,7 @@ import org.srs.jobcontrol.common.CommonJobStatus;
 class CondorStatus {
 
     private final static long CACHE_TIME = 60 * 1000; // Needed to avoid excessive calls to condor_q
-    private final static String STATUS_COMMAND = "/usr/local/bin/condor_q -long -format \\n\\nid=%d ClusterId -format \\nrh=%s RemoteHost -format \\nlrh=%s LastRemoteHost -format \\nstatus=%s JobStatus -format \\nrc=%d ExitStatus -format \\nend=%d CompletionDate -format \\nstart=%d JobStartDate -format \\nsubmit=%d QDate -format \\nuser=%s Owner -format \\ncomment=%s HoldReason -submitter ";
+    private final static String STATUS_COMMAND = "condor_q -long -format \\n\\nid=%d ClusterId -format \\nrh=%s RemoteHost -format \\nlrh=%s LastRemoteHost -format \\nstatus=%s JobStatus -format \\nrc=%d ExitStatus -format \\nend=%d CompletionDate -format \\nstart=%d JobStartDate -format \\nsubmit=%d QDate -format \\nuser=%s Owner -format \\ncomment=%s HoldReason -submitter ";
     private final static Pattern pattern = Pattern.compile("(\\S+)=(\\S+)");
     private final static Logger logger = Logger.getLogger(CondorStatus.class.getName());
     private Map<String, JobStatus> map;
