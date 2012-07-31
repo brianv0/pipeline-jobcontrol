@@ -40,7 +40,9 @@ import org.srs.jobcontrol.common.JobControlService.DeleteFile;
  */
 
 class gridEngineJobControlService extends JobControlService {
-    private final static String SUBMIT_COMMAND = System.getProperty("org.srs.jobcontrol.ge.submitCommand","/opt/sge/bin/lx24-amd64/qsub -P P_glast");
+    private final static String GROUP = System.getProperty("org.srs.jobcontrol.ge.group","P_glast"); // the default group for the submit command
+    private String default_submit = "/opt/sge/bin/lx24-amd64/qsub -P "+GROUP;
+    private String SUBMIT_COMMAND = System.getProperty("org.srs.jobcontrol.ge.submitCommand",default_submit);
     private final static String KILL_COMMAND = System.getProperty("org.srs.jobcontrol.ge.killCommand","/opt/sge/bin/lx24-amd64/qdel");
     private final static Pattern pattern = Pattern.compile("Your job (\\w+)*");
     private final gridEngineStatus geStatus = new gridEngineStatus();    
