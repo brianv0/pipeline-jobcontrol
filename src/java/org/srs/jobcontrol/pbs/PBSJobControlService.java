@@ -45,7 +45,7 @@ import org.srs.jobcontrol.pbs.PBSStatus;
  */
 public class PBSJobControlService extends JobControlService{
     private final static String GROUP = System.getProperty("org.srs.jobcontrol.ge.group","P_glast"); // the default group for the submit command
-    private String default_submit = "qsub";
+    private String default_submit = "qsub PBS.submit";
     private String SUBMIT_COMMAND = System.getProperty("org.srs.jobcontrol.pbs.submitCommand",default_submit);
     private final static String KILL_COMMAND = System.getProperty("org.srs.jobcontrol.pbs.killCommand","qdel");
     private final static Pattern pattern = Pattern.compile("Your job (\\w+)*"); // might need adjustment.
@@ -126,8 +126,7 @@ public class PBSJobControlService extends JobControlService{
         }
         PBS_script.append('\n');
         submitFile.put("",PBS_script.toString());
-
-        
+                
         Map<String, String> env = new HashMap<String, String>();
         if (job.getEnv() != null) {
             env.putAll(job.getEnv());
@@ -200,40 +199,27 @@ public class PBSJobControlService extends JobControlService{
                 builder.directory(dir);
                 storeFiles(dir, job.getFiles(), undoList);
                 // Add the environment to the submit file
-                StringBuilder envValue = new StringBuilder("\"");
-                for (Map.Entry<String, String> entry : env.entrySet()) {
-                    envValue.append(entry.getKey()).append("='").append(entry.getValue()).append("'").append(' ');
-                }
-                envValue.append("\"");
-                //submitFile.put("environment", envValue.toString());
+//                StringBuilder envValue = new StringBuilder("\"");
+//                for (Map.Entry<String, String> entry : env.entrySet()) {
+//                    envValue.append(entry.getKey()).append("='").append(entry.getValue()).append("'").append(' ');
+//                }
+//                envValue.append("\"");
+//                //submitFile.put("environment", envValue.toString());
                 // Write the submit file
                 {
                     File file = new File(dir, "PBS.submit");
                     PrintWriter writer = new PrintWriter(new FileWriter(file));
                     undoList.add(new DeleteFile(file));
                     writer.println("#!/bin/bash");
-                    writer.print(command);
-                    if (job.getArguments() != null) {
-                        for (String argument : job.getArguments()) {
-                            writer.print(' ');
-                            writer.print(argument);
-                        }
+                    for (Map.Entry<String, String> fileLine : submitFile.entrySet()) {
+                        writer.print(fileLine.getKey());
+                        writer.print("=");
+                        writer.println(fileLine.getValue());
                     }
                     writer.close();
                     file.setExecutable(true);
                 }
-                // Write the submit file
-//                {
-//                    File file = new File(dir, "PBS.submit");
-//                    PrintWriter writer = new PrintWriter(new FileWriter(file));
-//                    undoList.add(new DeleteFile(file));
-//                    for (Map.Entry<String, String> fileLine : submitFile.entrySet()) {
-//                        writer.print(fileLine.getKey());
-//                        writer.print("=");
-//                        writer.println(fileLine.getValue());
-//                    }
-//                    writer.close();
-//                }
+                
             }
             builder.redirectErrorStream(true);
             Process process = builder.start();
