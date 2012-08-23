@@ -4,7 +4,9 @@
  */
 package org.srs.jobcontrol.pbs;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.lang.management.ManagementFactory;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -15,6 +17,7 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -42,10 +45,10 @@ import org.srs.jobcontrol.pbs.PBSStatus;
  */
 public class PBSJobControlService extends JobControlService{
     private final static String GROUP = System.getProperty("org.srs.jobcontrol.ge.group","P_glast"); // the default group for the submit command
-    private String default_submit = "/opt/sge/bin/lx24-amd64/qsub -P "+GROUP;
-    private String SUBMIT_COMMAND = System.getProperty("org.srs.jobcontrol.ge.submitCommand",default_submit);
-    private final static String KILL_COMMAND = System.getProperty("org.srs.jobcontrol.ge.killCommand","/opt/sge/bin/lx24-amd64/qdel");
-    private final static Pattern pattern = Pattern.compile("Your job (\\w+)*");
+    private String default_submit = "qsub";
+    private String SUBMIT_COMMAND = System.getProperty("org.srs.jobcontrol.pbs.submitCommand",default_submit);
+    private final static String KILL_COMMAND = System.getProperty("org.srs.jobcontrol.pbs.killCommand","qdel");
+    private final static Pattern pattern = Pattern.compile("Your job (\\w+)*"); // might need adjustment.
     private final PBSStatus pbsStatus = new PBSStatus();    
     
     private PBSJobControlService() {
@@ -96,168 +99,185 @@ public class PBSJobControlService extends JobControlService{
             throw t;
         }
     }
-    private String submitInternal(Job job) throws JobSubmissionException, JobControlException {
-        //logger.info("BEGIN submitInternal");
+      private String submitInternal(Job job) throws JobSubmissionException, JobControlException {
         String command = job.getCommand();
-	logger.info("command:" + command);
-	
-        if (command == null || command.length() == 0) throw new JobSubmissionException("Missing command");
+        if (command == null || command.length() == 0) {
+            throw new JobSubmissionException("Missing command");
+        }
         List<String> qsub = new ArrayList<String>(Arrays.<String>asList(SUBMIT_COMMAND.split("\\s+")));
-        String logFileName = job.getLogFile()==null ? "logFile.log" : sanitize(job.getLogFile());
-        // eventhough we may not use lyons resources, we still use the protocol, so enable it...
-        qsub.add("-l");
-        qsub.add("xrootd=1"); // activate use of xrootd
-        qsub.add("-l");
-        qsub.add("sps=1"); // activate use of sps;
-        // SZ 2011-07-24: remove email notification - is handled explicitly in the wrapper script
-        qsub.add("-m");
-        qsub.add("n"); // send *NO* email at all!
-        qsub.add("-o");
-        qsub.add(job.getWorkingDirectory()+"/"+logFileName);// SZ 2011-07-18, GE needs path for logFile
-        qsub.add("-j");
-        qsub.add("y");// Send stderr to the stdout (the log file)
-        if (job.getMaxCPU() != 0) 
-        { 
-           qsub.add("-l");
-           qsub.add("ct="+convertToNormalisedSec(job.getMaxCPU()));
-        }
-        if (job.getMaxMemory() != 0) 
-        { 
-           qsub.add("-l");
-           qsub.add("vmem="+job.getMaxMemory()+"M");
-        }
-        // Ignore the jobname option for PBS, we need PBS to assign a unique name for later query
-        //if (job.getName() != null) { qsub.append(" -N ").append(sanitize(job.getName())).append(" ");  }
-
-	qsub.add("-V");
-        /**interjob dependencies not managed by PBS in this simple manner:
-         * if (!job.getRunAfter().isEmpty()) {
-            qsub.append(" -w ");
-            for (Iterator iter = job.getRunAfter().iterator(); iter.hasNext() ; ) {
-                qsub.append("ended(").append(iter.next()).append(')');
-                if (iter.hasNext()) qsub.append("&&");
-            }
-        }*/
+        Map<String, String> submitFile = new HashMap<String, String>();
+        String logFileName = job.getLogFile() == null ? "logFile.log" : sanitize(job.getLogFile());
         
-        if (job.getExtraOptions() != null)
-        { 
-            qsub.addAll(tokenizeExtraOption(job.getExtraOptions())); 
-        }
-        // PBS only accepts a script as a argument, not a command
-        // Also PBS does not automatically copy the current working directory to the job
-        String pbsCommand = "pbs_script";
+        submitFile.put("#PBS -l mem=",Integer.toString(job.getMaxMemory()));
+        submitFile.put("#PBS -l walltime=",Integer.toString(job.getMaxCPU()));
+        submitFile.put("#PBS -o ",logFileName);
+        submitFile.put("#PBS -j ","o"); // merge StdErr/StdOut
+        submitFile.put("#PBS -r","n"); // do not re-run
+        submitFile.put("#PBS -V",""); // export all env vars
+        //TODO: what about access to xrootd/afs?
+        StringBuilder PBS_script = new StringBuilder();
         if (job.getWorkingDirectory() != null)
         {
-           pbsCommand = job.getWorkingDirectory()+"/"+pbsCommand;
+           PBS_script.append("cd ").append(job.getWorkingDirectory()).append('\n');
         }
-        qsub.add(pbsCommand);
-        
-        StringBuilder pbs_script = new StringBuilder();
-        if (job.getWorkingDirectory() != null)
-        {
-           pbs_script.append("cd ").append(job.getWorkingDirectory()).append('\n');
-        }
-        pbs_script.append(command);
+        PBS_script.append(command);
         if (job.getArguments() != null) {
-            for (String arg : job.getArguments()) { pbs_script.append(" \""+arg+"\""); }
+            for (String arg : job.getArguments()) { PBS_script.append(" \""+arg+"\""); }
         }
-        pbs_script.append('\n');
-        job.getFiles().put("pbs_script",pbs_script.toString());
+        PBS_script.append('\n');
+        submitFile.put("",PBS_script.toString());
+
+        
+        Map<String, String> env = new HashMap<String, String>();
+        if (job.getEnv() != null) {
+            env.putAll(job.getEnv());
+        }
+//        StringBuilder requirements = new StringBuilder();
+
+//        if (job.getMaxCPU() != 0) {
+//            bsub.add("-c");
+//            bsub.add(String.valueOf(convertToMinutes(job.getMaxCPU())));
+//        }
+//        if (job.getMaxMemory() != 0) {
+//            if (requirements.length() > 0) {
+//                requirements.append(" && ");
+//            }
+//            requirements.append("Memory>").append(job.getMaxMemory());
+//        }
+//        if (job.getName() != null) {
+//            bsub.add("-J");
+//            bsub.add(sanitize(job.getName()));
+//        }
+//        if (!job.getRunAfter().isEmpty()) {
+//            bsub.add("-w");
+//            StringBuilder condition = new StringBuilder();
+//            for (Iterator iter = job.getRunAfter().iterator(); iter.hasNext();) {
+//                condition.append("ended(").append(iter.next()).append(')');
+//                if (iter.hasNext()) {
+//                    condition.append("&&");
+//                }
+//            }
+//            bsub.add(condition.toString());
+//        }
+//        if (job.getExtraOptions() != null) {
+//            bsub.addAll(tokenizeExtraOption(job.getExtraOptions()));
+//        }
+//        submitFile.put("requirements", requirements.toString());
         String fullCommand = toFullCommand(qsub);
-        logger.info("Submit: "+fullCommand);
-             
+        logger.info("Submit: " + fullCommand);
+        env.put("JOBCONTROL_SUBMIT_COMMAND", fullCommand);
+
         // Things to be undone if the submit fails.
         List<Runnable> undoList = new ArrayList<Runnable>();
         try {
-
             ProcessBuilder builder = new ProcessBuilder(qsub);
-            Map<String,String> env = builder.environment();
-            env.put("JOBCONTROL_SUBMIT_COMMAND",fullCommand);
-            
-            if (job.getEnv() != null) {
-                env.putAll(job.getEnv());
-            }
-	    
-            if (job.getWorkingDirectory() != null)
-            {
-               File dir = new File(job.getWorkingDirectory());
-               for (int retry : retryDelays)
-               {
-                  if (!dir.exists())
-                  {
-                     // This occasionally fails due to NFS/automount problems, so retry a few times
-                     boolean rc = dir.mkdirs();
-                     if (!rc) 
-                     {
-                        if (retry > 0)
-                        {
-                           Thread.sleep(retry);
-                           continue;
+
+            //FIXME: This does not work if working directory is null
+            if (job.getWorkingDirectory() != null) {
+                File dir = new File(job.getWorkingDirectory());
+                for (int retry : retryDelays) {
+                    if (!dir.exists()) {
+                        // This occasionally fails due to NFS/automount problems, so retry a few times
+                        boolean rc = dir.mkdirs();
+                        if (!rc) {
+                            if (retry > 0) {
+                                Thread.sleep(retry);
+                                continue;
+                            } else {
+                                throw new JobSubmissionException("Could not create working directory " + dir);
+                            }
+                        } else {
+                            undoList.add(new DeleteFile(dir));
                         }
-                        else throw new JobSubmissionException("Could not create working directory "+dir);
-                     }
-                     else 
-                     {
-                        undoList.add(new DeleteFile(dir));
-                     }
-                  }
-                  else if (!dir.isDirectory()) throw new JobSubmissionException("Working directory is not a directory "+dir);
-                  else if (job.getArchiveOldWorkingDir() != null)
-                  {
-                     archiveOldWorkingDir(dir, job.getArchiveOldWorkingDir(),undoList);
-                  }
-                  break;
-               }
-               builder.directory(dir);
-               env.put("JOBCONTROL_LOGFILE",new File(dir,logFileName).getAbsolutePath());
-               storeFiles(dir, job.getFiles(), undoList);
+                    } else if (!dir.isDirectory()) {
+                        throw new JobSubmissionException("Working directory is not a directory " + dir);
+                    } else if (job.getArchiveOldWorkingDir() != null) {
+                        archiveOldWorkingDir(dir, job.getArchiveOldWorkingDir(), undoList);
+                    }
+                    break;
+                }
+                env.put("JOBCONTROL_LOGFILE", new File(dir, logFileName).getAbsolutePath());
+                builder.directory(dir);
+                storeFiles(dir, job.getFiles(), undoList);
+                // Add the environment to the submit file
+                StringBuilder envValue = new StringBuilder("\"");
+                for (Map.Entry<String, String> entry : env.entrySet()) {
+                    envValue.append(entry.getKey()).append("='").append(entry.getValue()).append("'").append(' ');
+                }
+                envValue.append("\"");
+                //submitFile.put("environment", envValue.toString());
+                // Write the submit file
+                {
+                    File file = new File(dir, "PBS.submit");
+                    PrintWriter writer = new PrintWriter(new FileWriter(file));
+                    undoList.add(new DeleteFile(file));
+                    writer.println("#!/bin/bash");
+                    writer.print(command);
+                    if (job.getArguments() != null) {
+                        for (String argument : job.getArguments()) {
+                            writer.print(' ');
+                            writer.print(argument);
+                        }
+                    }
+                    writer.close();
+                    file.setExecutable(true);
+                }
+                // Write the submit file
+//                {
+//                    File file = new File(dir, "PBS.submit");
+//                    PrintWriter writer = new PrintWriter(new FileWriter(file));
+//                    undoList.add(new DeleteFile(file));
+//                    for (Map.Entry<String, String> fileLine : submitFile.entrySet()) {
+//                        writer.print(fileLine.getKey());
+//                        writer.print("=");
+//                        writer.println(fileLine.getValue());
+//                    }
+//                    writer.close();
+//                }
             }
-	    
             builder.redirectErrorStream(true);
             Process process = builder.start();
-            OutputProcessor output = new OutputProcessor(process.getInputStream(),logger);
-
+            OutputProcessor output = new OutputProcessor(process.getInputStream(), logger);
             process.waitFor();
             output.join();
-            
             List<String> result = output.getResult();
             int rc = process.exitValue();
-            logger.info("process.exitValue=" + rc);
             if (rc != 0) {
-               StringBuilder message = new StringBuilder("Process failed rc="+rc);
-               if (!result.isEmpty()) message.append(" output was:");
-               for (String line : result)
-               {
-                  message.append('\n').append(line);
-               }
-               throw new JobControlException(message.toString());
+                StringBuilder message = new StringBuilder("Process failed rc=" + rc);
+                if (!result.isEmpty()) {
+                    message.append(" output was:");
+                }
+                for (String line : result) {
+                    message.append('\n').append(line);
+                }
+                throw new JobControlException(message.toString());
             }
-            
-            if (output.getStatus() != null) throw output.getStatus();
 
-            if (result.size() == 0) throw new JobControlException("Unexpected output length "+result.size());
+            if (output.getStatus() != null) {
+                throw output.getStatus();
+            }
+
+            if (result.size() == 0) {
+                throw new JobControlException("Unexpected output length " + result.size());
+            }
             for (String line : result) {
-	    
-	        logger.info("line:" + line);
                 Matcher matcher = pattern.matcher(line);
-		  
                 boolean ok = matcher.find();
-
-                //if (ok) return Integer.parseInt(matcher.group(1));
-		if (ok)  {
-                   undoList.clear();
-                   return matcher.group(1);
+                if (ok) {
+                    undoList.clear();
+                    return matcher.group(1);
                 }
             }
             throw new JobControlException("Could not find job number in output");
         } catch (IOException x) {
-            throw new JobControlException("IOException during job submission",x);
+            throw new JobControlException("IOException during job submission", x);
         } catch (InterruptedException x) {
-            throw new JobControlException("Job submission interrupted",x);
-        }
-        finally {
+            throw new JobControlException("Job submission interrupted", x);
+        } finally {
             Collections.reverse(undoList);
-            for (Runnable undo : undoList) undo.run();
+            for (Runnable undo : undoList) {
+                undo.run();
+            }
         }
     }
 
