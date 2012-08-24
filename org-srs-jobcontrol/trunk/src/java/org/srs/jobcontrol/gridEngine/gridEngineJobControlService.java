@@ -152,6 +152,17 @@ class gridEngineJobControlService extends JobControlService {
         qsub.add(geCommand);
         
         StringBuilder ge_script = new StringBuilder();
+        // first recast variables to match those from BQS times (needed by the other codes)
+        ge_script.append("export QSUB_HOME=${SGE_CWD_PATH}\n");
+        ge_script.append("export QSUB_HOST=${SGE_CELL}\n");
+        ge_script.append("export QSUB_SHELL=${SGE_O_CSHELL}\n");
+        ge_script.append("export QSUB_USER=${SGE_O_LOGNAME}\n");
+        ge_script.append("export QSUB_WORKDIR=${SGE_O_WORKDIR}\n");
+        ge_script.append("export QSUB_REQNAME=${JOB_ID}\n");
+        ge_script.append("export QSUB_REQID=${SGE_O_HOST}\n");
+        ge_script.append("export TMPBATCH=${TMPDIR}\n");
+        // okay with this, the primaryGPLscript should have those vars.
+        
         if (job.getWorkingDirectory() != null)
         {
            ge_script.append("cd ").append(job.getWorkingDirectory()).append('\n');
