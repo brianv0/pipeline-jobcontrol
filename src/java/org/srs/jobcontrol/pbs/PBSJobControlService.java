@@ -114,6 +114,13 @@ public class PBSJobControlService extends JobControlService{
         submitFile.put("#PBS -j ","o"); // merge StdErr/StdOut
         submitFile.put("#PBS -r","n"); // do not re-run
         submitFile.put("#PBS -V",""); // export all env vars
+        submitFile.put("export QSUB_HOME=${PBS_O_HOME}","");
+        submitFile.put("export QSUB_HOST=${PBS_O_HOST}","");
+        submitFile.put("export QSUB_WORKDIR=${PBS_O_WORKDIR}","");
+        submitFile.put("export QSUB_USER=${PBS_O_LOGNAME}","");
+        submitFile.put("export QSUB_REQNAME=${PBS_JOB_ID}","");
+        submitFile.put("export QSUB_REQID=${PBS_O_HOST}","");
+        //TODO: TMPBATCH only unresolved VAR
         //TODO: what about access to xrootd/afs?
         StringBuilder PBS_script = new StringBuilder();
         if (job.getWorkingDirectory() != null)
