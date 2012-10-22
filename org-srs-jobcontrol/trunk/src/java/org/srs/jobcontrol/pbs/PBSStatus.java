@@ -31,8 +31,19 @@ public class PBSStatus {
    //I3432967 clavalle ENDED      ccwl0494.in2p3.fr ccwl0494.in2p3.fr  09/26/2006-15:49:04 09/26/2006-15:53:10 09/26/2006-19:04:56 10300       274         0
    // (\\d+)\\s+(\\S+)\\s+(\\S+)  \\s+(\\S+)        \\s+(\\S+)         \\s+(\\S+)          \\s+(\\S+)          \\s+(\\S+)           \\s+(\\d+) \\s+(\\d+)  \\s+(\\d+)
    //INFO: NoMatch: "I6462026 clavalle QUEUED - - 02/27/2007-15:27:51 - - - - -"
-	    
-   private final static Pattern pattern = Pattern.compile("(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)");
+   // new
+//   mgmt.cluster.com: 
+//                                                                            Req'd  Req'd   Elap
+//   Job ID               Username Queue    Jobname          SessID NDS   TSK Memory Time  S Time
+//   -------------------- -------- -------- ---------------- ------ ----- --- ------ ----- - -----
+//   2359.mgmt.cluste     rachac   batch    BpBm_3_1           7845     1   1    --  80:00 R 04:33
+//   (\\S+)\\s+           (\\S+)\\s+(\\S+)\\s+\\S+
+   //   -- 
+//   2360.mgmt.cluste     rachac   batch    BpBm_3_2          22984     1   1    --  80:00 R 04:32
+//   -- 
+//   2361.mgmt.cluste     rachac   batch    BpBm_3_3          32212     1   1    --  80:00 R 04:32
+   
+   private final static Pattern pattern = Pattern.compile("(\\S+)(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)");
    private final static Pattern patternQueued = Pattern.compile("(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\W)\\s+(\\W)\\s+(\\S+)\\s+(\\W)\\s+(\\W)\\s+(\\W)\\s+(\\W)\\s+(\\W)");
 
    private final static Pattern timePattern = Pattern.compile("(\\d+):(\\d+):(\\d+).(\\d+)");

@@ -146,14 +146,15 @@ public class DIRACJobControlService extends JobControlService{
             ProcessBuilder builder = new ProcessBuilder(qsub);
             Map<String,String> env = builder.environment();
             env.put("JOBCONTROL_SUBMIT_COMMAND",fullCommand);
-            
+           
             if (job.getEnv() != null) {
                 env.putAll(job.getEnv());
             }
 	    
             if (job.getWorkingDirectory() != null)
             {
-               File dir = new File(job.getWorkingDirectory());
+                env.put("JOBCONTROL_WORKINGDIR",job.getWorkingDirectory());
+                File dir = new File(job.getWorkingDirectory());
                for (int retry : retryDelays)
                {
                   if (!dir.exists())
