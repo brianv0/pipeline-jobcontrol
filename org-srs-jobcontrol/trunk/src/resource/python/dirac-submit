@@ -1,0 +1,99 @@
+#!/usr/bin/env python
+# S.Zimmer 10/2012 The Oskar Klein Center for Cosmoparticle Physics
+
+class options:
+    def __init__(self,DICT,**kwargs):
+        self.RTE = None
+        self.cpu = 64000
+        self.site = None
+        self.stagein = None
+        self.name = None
+        self.debug = False
+        self.env = None
+        self.outputsandbox = None
+        self.__dict__.update(DICT)
+        self.__dict__.update(kwargs)
+
+def setSpecialOption( optVal ):
+    from DIRAC import S_OK
+    global specialOptions
+    option,value = optVal.split('=')
+    specialOptions[option] = value
+    return S_OK()
+
+def extract_inputfiles(fname):
+    file_list = []
+    lines = open(fname,'read').readlines()
+    for line in lines:
+        thisLine = line.replace("\n","")
+        file_list.append(thisLine)
+    return file_list
+
+if __name__ == "__main__":
+
+    import sys
+    from DIRAC.Core.Base import Script
+    specialOptions = {}
+    Script.registerSwitch( "p:", "parameter=", "Special option (currently supported: RTE, cpu, site, stagein, name, debug, env, outputsandbox) ", setSpecialOption )
+    Script.parseCommandLine()
+
+    from DIRAC.Interfaces.API.Job import Job
+    from DIRAC.Interfaces.API.Dirac import Dirac
+
+    opts = options(specialOptions) # converts the "DIRAC registerSwitch()" to something similar to OptionParser
+    #print opts.__dict__
+    #sys.exit()
+
+    pipeline_dict = None
+    if not opts.env is None:
+        import json
+        f = open(specialOptions["env"],"r")
+        pipeline_dict = json.load(f)
+    input_sandbox_files = ['']
+    if not pipeline_dict is None and pipeline_dict.has_key("GPL_CONFIGDIR"):
+        GPL_CONFIGDIR = pipeline_dict['GPL_CONFIGDIR']
+        if os.path.isdir(GPL_CONFIGDIR):
+            files = os.listdir(GPL_CONFIGDIR)
+            for f in files:
+                input_sandbox_files.append(f)
+    input_sandbox_files.append("pipeline_wrapper")
+
+    j = Job()
+    j.setExecutable(sys.argv[1])
+    j.setName("MC job")
+    if not opts.name is None:
+        j.setName(opts.name)
+
+    j.setInputSandbox(input_sandbox_files) # all input files in the sandbox
+
+    if not opts.outputsandbox is None:
+        j.setOutputSandbox(opts.outputsandbox)
+
+    j.setExecutionEnv(pipeline_dict) # that sets the env vars
+    j.setCPUTime(opts.cpu)
+    if not opts.RTE is None:
+        j._addJDLParameter("other.GlueHostApplicationSoftwareRunTimeEnvironment",opts.RTE)
+
+    if not opts.site is None:
+        j.setDestination(opts.site)
+
+    if not opts.stagein is None:
+        input_stage_files = []
+        # we do add. input staging
+        files = opts.stagein.split(",")
+        for f in files:
+            if f.startswith("LFN"):
+                input_stage_files.append(f)
+            else:
+                input_stage_files+=extract_file(f)
+        for f in input_stage_files:
+            if not f.startswith("LFN"):
+                raise Exception("*ERROR* required inputfiles to be defined through LFN, could not find LFN in %s"%f)
+        j.setInputData(input_stage_files)
+
+    if opts.debug:
+        print '*DEBUG* just showing the JDL of the job to be submitted'
+        print j._toJDL()
+    else:
+        d = Dirac()
+        print "Your job %s has been submitted."%str(d.submit(j)['Value'])
