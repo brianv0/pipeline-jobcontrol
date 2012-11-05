@@ -1,0 +1,43 @@
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="joblist">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="job" maxOccurs="unbounded" minOccurs="0">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element type="xs:string" name="StandardOutput"/>
+            </xs:sequence>
+            <xs:attribute type="xs:float" name="CPUMHz" use="optional"/>
+            <xs:attribute type="xs:float" name="CPUNormalizationFactor" use="optional"/>
+            <xs:attribute type="xs:float" name="CPUScalingFactor" use="optional"/>
+            <xs:attribute type="xs:string" name="CacheSizekB" use="optional"/>
+            <xs:attribute type="xs:string" name="Ended" use="optional"/>
+            <xs:attribute type="xs:string" name="HostName" use="optional"/>
+            <xs:attribute type="xs:int" name="JobID" use="optional"/>
+            <xs:attribute type="xs:string" name="JobPath" use="optional"/>
+            <xs:attribute type="xs:string" name="JobSanityCheck" use="optional"/>
+            <xs:attribute type="xs:short" name="JobWrapperPID" use="optional"/>
+            <xs:attribute type="xs:string" name="LocalAccount" use="optional"/>
+            <xs:attribute type="xs:string" name="LocalBatchID" use="optional"/>
+            <xs:attribute type="xs:int" name="LocalJobID" use="optional"/>
+            <xs:attribute type="xs:string" name="MemorykB" use="optional"/>
+            <xs:attribute type="xs:string" name="MinorStatus" use="optional"/>
+            <xs:attribute type="xs:string" name="ModelName" use="optional"/>
+            <xs:attribute type="xs:float" name="NormCPUTimes" use="optional"/>
+            <xs:attribute type="xs:string" name="OK" use="optional"/>
+            <xs:attribute type="xs:string" name="OutputSandboxMissingFiles" use="optional"/>
+            <xs:attribute type="xs:short" name="PayloadPID" use="optional"/>
+            <xs:attribute type="xs:string" name="PilotAgent" use="optional"/>
+            <xs:attribute type="xs:string" name="Pilot_Reference" use="optional"/>
+            <xs:attribute type="xs:float" name="ScaledCPUTime" use="optional"/>
+            <xs:attribute type="xs:string" name="Site" use="optional"/>
+            <xs:attribute type="xs:string" name="Started" use="optional"/>
+            <xs:attribute type="xs:string" name="Status" use="optional"/>
+            <xs:attribute type="xs:string" name="Submitted" use="optional"/>
+            <xs:attribute type="xs:float" name="TotalCPUTimes" use="optional"/>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
