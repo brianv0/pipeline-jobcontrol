@@ -21,6 +21,7 @@ import javax.xml.bind.Unmarshaller;
 import org.srs.jobcontrol.*;
 import org.srs.jobcontrol.common.CommonJobStatus;
 import org.srs.jobcontrol.DIRAC.StatusXML.*;
+import org.srs.jobcontrol.JobStatus.Status;
 /*
  *
  * @author zimmer
@@ -60,39 +61,36 @@ class DIRACStatus
          JAXBContext jc = JAXBContext.newInstance ("org.srs.jobcontrol.DIRAC.StatusXML");
          Unmarshaller um = jc.createUnmarshaller ();
          SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
-         
-         final JAXBElement element = (JAXBElement)um.unmarshal (process.getInputStream());
-         final Joblist joblist = (Joblist)element.getValue();
+         final Joblist joblist = (Joblist)um.unmarshal(process.getInputStream());
          // main loop over all jobs
          for (Joblist.Job job : joblist.getJob()){
              final String job_id = String.valueOf(job.getJobID());
              CommonJobStatus stat = new CommonJobStatus();
              stat.setId(job_id);
-             if (job.getTotalCPUTimes()!=null){
+             if (job.getTotalCPUTimes()!=null || !"-".equals(job.getTotalCPUTimes())){
                  stat.setCpuUsed(Math.round(job.getTotalCPUTimes()));
              }
-             if (job.getMemorykB()!=null){
+             if (job.getMemorykB()!=null || !"-".equals(job.getMemorykB())){
                  String memory_kb = job.getMemorykB().replace("kB",""); // now we removed the kB
                  Float memory_kb_flt = Float.valueOf(memory_kb).floatValue();
                  int memory_used = Math.round(memory_kb_flt)*1024;
                  stat.setMemoryUsed(memory_used);
              }
-             if (job.getSite()!=null){
+             if (job.getSite()!=null || !"-".equals(job.getSite())){
                  stat.setHost(job.getSite());
              }
              
-             if (job.getStarted()!=null){
+             if (job.getStarted()!=null || !"-".equals(job.getStarted())){
                  final String str_started_time = job.getStarted();
                  Date start_time = (Date)formatter.parse(str_started_time);
                  stat.setStarted(start_time);
              }
-             if (job.getEnded()!=null){
+             if (job.getEnded()!=null || !"-".equals(job.getEnded())){
                  final String str_end_time = job.getEnded();
                  Date end_time = (Date)formatter.parse(str_end_time);
                  stat.setStarted(end_time);
              }
-             if (job.getSubmitted()!=null){
+             if (job.getSubmitted()!=null || !"-".equals(job.getSubmitted())){
                  final String str_sub_time = job.getEnded();
                  Date submit_time = (Date)formatter.parse(str_sub_time);
                  stat.setStarted(submit_time);
@@ -100,6 +98,11 @@ class DIRACStatus
              if (job.getPilotReference()!=null){
                  final String pilot_reference = job.getPilotReference();
                  stat.setComment("pilot reference="+pilot_reference);
+             }
+             if (job.getStatus()!=null){
+                 Status sstatus = toStatus(job.getStatus());
+                 System.out.println("*DEBUG* status found "+sstatus.toString());
+                 stat.setStatus(sstatus);
              }
             map.put(job_id,stat); 
          }
@@ -121,6 +124,7 @@ class DIRACStatus
       }
       catch (JAXBException e) 
       {
+         System.out.println("*DEBUG* "+STATUS_COMMAND);
          throw new JobControlException("caught JAXB Exception",e);
       }
       catch (ParseException e){
