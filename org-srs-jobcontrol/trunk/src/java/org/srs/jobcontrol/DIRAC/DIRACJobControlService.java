@@ -3,6 +3,7 @@
  * and open the template in the editor.
  */
 package org.srs.jobcontrol.DIRAC;
+import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.rmi.RemoteException;
@@ -14,6 +15,7 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -102,14 +104,17 @@ public class DIRACJobControlService extends JobControlService{
         List<String> qsub = new ArrayList<String>(Arrays.<String>asList(SUBMIT_COMMAND.split("\\s+")));
         
         qsub.add(command);
-        qsub.add("-p");
         if (job.getMaxCPU() != 0) 
         { 
+           qsub.add("-p");
            qsub.add("cpu="+convertToNormalisedSec(job.getMaxCPU()));
         }
         // the later created json file containing the pipeline env vars is referenced here
-        qsub.add("-p");
-        qsub.add("env=pipeline_environment.json"); 
+        if (job.getEnv() != null && job.getWorkingDirectory()!=null) 
+        {
+            qsub.add("-p");
+            qsub.add("env=pipeline_environment.json"); 
+        }
         
         // everything else is defined in extra options
         if (job.getExtraOptions() != null)
@@ -120,6 +125,8 @@ public class DIRACJobControlService extends JobControlService{
         // Also DIRAC does not automatically copy the current working directory to the job
         
         String fullCommand = toFullCommand(qsub);
+        // DEBUG
+        System.out.println("*DEBUG* "+fullCommand);
         logger.log(Level.INFO, "Submit: {0}", fullCommand);
              
         // Things to be undone if the submit fails.
@@ -129,13 +136,54 @@ public class DIRACJobControlService extends JobControlService{
             ProcessBuilder builder = new ProcessBuilder(qsub);
             Map<String,String> env = builder.environment();
             env.put("JOBCONTROL_SUBMIT_COMMAND",fullCommand);
+            if (job.getEnv()!=null){
+                Map<String,String> env_pipeline = new HashMap<String,String>();
+                env_pipeline.put("JOBCONTROL_SUBMIT_COMMAND", fullCommand);
+                env_pipeline.putAll(job.getEnv());
+                JSONObject env_pipeline_json = new JSONObject(env_pipeline);
+                job.getFiles().put("pipeline_environment.json", env_pipeline_json.toString()); // that should create this file in the working directory?       
+                System.out.println("*DEBUG* JSON output \n"+env_pipeline_json.toString());
            
-            if (job.getEnv() != null) {
-                env.putAll(job.getEnv());
             }
-            JSONObject env_pipeline_json = new JSONObject(env);
-            job.getFiles().put("pipeline_environment.json", env_pipeline_json.toString()); // that should create this file in the working directory?
-            
+          
+            if (job.getWorkingDirectory() != null)
+                
+            {
+               File dir = new File(job.getWorkingDirectory());
+               for (int retry : retryDelays)
+               {
+                  if (!dir.exists())
+                  {
+                     // This occasionally fails due to NFS/automount problems, so retry a few times
+                     boolean rc = dir.mkdirs();
+                     if (!rc) 
+                     {
+                        if (retry > 0)
+                        {
+                           Thread.sleep(retry);
+                           continue;
+                        }
+                        else {
+                             throw new JobSubmissionException("Could not create working directory "+dir);
+                         }
+                     }
+                     else 
+                     {
+                        undoList.add(new DeleteFile(dir));
+                     }
+                  }
+                  else if (!dir.isDirectory()) {
+                       throw new JobSubmissionException("Working directory is not a directory "+dir);
+                   }
+                  else if (job.getArchiveOldWorkingDir() != null)
+                  {
+                     archiveOldWorkingDir(dir, job.getArchiveOldWorkingDir(),undoList);
+                  }
+                  break;
+               }
+               builder.directory(dir);
+               storeFiles(dir, job.getFiles(), undoList);
+            }
             builder.redirectErrorStream(true);
             Process process = builder.start();
             OutputProcessor output = new OutputProcessor(process.getInputStream(),logger);
@@ -161,7 +209,6 @@ public class DIRACJobControlService extends JobControlService{
             if (output.getStatus() != null) {
                 throw output.getStatus();
             }
-
             if (result.isEmpty()) {
                 throw new JobControlException("Unexpected output length "+result.size());
             }
@@ -215,6 +262,7 @@ public class DIRACJobControlService extends JobControlService{
             
             Map<String,JobStatus> statii;
             statii = DIRACStatus.getStatus();
+            System.out.println("status: "+jobID+" :"+statii.toString()+" from "+ip);
             JobStatus result = statii.get(jobID);
             if (result == null) {
                 throw new NoSuchJobException("Job id "+jobID);
