@@ -68,8 +68,10 @@ class DIRACStatus
              final String job_id = String.valueOf(job.getJobID());
              CommonJobStatus stat = new CommonJobStatus();
              stat.setId(job_id);
-             if (job.getTotalCPUTimes()!=null || !"-".equals(job.getTotalCPUTimes())){
-                 stat.setCpuUsed(Math.round(job.getTotalCPUTimes()));
+             if (job.getTotalCPUTimes()!=null){
+                 Float t = job.getTotalCPUTimes();
+                 int cpuUsed = Math.round(t);
+                 stat.setCpuUsed(cpuUsed);
              }
              if (job.getMemorykB()!=null || !"-".equals(job.getMemorykB())){
                  String memory_kb = job.getMemorykB().replace("kB",""); // now we removed the kB
