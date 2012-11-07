@@ -10,6 +10,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -32,7 +33,7 @@ class DIRACStatus
    private final static String STATUS_COMMAND = System.getProperty("org.srs.jobcontrol.DIRACstatusCommand","dirac-status -p xml=True");
    private final static Logger logger = Logger.getLogger("org.srs.jobcontrol.DIRACStatus");
    
-   private Map<String,JobStatus> map;
+   private Map<String,JobStatus> map = new HashMap<String,JobStatus>();
    private long timeStamp;
    
    /** Creates a new instance of DIRACStatus */
