@@ -125,8 +125,8 @@ public class DIRACJobControlService extends JobControlService{
         // Also DIRAC does not automatically copy the current working directory to the job
         
         String fullCommand = toFullCommand(qsub);
-        // DEBUG
-        System.out.println("*DEBUG* "+fullCommand);
+        
+        //System.out.println("*DEBUG* "+fullCommand);
         logger.log(Level.INFO, "Submit: {0}", fullCommand);
              
         // Things to be undone if the submit fails.
@@ -142,7 +142,7 @@ public class DIRACJobControlService extends JobControlService{
                 env_pipeline.putAll(job.getEnv());
                 JSONObject env_pipeline_json = new JSONObject(env_pipeline);
                 job.getFiles().put("pipeline_environment.json", env_pipeline_json.toString()); // that should create this file in the working directory?       
-                System.out.println("*DEBUG* JSON output \n"+env_pipeline_json.toString());
+                //System.out.println("*DEBUG* JSON output \n"+env_pipeline_json.toString());
            
             }
           
@@ -262,7 +262,7 @@ public class DIRACJobControlService extends JobControlService{
             
             Map<String,JobStatus> statii;
             statii = DIRACStatus.getStatus();
-            System.out.println("status: "+jobID+" :"+statii.toString()+" from "+ip);
+            //System.out.println("status: "+jobID+" :"+statii.toString()+" from "+ip);
             JobStatus result = statii.get(jobID);
             if (result == null) {
                 throw new NoSuchJobException("Job id "+jobID);

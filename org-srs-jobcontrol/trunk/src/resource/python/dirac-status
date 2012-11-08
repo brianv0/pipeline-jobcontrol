@@ -14,13 +14,13 @@ class logging:
 class internalstatus:
     def __init__(self,job_id,my_dict,**kwargs):
         self.id = job_id
-        self.status = "-"
-        self.started = "-"
-        self.submitted = "-"
-        self.ended = "-"
-        self.cputime = "-"
-        self.mem = "-"
-        self.hostname = ""
+        self.status = None
+        self.started = None
+        self.submitted = None
+        self.ended = None
+        self.cputime = None
+        self.mem = None
+        self.hostname = None
         if my_dict.has_key("Status"):
             self.status = my_dict['Status']
         if my_dict.has_key("Started"):
@@ -34,28 +34,37 @@ class internalstatus:
         if my_dict.has_key('CacheSize(kB)'):
             self.mem = my_dict['CacheSize(kB)']
         if my_dict.has_key("Site"):
+            if self.hostname is None:
+                self.hostname = ""
             self.hostname+=my_dict['Site']
         self.mydict = my_dict
         self.__dict__.update(kwargs)
         #print my_dict
 
     def __call__(self):
-        return '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s'%(self.id,self.hostname,self.status,self.submitted,self.started,self.ended,self.cputime,self.mem)
+        old_dict = self.__dict__
+        for key in self.__dict__.keys():
+            if self.__dict__[key] is None:
+                self.__dict__[key]="-"
+        k = '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s'%(self.id,self.hostname,self.status,self.submitted,self.started,self.ended,self.cputime,self.mem)
+        self.__dict__ = old_dict
+        return k
 
     def _toxml(self):
         xf = xdom.parse(StringIO.StringIO('<?xml version="1.0" ?><some_tag/>'))
         job = xf.createElement("job")
         job.setAttribute("JobID",self.id)
         for key in self.mydict.keys():
-            xmlkey = key.replace("(","").replace(")","")
+            xmlkey = key.replace("(","").replace(")","").replace(" ","")
             new_node = xf.createElement(xmlkey)
             dict_value = self.mydict[key]
-            if "\n" in dict_value:
-                textnode = xf.createTextNode(dict_value)
-                new_node.appendChild(textnode)
-                job.appendChild(new_node)
-            else:
-                job.setAttribute(xmlkey,str(dict_value))
+            if not dict_value is None:
+                if "\n" in dict_value:
+                    textnode = xf.createTextNode(dict_value)
+                    new_node.appendChild(textnode)
+                    job.appendChild(new_node)
+                else:
+                    job.setAttribute(xmlkey,str(dict_value))
         return job
     
 def setSpecialOption( optVal ):
@@ -97,7 +106,7 @@ if __name__ == "__main__":
     w = RPCClient("WorkloadManagement/JobMonitoring")
     
     my_dict = {}
-    my_dict['Status']=['Done','Completed','Stalled','Failed','Killed','Waiting','Running','Checking']
+    #my_dict['Status']=['Done','Completed','Stalled','Failed','Killed','Waiting','Running','Checking']
     my_dict['Owner']=[user]
     if specialOptions.has_key("dayspassed"):
         delay = int(specialOptions["dayspassed"])
@@ -143,8 +152,8 @@ if __name__ == "__main__":
         #print logging_obj[-1].__dict__
         logging_info = {}
         logging_info['Submitted']=logging_obj[0].time
-        logging_info['Started']="-"
-        logging_info['Ended']="-"
+        logging_info['Started']=None
+        logging_info['Ended']=None
         logging_info['JobID']=j
         for l in logging_obj:
             if l.major_status == 'Application':
