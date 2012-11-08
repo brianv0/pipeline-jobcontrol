@@ -196,7 +196,7 @@ public class Joblist {
         @XmlAttribute(name = "LocalBatchID")
         protected String localBatchID;
         @XmlAttribute(name = "LocalJobID")
-        protected Integer localJobID;
+        protected String localJobID;
         @XmlAttribute(name = "MemorykB")
         protected String memorykB;
         @XmlAttribute(name = "MinorStatus")
@@ -548,7 +548,7 @@ public class Joblist {
          *     {@link Integer }
          *     
          */
-        public Integer getLocalJobID() {
+        public String getLocalJobID() {
             return localJobID;
         }
 
@@ -557,10 +557,10 @@ public class Joblist {
          * 
          * @param value
          *     allowed object is
-         *     {@link Integer }
+         *     {@link String }
          *     
          */
-        public void setLocalJobID(Integer value) {
+        public void setLocalJobID(String value) {
             this.localJobID = value;
         }
 
