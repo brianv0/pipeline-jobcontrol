@@ -39,7 +39,7 @@ import org.srs.jobcontrol.common.JobControlService;
  * TODO: handle creation of archive folders
  */
 public class DIRACJobControlService extends JobControlService{
-    private final static String SUBMIT_COMMAND = System.getProperty("org.srs.jobcontrol.DIRACsubmitCommand","dirac-submit");
+    private final static String SUBMIT_COMMAND = System.getProperty("org.srs.jobcontrol.DIRACsubmitCommand","dirac-glast-pipeline-submit");
     private final static String KILL_COMMAND = System.getProperty("org.srs.jobcontrol.DIRACkillCommand","dirac-wms-job-kill");
     private final static Pattern pattern = Pattern.compile("Your job (\\w+)*");
     private final DIRACStatus DIRACStatus = new DIRACStatus();    
