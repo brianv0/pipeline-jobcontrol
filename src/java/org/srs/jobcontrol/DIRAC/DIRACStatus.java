@@ -30,7 +30,7 @@ import org.srs.jobcontrol.JobStatus.Status;
 class DIRACStatus
 {
    private final static long CACHE_TIME = 60*1000; // Needed to avoid excessive calls to bjobs
-   private final static String STATUS_COMMAND = System.getProperty("org.srs.jobcontrol.DIRACstatusCommand","dirac-status -p xml=True");
+   private final static String STATUS_COMMAND = System.getProperty("org.srs.jobcontrol.DIRACstatusCommand","dirac-glast-pipeline-status -p xml=True");
    private final static Logger logger = Logger.getLogger("org.srs.jobcontrol.DIRACStatus");
    
    private Map<String,JobStatus> map = new HashMap<String,JobStatus>();
