@@ -140,12 +140,13 @@ public class DIRACJobControlService extends JobControlService{
                 Map<String,String> env_pipeline = new HashMap<String,String>();
                 env_pipeline.put("JOBCONTROL_SUBMIT_COMMAND", fullCommand);
                 env_pipeline.putAll(job.getEnv());
-                JSONObject env_pipeline_json = new JSONObject(env_pipeline);
-                job.getFiles().put("pipeline_environment.json", env_pipeline_json.toString()); // that should create this file in the working directory?       
                 // this one writes out a meta info file, containing the working directory
                 if (job.getWorkingDirectory()!=null){
+                    env_pipeline.put("PIPELINE_WORKDIR",job.getWorkingDirectory().toString());
                     job.getFiles().put("jobmeta.inf",job.getWorkingDirectory().toString()+"\n");
                 }
+                JSONObject env_pipeline_json = new JSONObject(env_pipeline);
+                job.getFiles().put("pipeline_environment.json", env_pipeline_json.toString()); // that should create this file in the working directory?       
                 //System.out.println("*DEBUG* JSON output \n"+env_pipeline_json.toString());
            
             }
