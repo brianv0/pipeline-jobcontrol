@@ -40,6 +40,7 @@ class LSFJobControlService extends JobControlService
 {
    private final static String SUBMIT_COMMAND = "/usr/local/bin/bsub";
    private final static String KILL_COMMAND = "/usr/local/bin/bkill";
+   private String ResourceOverride = System.getProperty("org.srs.jobcontrol.lsf.resourceOverride","");
    private final static Pattern pattern = Pattern.compile("Job <(\\d+)>");
    private final LSFStatus lsfStatus = new LSFStatus();
    
@@ -102,6 +103,7 @@ class LSFJobControlService extends JobControlService
       if (command == null || command.length() == 0) throw new JobSubmissionException("Missing command");
       List<String> bsub = new ArrayList<String>(Arrays.<String>asList(SUBMIT_COMMAND.split("\\s+")));
       String logFileName = job.getLogFile()==null ? "logFile.log" : sanitize(job.getLogFile());
+      bsub.add(ResourceOverride.toString());
       bsub.add("-o");
       bsub.add(logFileName);
       if (job.getMaxCPU() != 0)
