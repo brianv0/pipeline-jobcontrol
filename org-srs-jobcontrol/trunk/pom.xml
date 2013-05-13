@@ -5,7 +5,7 @@
     <parent>
         <groupId>srs</groupId>
         <artifactId>org-srs-maven-project-jar</artifactId>
-        <version>3.1</version>
+        <version>3.6</version>
     </parent>
 
 
@@ -17,15 +17,9 @@
 
     <repositories>
         <repository>
-            <id>srs-maven2</id>
+            <id>srs-maven2-public</id>
             <name>SRS Maven 2 central repository</name>
-            <url>http://srs.slac.stanford.edu/maven2</url>
-        </repository>
-        <!-- use the following if you ARE using a snapshot version. -->
-        <repository>
-            <id>srs-maven2-snapshots</id>
-            <name>SRS Maven2 central SNAPSHOTS repository</name>
-            <url>http://srs.slac.stanford.edu/maven2/SNAPSHOTS</url>
+            <url>http://srs.slac.stanford.edu/nexus/content/groups/srs-maven2-public/</url>
         </repository>
     </repositories>
 
