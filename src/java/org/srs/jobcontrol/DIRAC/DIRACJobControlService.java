@@ -122,11 +122,11 @@ public class DIRACJobControlService extends JobControlService{
             qsub.addAll(tokenizeExtraOption(job.getExtraOptions())); 
         }
         // DIRAC only accepts a script as a argument, not a command
-        // Also DIRAC does not automatically copy the current working directory to the job
+        // Also DIRAC does not automatically copy the current working directory to the jobpipeline_wrapper
         
         String fullCommand = toFullCommand(qsub);
         
-        //System.out.println("*DEBUG* "+fullCommand);
+        System.out.println("*DEBUG* "+fullCommand);
         logger.log(Level.INFO, "Submit: {0}", fullCommand);
              
         // Things to be undone if the submit fails.
@@ -147,8 +147,8 @@ public class DIRACJobControlService extends JobControlService{
                 }
                 JSONObject env_pipeline_json = new JSONObject(env_pipeline);
                 job.getFiles().put("pipeline_environment.json", env_pipeline_json.toString()); // that should create this file in the working directory?       
-                //System.out.println("*DEBUG* JSON output \n"+env_pipeline_json.toString());
-           
+                System.out.println("*DEBUG* JSON output \n"+env_pipeline_json.toString());
+                System.out.println("*DEBUG* work dir \n"+job.getWorkingDirectory().toString());
             }
           
             if (job.getWorkingDirectory() != null)

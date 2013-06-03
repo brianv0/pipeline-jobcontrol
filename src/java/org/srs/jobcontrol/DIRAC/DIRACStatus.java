@@ -143,37 +143,42 @@ class DIRACStatus
    {
       System.out.println("status found=" + status);
       // statii queried by dirac-status command
-      //'Done','Completed','Stalled','Failed','Killed','Waiting','Running','Checking'
-      if      ("Done".equals(status)) {
-           return JobStatus.Status.DONE;
-       }
-      else if ("Received".equals(status)){
+      if ("Received".equals(status)) {
+           return JobStatus.Status.PENDING;
+      }
+      else if ("Checking".equals(status)){
+          return JobStatus.Status.PENDING;
+      }
+      else if ("Staging".equals(status)){
+          return JobStatus.Status.PENDING;
+      }
+      else if ("Waiting".equals(status)){
           return JobStatus.Status.WAITING;
       }
-      else if ("Completed".equals(status)) {
-           return JobStatus.Status.DONE;
-       }
-      else if ("Stalled".equals(status)) {
-           return JobStatus.Status.SUSPENDED;
-       }
-      else if ("Failed".equals(status)) {
-           return JobStatus.Status.FAILED;
-       }
-      else if ("Killed".equals(status)) {
-           return JobStatus.Status.FAILED;
-       }
-      else if ("Waiting".equals(status)) {
-           return JobStatus.Status.WAITING;
-       }
-      else if ("Running".equals(status)) {
-           return JobStatus.Status.RUNNING;
-       }
-      else if ("Checking".equals(status)) {
-           return JobStatus.Status.PENDING;
-       }
+      else if ("Matched".equals(status)){
+          return JobStatus.Status.WAITING;
+      }
+      else if ("Running".equals(status)){
+          return JobStatus.Status.RUNNING;
+      }
+      else if ("Completed".equals(status)){
+          return JobStatus.Status.RUNNING;
+      }
+      else if ("Stalled".equals(status)){
+          return JobStatus.Status.SUSPENDED;
+      }
+      else if ("Failed".equals(status)){
+          return JobStatus.Status.FAILED;
+      }
+      else if ("Killed".equals(status)){
+          return JobStatus.Status.FAILED;
+      }
+      else if ("Done".equals(status)){
+          return JobStatus.Status.DONE;
+      }
       else {
            return JobStatus.Status.UNKNOWN;
-       }
+      }
    }
    Map<String, JobStatus> getStatus() throws JobControlException
    {
