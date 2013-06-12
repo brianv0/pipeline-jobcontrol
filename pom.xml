@@ -45,7 +45,7 @@
         </resources>
         <plugins>
             <plugin>
-                <artifactId>maven-war-plugin</artifactId>
+                <artifactId>maven-jar-plugin</artifactId>
                 <configuration>
                     <archive>
                         <manifest>
