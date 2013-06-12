@@ -60,7 +60,6 @@ class DIRACStatus
          output.join();
          int rc = process.exitValue();
          if (rc != 0) {
-              System.out.println("FAILED");
               throw new JobControlException("Process failed, rc="+rc);
           }
 
