@@ -48,21 +48,22 @@ class DIRACStatus
          String command = STATUS_COMMAND;
          List<String> commands = new ArrayList<String>(Arrays.asList(command.split("\\s+")));
          ProcessBuilder builder = new ProcessBuilder();
-         
+         JAXBContext jc = JAXBContext.newInstance ("org.srs.jobcontrol.DIRAC.StatusXML");
+         Unmarshaller um = jc.createUnmarshaller ();
+         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
          builder.command(commands);
          Process process = builder.start();
-         OutputProcessor output = new OutputProcessor(process.getErrorStream(),logger);
+         OutputProcessor output = new OutputProcessor(process.getErrorStream(),logger);         
+         final Joblist joblist = (Joblist)um.unmarshal(process.getInputStream());
          process.waitFor();
          output.join();
          int rc = process.exitValue();
          if (rc != 0) {
+              System.out.println("FAILED");
               throw new JobControlException("Process failed, rc="+rc);
           }
-         
-         JAXBContext jc = JAXBContext.newInstance ("org.srs.jobcontrol.DIRAC.StatusXML");
-         Unmarshaller um = jc.createUnmarshaller ();
-         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-         final Joblist joblist = (Joblist)um.unmarshal(process.getInputStream());
+
          // main loop over all jobs
          for (Joblist.Job job : joblist.getJob()){
              final String job_id = String.valueOf(job.getJobID());
@@ -131,7 +132,7 @@ class DIRACStatus
       }
       catch (JAXBException e) 
       {
-         System.out.println("caught JAXB Exception after"+STATUS_COMMAND);
+         System.out.println("caught JAXB Exception after "+STATUS_COMMAND);
          throw new JobControlException("caught JAXB Exception",e);
       }
       catch (ParseException e){
