@@ -38,8 +38,8 @@ import org.srs.jobcontrol.common.JobControlService.DeleteFile;
  */
 class LSFJobControlService extends JobControlService
 {
-   private final static String SUBMIT_COMMAND = "/usr/local/bin/bsub";
-   private final static String KILL_COMMAND = "/usr/local/bin/bkill";
+   private final static String SUBMIT_COMMAND = System.getProperty("org.srs.jobcontrol.lsf.submitCommand","/usr/local/bin/bsub");
+   private final static String KILL_COMMAND = System.getProperty("org.srs.jobcontrol.lsf.killCommand","/usr/local/bin/bkill");
    private String ResourceOverride = System.getProperty("org.srs.jobcontrol.lsf.resourceOverride","");
    private final static Pattern pattern = Pattern.compile("Job <(\\d+)>");
    private final LSFStatus lsfStatus = new LSFStatus();

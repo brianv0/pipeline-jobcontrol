@@ -21,7 +21,7 @@ import org.srs.jobcontrol.common.CommonJobStatus;
 class LSFStatus
 {
    private final static long CACHE_TIME = 60*1000; // Needed to avoid excessive calls to bjobs
-   private final static String STATUS_COMMAND = "/usr/local/bin/bjobs -W -a -p -u";
+   private final static String STATUS_COMMAND = System.getProperty("org.srs.jobcontrol.lsf.statusCommand", "/usr/local/bin/bjobs -W -a -p -u");
    private final static Pattern pattern = Pattern.compile("(\\d+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(.*)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\d+)\\s+(\\d+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s*");
    private final static Pattern timePattern = Pattern.compile("(\\d+):(\\d+):(\\d+).(\\d+)");
    private final static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss");
