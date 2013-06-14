@@ -97,7 +97,8 @@ public class DIRACJobControlService extends JobControlService{
         //logger.info("BEGIN submitInternal");
         String command = job.getCommand();
 	logger.log(Level.INFO, "command:{0}", command);
-	
+    	String logFileName = job.getLogFile()==null ? "logFile.log" : sanitize(job.getLogFile());
+
         if (command == null || command.length() == 0) {
             throw new JobSubmissionException("Missing command");
         }
@@ -138,6 +139,7 @@ public class DIRACJobControlService extends JobControlService{
             env.put("JOBCONTROL_SUBMIT_COMMAND",fullCommand);
             if (job.getEnv()!=null){
                 Map<String,String> env_pipeline = new HashMap<String,String>();
+                env_pipeline.put("JOBCONTROL_LOGFILE",logFileName);
                 env_pipeline.put("JOBCONTROL_SUBMIT_COMMAND", fullCommand);
                 env_pipeline.putAll(job.getEnv());
                 // this one writes out a meta info file, containing the working directory
