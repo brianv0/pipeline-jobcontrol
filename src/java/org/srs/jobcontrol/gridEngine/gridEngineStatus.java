@@ -45,18 +45,20 @@ class gridEngineStatus
          String command = STATUS_COMMAND;
          List<String> commands = new ArrayList<String>(Arrays.asList(command.split("\\s+")));
          ProcessBuilder builder = new ProcessBuilder();
+         JAXBContext jc = JAXBContext.newInstance ("org.srs.jobcontrol.gridEngine.qstat");
+         Unmarshaller um = jc.createUnmarshaller();
          
          builder.command(commands);
          Process process = builder.start();
-         JAXBOutputProcessor<JobInfo> jaxbOutput = new JAXBOutputProcessor<JobInfo>(process.getInputStream(),"org.srs.jobcontrol.gridEngine.qstat",logger);
+         OutputProcessor output = new OutputProcessor(process.getErrorStream(),logger);         
+         final JobInfo ji = (JobInfo)um.unmarshal(process.getInputStream());
          process.waitFor();
-         jaxbOutput.join();
+         output.join();
          int rc = process.exitValue();
          if (rc != 0) {
               throw new JobControlException("Process failed, rc="+rc);
           }
          
-         JobInfo ji = jaxbOutput.getResult();
          List list = ((QueueInfoT)ji.getQueueInfo().get(0)).getQueueListAndJobList();
          Iterator i = list.iterator ();
          
