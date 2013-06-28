@@ -103,7 +103,9 @@ class LSFJobControlService extends JobControlService
       if (command == null || command.length() == 0) throw new JobSubmissionException("Missing command");
       List<String> bsub = new ArrayList<String>(Arrays.<String>asList(SUBMIT_COMMAND.split("\\s+")));
       String logFileName = job.getLogFile()==null ? "logFile.log" : sanitize(job.getLogFile());
-      bsub.add(ResourceOverride.toString());
+      if(ResourceOverride.length() > 0){
+        bsub.add(ResourceOverride.toString());
+      }
       bsub.add("-o");
       bsub.add(logFileName);
       if (job.getMaxCPU() != 0)
