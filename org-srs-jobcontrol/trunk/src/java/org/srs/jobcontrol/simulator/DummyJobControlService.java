@@ -1,5 +1,10 @@
 package org.srs.jobcontrol.simulator;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -7,6 +12,12 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.Collections;
 import java.util.Map;
 import java.util.WeakHashMap;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.logging.Logger;
 import org.srs.jobcontrol.Job;
 import org.srs.jobcontrol.JobControl;
@@ -77,6 +88,10 @@ public class DummyJobControlService implements JobControl {
 
     private String generateJobId() {
         return String.valueOf(nextJobId.getAndIncrement());
+    }
+
+    public String summary(File workingDir) throws RemoteException, FileNotFoundException, TimeoutException, JobControlException {
+        throw new UnsupportedOperationException( "Not supported yet." );
     }
 
 }
