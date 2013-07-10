@@ -1,20 +1,31 @@
 package org.srs.jobcontrol.common;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.srs.jobcontrol.JobControl;
+import org.srs.jobcontrol.JobControlException;
 import org.srs.jobcontrol.JobStatus;
 import org.srs.jobcontrol.JobSubmissionException;
 
@@ -61,7 +72,7 @@ public abstract class JobControlService implements JobControl, JobControlService
                undoList.add(new Runnable()
                {
                   public void run()
-                  {
+                  { 
                      newFile.renameTo(oldFile);
                   }
                });
@@ -69,6 +80,59 @@ public abstract class JobControlService implements JobControl, JobControlService
          }
       }
    }
+   
+   /**
+    * Summary will return the pipeline_summary file as a string representation.
+    * It must be read and returned within 15 seconds, otherwise we will time
+    * out the thread and return an exception, in which case a job will be 
+    * terminated.
+    * @param workingDir Working directory of the job
+    * @return String representation of the summary.
+    * @throws FileNotFoundException
+    * @throws TimeoutException
+    * @throws JobControlException 
+    */
+    public String summary(File workingDir) throws 
+            FileNotFoundException, TimeoutException, JobControlException {
+        
+        final File summary = new File(workingDir, "pipeline_summary");
+        
+        // Callable so I can set a timeout on reading this file.
+        Callable<String> readFile = new Callable<String>(){
+            public String call() throws Exception {
+                // Keep this in here, because even trying to see if the file is
+                // there could take a long time.
+                if( !summary.exists() ){
+                    throw new FileNotFoundException(
+                            "Summary file does not exist.");
+                }
+                FileChannel channel = new FileInputStream(summary).getChannel();
+                int len = (int) summary.length();
+                ByteBuffer buf = ByteBuffer.allocate( len );
+                // Not sure if read will always fill buffer...
+                for(int read = 0; read < len; read += channel.read(buf));
+                return new String(buf.array());
+            }
+        };
+        
+        // Read, but keep a timeout because we'd rather just kill it than 
+        // lock up a thread on the server.
+        Future<String> info = 
+                Executors.newSingleThreadExecutor().submit( readFile );
+        
+        try {
+            return info.get( 15 , TimeUnit.SECONDS );
+        } catch (InterruptedException ex) {
+            throw new JobControlException(
+                    "Unknown exception occurred when reading summary", ex);
+        } catch (ExecutionException ex) {
+            if(ex.getCause() instanceof FileNotFoundException){
+                throw (FileNotFoundException) ex.getCause();
+            }
+            throw new JobControlException(
+                    "Unknown exception occurred when reading summary", ex);
+        }
+    }
    
    protected String sanitize(String option)
    {

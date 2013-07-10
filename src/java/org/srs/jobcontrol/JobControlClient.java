@@ -1,9 +1,12 @@
 package org.srs.jobcontrol;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.util.concurrent.TimeoutException;
 
 /**
  * This is the main class clients should use to interact with the job submission system.
@@ -66,6 +69,7 @@ public class JobControlClient
          throw new JobControlException("Remote Exception during job submission",x.getCause());
       }
    }
+   
     /**
      * Get the status of a job.
      * @param jobID The jobID for which status should be returned
@@ -87,6 +91,41 @@ public class JobControlClient
          throw new JobControlException("Remote Exception getting job status",x.getCause());
       }
    }
+   
+    /**
+     * Attempt to get the summary file of a job as a String given 
+     * the working directory
+     * @param jobID The jobID for which status should be returned
+     * @return The jobs status
+     */
+   public String summary(File workingDir) 
+           throws FileNotFoundException, TimeoutException, JobControlException
+   {
+      try
+      {
+         return getJobControl().summary( workingDir );
+      }
+      catch (FileNotFoundException x)
+      {
+         throw new JobControlException(
+                 "The underlying file was not found.",x);
+      }
+      catch (TimeoutException x)
+      {
+         throw new JobControlException("Timeout when trying to read file",x );
+      }
+      catch (RemoteException x)
+      {
+         throw new JobControlException(
+                 "Remote Exception getting job status",x.getCause());
+      }
+      catch (NotBoundException x)
+      {
+         throw new JobControlException(
+                 "Server not running while getting job status",x);
+      }
+   }
+   
    /**
     * Cancels a job. If the job is already running it will be killed.
     */
