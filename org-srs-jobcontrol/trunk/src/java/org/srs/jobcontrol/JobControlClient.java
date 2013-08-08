@@ -1,7 +1,10 @@
 package org.srs.jobcontrol;
 
+import com.healthmarketscience.rmiio.RemoteInputStreamClient;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -93,36 +96,50 @@ public class JobControlClient
    }
    
     /**
-     * Attempt to get the summary file of a job as a String given 
-     * the working directory
-     * @param jobID The jobID for which status should be returned
-     * @return The jobs status
-     */
-   public String summary(File workingDir) 
+     * Attempt to get a remote file as a string. Files should be small, otherwise you the stream.
+     * @param spID String in the form of "streamPk:processInstancePk"
+     * @param workingDir Working dir of this process instance
+     * @param fileName name of file relative to workingDir
+     * @return A string representation of the file.
+     * @throws FileNotFoundException
+     * @throws TimeoutException
+     * @throws JobControlException 
+    */
+   public String getFile(String spID, File workingDir, String fileName) 
            throws FileNotFoundException, TimeoutException, JobControlException
    {
-      try
-      {
-         return getJobControl().summary( workingDir );
+      try {
+         return getJobControl().getFile( spID, workingDir, fileName );
       }
-      catch (FileNotFoundException x)
-      {
-         throw new JobControlException(
-                 "The underlying file was not found.",x);
+      catch (RemoteException x) {
+         throw new JobControlException( "Remote Exception getting job status", x.getCause());
       }
-      catch (TimeoutException x)
-      {
-         throw new JobControlException("Timeout when trying to read file",x );
+      catch (NotBoundException x) {
+         throw new JobControlException("Server not running while getting job status",x);
       }
-      catch (RemoteException x)
-      {
-         throw new JobControlException(
-                 "Remote Exception getting job status",x.getCause());
+   }
+   
+    /**
+     * Get an InputStream from a remote file to be transferred over RMI.
+     * You should do everything you can to close this InputStream when you are done.
+     * 
+     * @param spID String in the form of "streamPk:processInstancePk"
+     * @param workingDir Working dir of this process instance
+     * @param fileName name of file relative to workingDir
+     * @return A InputStream to a remote file
+     */
+   public InputStream getFileStream(String spID, File workingDir, String fileName) 
+           throws IOException, JobControlException
+   {
+      try {
+         return RemoteInputStreamClient.wrap( 
+                 getJobControl().getFileStream( spID, workingDir, fileName ) );
       }
-      catch (NotBoundException x)
-      {
-         throw new JobControlException(
-                 "Server not running while getting job status",x);
+      catch (RemoteException x) {
+         throw new JobControlException( "Remote Exception getting job status", x.getCause());
+      }
+      catch (NotBoundException x) {
+         throw new JobControlException("Server not running while getting job status",x);
       }
    }
    

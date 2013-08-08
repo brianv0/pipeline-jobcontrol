@@ -1,7 +1,9 @@
 package org.srs.jobcontrol;
 
+import com.healthmarketscience.rmiio.RemoteInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.concurrent.TimeoutException;
@@ -14,6 +16,9 @@ public interface JobControl extends Remote
 {
    String submit(Job job) throws RemoteException, JobSubmissionException, JobControlException;
    JobStatus status(String jobID) throws RemoteException, NoSuchJobException, JobControlException;
-   String summary(File workingDir) throws RemoteException, FileNotFoundException, TimeoutException, JobControlException;
+   String getFile(String sp_id, File workingDir, String fileName) 
+           throws RemoteException, FileNotFoundException, TimeoutException, JobControlException;
+   RemoteInputStream getFileStream(String spID, File workingDir, String fileName)
+            throws IOException, JobControlException;
    void cancel(String jobID) throws RemoteException, NoSuchJobException, JobControlException;
 }
