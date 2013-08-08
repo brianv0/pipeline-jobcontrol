@@ -1,8 +1,14 @@
 package org.srs.jobcontrol.common;
 
+import com.healthmarketscience.rmiio.GZIPRemoteInputStream;
+import com.healthmarketscience.rmiio.RemoteInputStream;
+import com.healthmarketscience.rmiio.RemoteInputStreamServer;
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -83,31 +89,70 @@ public abstract class JobControlService implements JobControl, JobControlService
    
    /**
     * Summary will return the pipeline_summary file as a string representation.
-    * It must be read and returned within 15 seconds, otherwise we will time
+    * It must be read and returned within 5 seconds, otherwise we will time
     * out the thread and return an exception, in which case a job will be 
     * terminated.
+    * @param spID String in the form of "streamPK:piPK"
     * @param workingDir Working directory of the job
-    * @return String representation of the summary.
+    * @param fileName valid file under the canonical path of workingDir
+    * @return String representation of the getFile.
     * @throws FileNotFoundException
     * @throws TimeoutException
     * @throws JobControlException 
     */
-    public String summary(File workingDir) throws 
-            FileNotFoundException, TimeoutException, JobControlException {
+    public String getFile(String spID, File workingDir, String fileName) 
+            throws FileNotFoundException, TimeoutException, JobControlException {
+        return getFileWithTimeout(spID, workingDir, fileName, 5);
+    }
+
+    /**
+     * Return a GZIPRemoteInputStream for large file access over RMI.
+     * 
+     * @param spID
+     * @param workingDir
+     * @param fileName
+     * @return Stream representation of the full file name
+     * @throws JobControlException
+     * @throws IOException 
+     */
+    public RemoteInputStream getFileStream(String spID, File workingDir, String fileName)
+            throws JobControlException, IOException {
+        File targetFile = new File(workingDir, fileName);
+        validateAccess( spID, workingDir, targetFile );
+
+        RemoteInputStreamServer istream = null;
+        try {
+            istream = new GZIPRemoteInputStream( new BufferedInputStream(
+                    new FileInputStream( targetFile ) ) );
+            // export the final stream for returning to the client
+            RemoteInputStream result = istream.export();
+            istream = null;
+            return result;
+        } finally {
+            if(istream != null) {
+                istream.close();
+            }
+        }
+    }
+   
+    private String getFileWithTimeout(String spID, File workingDir, String fileName, int timeout) 
+            throws FileNotFoundException, TimeoutException, JobControlException {
+        // Validate files
+        final File targetFile = new File(workingDir, fileName);
+        validateAccess(spID, workingDir, targetFile);
         
-        final File summary = new File(workingDir, "pipeline_summary");
         
         // Callable so I can set a timeout on reading this file.
         Callable<String> readFile = new Callable<String>(){
             public String call() throws Exception {
                 // Keep this in here, because even trying to see if the file is
                 // there could take a long time.
-                if( !summary.exists() ){
+                if( !targetFile.exists() ){
                     throw new FileNotFoundException(
                             "Summary file does not exist.");
                 }
-                FileChannel channel = new FileInputStream(summary).getChannel();
-                int len = (int) summary.length();
+                FileChannel channel = new FileInputStream(targetFile).getChannel();
+                int len = (int) targetFile.length();
                 ByteBuffer buf = ByteBuffer.allocate( len );
                 // Not sure if read will always fill buffer...
                 for(int read = 0; read < len; read += channel.read(buf));
@@ -121,7 +166,7 @@ public abstract class JobControlService implements JobControl, JobControlService
                 Executors.newSingleThreadExecutor().submit( readFile );
         
         try {
-            return info.get( 15 , TimeUnit.SECONDS );
+            return info.get( timeout , TimeUnit.SECONDS );
         } catch (InterruptedException ex) {
             throw new JobControlException(
                     "Unknown exception occurred when reading summary", ex);
@@ -131,6 +176,30 @@ public abstract class JobControlService implements JobControl, JobControlService
             }
             throw new JobControlException(
                     "Unknown exception occurred when reading summary", ex);
+        }
+    }
+    
+    // Validate access to files. Throw an exception otherwise.
+    private void validateAccess(String spID, File workingDir, File maybeChild) 
+            throws JobControlException {
+        // Validate files
+        BufferedReader spid_rd = null;
+        try {
+            workingDir = workingDir.getCanonicalFile();
+            // Check pipeline_spid to verify they are the same
+            File spid_file = new File(workingDir, "pipeline_spid");
+            spid_rd = new BufferedReader(new FileReader(spid_file));
+            if( !spid_rd.readLine().equals( spID ) ){
+                throw new SecurityException("The spid is invalid");
+            }
+
+            if( !maybeChild.getCanonicalPath().startsWith( workingDir.getCanonicalPath() ) ){
+                throw new SecurityException("The filename is invalid");
+            }
+        } catch (Exception ex) {
+            throw new JobControlException("Unable to validate access to file", ex);
+        } finally {
+            try {spid_rd.close();} catch (Exception e){}
         }
     }
    
