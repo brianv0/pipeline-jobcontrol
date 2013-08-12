@@ -135,11 +135,11 @@ public class JobControlClient
          return RemoteInputStreamClient.wrap( 
                  getJobControl().getFileStream( spID, workingDir, fileName ) );
       }
-      catch (RemoteException x) {
-         throw new JobControlException( "Remote Exception getting job status", x.getCause());
+      catch (RemoteException x) { 
+         throw new JobControlException( "Remote Exception getting remote file stream", x.getCause());
       }
       catch (NotBoundException x) {
-         throw new JobControlException("Server not running while getting job status",x);
+         throw new JobControlException("Server not running while getting remote file stream",x);
       }
    }
    
@@ -159,6 +159,6 @@ public class JobControlClient
       catch (RemoteException x)
       {
          throw new JobControlException("Remote Exception killing job",x.getCause());
-      }      
+      }
    }
 }
