@@ -27,7 +27,7 @@ import org.srs.jobcontrol.gridEngine.qstat.*;
 class gridEngineStatus
 {
    private final static long CACHE_TIME = 60*1000; // Needed to avoid excessive calls to bjobs
-   private final static String STATUS_COMMAND = "qstat -xml -ext"; 
+   private final static String STATUS_COMMAND = "qstat -s az -xml -ext"; 
    private final static Logger logger = Logger.getLogger("org.srs.jobcontrol.gridEngineStatus");
    
    private Map<String,JobStatus> map;
@@ -64,53 +64,8 @@ class gridEngineStatus
          
          Map<String,JobStatus> map = new HashMap<String,JobStatus>();
          // use a HashMap to assign the jobstatus with each job
-         
-         // now loop over all jobs
-         while (i.hasNext ()) {
-             JobListT jlt = (JobListT)i.next ();
-             String job_id = String.valueOf(jlt.getJBJobNumber());
-             CommonJobStatus stat = new CommonJobStatus();
-             stat.setId(job_id);
-             if (jlt.getCpuUsage()!=null) {
-                 stat.setCpuUsed(Math.round(jlt.getCpuUsage()));
-             }
-             if (jlt.getMemUsage()!=null) {
-                 stat.setMemoryUsed(Math.round(jlt.getMemUsage()));
-             }
-             if (jlt.getQueueName()!=null)
-             {
-                 String sge_queue_name = jlt.getQueueName();
-                 String[] splits = sge_queue_name.split("@");
-                 if (splits.length == 2){
-                     stat.setHost(splits[1].replace(".in2p3.fr",""));
-                     stat.setQueue(splits[0]);
-                 }
-                 else{    
-                     stat.setHost(jlt.getQueueName());
-                 }
-             }
-             if (jlt.getIoUsage()!=null) {
-                 stat.setSwapUsed(Math.round(jlt.getIoUsage()));
-             }
-             if (jlt.getJBSubmissionTime()!=null)
-             {
-                XMLGregorianCalendar submit_time = jlt.getJBSubmissionTime();
-                Date submit_date = submit_time.toGregorianCalendar().getTime();
-                stat.setSubmitted(submit_date);
-             }
-             if (jlt.getJBOwner()!=null) {
-                 stat.setUser(jlt.getJBOwner());
-             }
-             if (jlt.getStateAttribute()!=null){
-                 stat.setStatus(toStatus(jlt.getStateAttribute()));
-             }
-             if (jlt.getJBProject()!=null){
-                 stat.setComment("project: "+jlt.getJBProject());
-             }
-             // assemble the hashmap
-             map.put(job_id,stat); 
-         }
-         System.out.println("*INFO* statuses found=" + map);
+        evaluateList( (List<JobListT>) ji.getQueueInfo().get( 0 ).getJobList(), map );
+        evaluateList( ji.getJobInfo().get( 0 ).getJobList(), map );
    
 	 synchronized (this)
          {
@@ -131,13 +86,62 @@ class gridEngineStatus
            e.printStackTrace ();
       }
    }
-   private JobStatus.Status toStatus(String status)
+   
+    public void evaluateList(List<JobListT> jobList, Map<String, JobStatus> jobMap){
+        if(jobList == null){
+            return;
+        }
+        for(JobListT jlt: jobList){
+            String job_id = String.valueOf( jlt.getJBJobNumber() );
+            CommonJobStatus stat = new CommonJobStatus();
+            stat.setId( job_id );
+            if(jlt.getCpuUsage() != null){
+                stat.setCpuUsed( Math.round( jlt.getCpuUsage() ) );
+            }
+            if(jlt.getMemUsage() != null){
+                stat.setMemoryUsed( Math.round( jlt.getMemUsage() ) );
+            }
+            if(jlt.getQueueName() != null){
+                String sge_queue_name = jlt.getQueueName();
+                String[] splits = sge_queue_name.split( "@" );
+                if(splits.length == 2){
+                    stat.setHost( splits[1].replace( ".in2p3.fr", "" ) );
+                    stat.setQueue( splits[0] );
+                } else {
+                    stat.setHost( jlt.getQueueName() );
+                }
+            }
+            if(jlt.getIoUsage() != null){
+                stat.setSwapUsed( Math.round( jlt.getIoUsage() ) );
+            }
+            if(jlt.getJBSubmissionTime() != null){
+                XMLGregorianCalendar submit_time = jlt.getJBSubmissionTime();
+                Date submit_date = submit_time.toGregorianCalendar().getTime();
+                stat.setSubmitted( submit_date );
+            }
+            if(jlt.getJBOwner() != null){
+                stat.setUser( jlt.getJBOwner() );
+            }
+            if(jlt.getStateAttribute() != null){
+                stat.setStatus( gridEngineStatus.toStatus( jlt.getStateAttribute() ) );
+            }
+            if(jlt.getJBProject() != null){
+                stat.setComment( "project: " + jlt.getJBProject() );
+            }
+            // assemble the hashmap
+            jobMap.put( job_id, stat );
+        }
+    }
+   
+   protected static JobStatus.Status toStatus(String status)
    {
       System.out.println("status found=" + status);
       if      ("pending".equals(status)) return JobStatus.Status.PENDING;
       else if ("running".equals(status)) return JobStatus.Status.RUNNING;
+      else if ("zombie".equals(status)) return JobStatus.Status.DONE;
       else return JobStatus.Status.UNKNOWN;
    }
+   
    Map<String, JobStatus> getStatus() throws JobControlException, JAXBException
    {
       synchronized (this)
@@ -149,4 +153,6 @@ class gridEngineStatus
       }
       return map;
    }
+   
+   
 }
