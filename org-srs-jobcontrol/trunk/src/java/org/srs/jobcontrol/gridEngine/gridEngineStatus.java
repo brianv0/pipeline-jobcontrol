@@ -59,17 +59,14 @@ class gridEngineStatus
               throw new JobControlException("Process failed, rc="+rc);
           }
          
-         List list = ((QueueInfoT)ji.getQueueInfo().get(0)).getQueueListAndJobList();
-         Iterator i = list.iterator ();
-         
-         Map<String,JobStatus> map = new HashMap<String,JobStatus>();
+         Map<String,JobStatus> newMap = new HashMap<String,JobStatus>();
          // use a HashMap to assign the jobstatus with each job
-        evaluateList( (List<JobListT>) ji.getQueueInfo().get( 0 ).getJobList(), map );
-        evaluateList( ji.getJobInfo().get( 0 ).getJobList(), map );
+        evaluateList( (List<JobListT>) ji.getQueueInfo().get( 0 ).getJobList(), newMap );
+        evaluateList( ji.getJobInfo().get( 0 ).getJobList(), newMap );
    
 	 synchronized (this)
          {
-            this.map = map;
+            this.map = newMap;
             this.timeStamp = System.currentTimeMillis();
          }
       }
