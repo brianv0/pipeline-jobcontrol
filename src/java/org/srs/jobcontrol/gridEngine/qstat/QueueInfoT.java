@@ -44,7 +44,7 @@ import javax.xml.bind.annotation.XmlType;
 public class QueueInfoT {
 
     @XmlElements({
-        @XmlElement(name = "Queue-List", type = QueueListT.class),
+        @XmlElement(name = "queue_list", type = QueueListT.class),
         @XmlElement(name = "job_list", type = JobListT.class)
     })
     protected List<Object> queueListAndJobList;
@@ -72,11 +72,18 @@ public class QueueInfoT {
      * 
      * 
      */
-    public List<Object> getQueueListAndJobList() {
+    public List<?> getQueueListAndJobList() {
         if (queueListAndJobList == null) {
             queueListAndJobList = new ArrayList<Object>();
         }
         return this.queueListAndJobList;
+    }
+    
+    public List<?> getJobList() {
+        if(!queueListAndJobList.isEmpty() && queueListAndJobList.get( 0) instanceof JobListT){
+            return queueListAndJobList;
+        }
+        return null;
     }
 
 }
