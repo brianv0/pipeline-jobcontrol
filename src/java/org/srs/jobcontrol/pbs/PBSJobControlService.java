@@ -128,9 +128,6 @@ public class PBSJobControlService extends JobControlService{
            PBS_script.append("cd ").append(job.getWorkingDirectory()).append('\n');
         }
         PBS_script.append(command);
-        if (job.getArguments() != null) {
-            for (String arg : job.getArguments()) { PBS_script.append(" \""+arg+"\""); }
-        }
         PBS_script.append('\n');
         submitFile.put("",PBS_script.toString());
                 

@@ -123,26 +123,11 @@ class LSFJobControlService extends JobControlService
          bsub.add("-J");
          bsub.add(sanitize(job.getName()));
       }
-      if (!job.getRunAfter().isEmpty())
-      {
-         bsub.add("-w");
-         StringBuilder condition = new StringBuilder();
-         for (Iterator iter = job.getRunAfter().iterator(); iter.hasNext() ; )
-         {
-            condition.append("ended(").append(iter.next()).append(')');
-            if (iter.hasNext()) condition.append("&&");
-         }
-         bsub.add(condition.toString());
-      }
       if (job.getExtraOptions() != null)
       {
          bsub.addAll(tokenizeExtraOption(job.getExtraOptions()));
       }
       bsub.addAll(Arrays.<String>asList(command.split("\\s+")));
-      if (job.getArguments() != null)
-      {
-         bsub.addAll(job.getArguments());
-      }
       String fullCommand = toFullCommand(bsub);
       logger.info("Submit: "+fullCommand);
       

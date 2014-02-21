@@ -170,9 +170,6 @@ class gridEngineJobControlService extends JobControlService {
            ge_script.append("cd ").append(job.getWorkingDirectory()).append('\n');
         }
         ge_script.append(command);
-        if (job.getArguments() != null) {
-            for (String arg : job.getArguments()) { ge_script.append(" \""+arg+"\""); }
-        }
         ge_script.append('\n');
         job.getFiles().put("ge_script",ge_script.toString());
         String fullCommand = toFullCommand(qsub);
