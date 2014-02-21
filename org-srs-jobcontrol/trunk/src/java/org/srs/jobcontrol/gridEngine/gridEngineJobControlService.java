@@ -18,14 +18,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.management.JMException;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
-import javax.xml.bind.JAXBException;
 import org.srs.jobcontrol.Job;
 import org.srs.jobcontrol.JobControl;
 import org.srs.jobcontrol.JobControlException;
@@ -274,41 +272,6 @@ class gridEngineJobControlService extends JobControlService {
         double f = 1.0;
         return (int)f*seconds;
     }
-    private void checkPermission(String ip) throws SecurityException {
-        //if (!ip.startsWith("134.79") && !ip.startsWith("198.129")) throw new SecurityException();
-        if (!ip.startsWith("134.158") && !ip.startsWith("134.79")) throw new SecurityException();
-	else
-	  System.out.println("Permission OK");
-    }
-    public JobStatus status(String jobID) throws NoSuchJobException, JobControlException {
-        try {
-            System.out.println("in gridEngineJobControlService.status");
-            String ip = RemoteServer.getClientHost();
-            //logger.info("status: "+jobID+" from "+ip);
-            System.out.println("status: "+jobID+" from "+ip);
-            checkPermission(ip);
-       
-            Map<String,JobStatus> statii;
-            statii = geStatus.getStatus();
-            //System.out.println("map"+statii);
-            JobStatus result = statii.get(jobID);
-            if (result == null) throw new NoSuchJobException("Job id "+jobID+" map "+statii);
-            return result;
-           
-        } catch (ServerNotActiveException t) {
-            logger.log(Level.SEVERE,"Unexpected error",t);
-            throw new JobControlException("Unexpected error",t);
-        } catch (NoSuchJobException t) {
-            logger.log(Level.SEVERE,"job status failed",t);
-            throw t;
-        } catch (JobControlException t) {
-            logger.log(Level.SEVERE,"job status failed",t);
-            throw t;
-        } catch (JAXBException t) {
-            logger.log(Level.SEVERE,"Unexpected error",t);
-            throw new JobControlException("Unexpected error when parsing",t);      
-        }       
-    }
     
     public void cancel(String jobID) throws NoSuchJobException, JobControlException {
         try {
@@ -351,40 +314,8 @@ class gridEngineJobControlService extends JobControlService {
         }
     }
    
-   public String getStatus()
-   {
-      try
-      {
-         geStatus.getStatus();
-         return "OK";
-      }
-      catch (JobControlException x)
-      {
-         logger.log(Level.SEVERE,"Error getting status",x);
-         return "Bad "+(x.getMessage());
-      }
-      catch (JAXBException x)
-      {
-         logger.log(Level.SEVERE,"Error getting status while parsing xml",x);
-         return "Bad "+(x.getMessage());
-      }
-   }
-   
-   public Map<String, Integer> getJobCounts()
-   {
-      try
-      {
-         return computeJobCounts(geStatus.getStatus());
-      }
-      catch (JobControlException x)
-      {
-         logger.log(Level.SEVERE,"Error getting job counts",x);
-         return null;
-      }
-      catch (JAXBException x)
-      {
-         logger.log(Level.SEVERE,"Error parsing xml for job counts",x);
-         return null;
-      }
-   }
+    @Override
+    public Map<String, JobStatus> getCurrentStatus() throws JobControlException{
+        return geStatus.getStatus();
+    }
 }

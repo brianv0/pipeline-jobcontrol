@@ -36,8 +36,6 @@ import org.srs.jobcontrol.NoSuchJobException;
 import org.srs.jobcontrol.OutputProcessor;
 import org.srs.jobcontrol.common.JobControlService;
 import org.srs.jobcontrol.common.JobControlService.DeleteFile;
-import org.srs.jobcontrol.pbs.PBSJobControlService;
-import org.srs.jobcontrol.pbs.PBSStatus;
 
 /**
  *
@@ -270,47 +268,12 @@ public class PBSJobControlService extends JobControlService{
             }
         }
     }
-
-    private int convertToNormalisedSec(int seconds) {
-        double f = 1.0;
-        return (int)f*seconds;
-    }
-    private void checkPermission(String ip) throws SecurityException {
-        //if (!ip.startsWith("134.79") && !ip.startsWith("198.129")) throw new SecurityException();
-        if (!ip.startsWith("134.158") && !ip.startsWith("134.79")) throw new SecurityException();
-	else
-	  System.out.println("Permission OK");
-    }
-    public JobStatus status(String jobID) throws NoSuchJobException, JobControlException {
-        try {
-            System.out.println("in PBSJobControlService.status");
-            String ip = RemoteServer.getClientHost();
-            //logger.info("status: "+jobID+" from "+ip);
-            System.out.println("status: "+jobID+" from "+ip);
-            checkPermission(ip);
-            
-            Map<String,JobStatus> statii = pbsStatus.getStatus();
-            JobStatus result = statii.get(jobID);
-            if (result == null) throw new NoSuchJobException("Job id "+jobID);
-            return result;
-        } catch (ServerNotActiveException t) {
-            logger.log(Level.SEVERE,"Unexpected error",t);
-            throw new JobControlException("Unexpected error",t);
-        } catch (NoSuchJobException t) {
-            logger.log(Level.SEVERE,"job status failed",t);
-            throw t;
-        } catch (JobControlException t) {
-            logger.log(Level.SEVERE,"job status failed",t);
-            throw t;
-        }
-    }
     
     public void cancel(String jobID) throws NoSuchJobException, JobControlException {
         try {
             String ip = RemoteServer.getClientHost();
             logger.info("killing: "+jobID+" from "+ip);
             checkPermission(ip);
-            
             cancelInternal(jobID);
             logger.fine("job "+jobID+" cancelled");
         } catch (ServerNotActiveException t) {
@@ -324,6 +287,7 @@ public class PBSJobControlService extends JobControlService{
             throw t;
         }
     }
+    
     private void cancelInternal(String jobID) throws NoSuchJobException, JobControlException {
         try {
             List<String> commands = new ArrayList<String>();
@@ -345,31 +309,9 @@ public class PBSJobControlService extends JobControlService{
             throw new JobControlException("InterruptedException while killing job "+jobID,x);
         }
     }
-   
-   public String getStatus()
-   {
-      try
-      {
-         pbsStatus.getStatus();
-         return "OK";
-      }
-      catch (JobControlException x)
-      {
-         logger.log(Level.SEVERE,"Error getting status",x);
-         return "Bad "+(x.getMessage());
-      }
-   }
-   
-   public Map<String, Integer> getJobCounts()
-   {
-      try
-      {
-         return computeJobCounts(pbsStatus.getStatus());
-      }
-      catch (JobControlException x)
-      {
-         logger.log(Level.SEVERE,"Error getting job counts",x);
-         return null;
-      }
-   }
+
+    @Override
+    public Map<String, JobStatus> getCurrentStatus() throws JobControlException{
+        return pbsStatus.getStatus();
+    }
 }

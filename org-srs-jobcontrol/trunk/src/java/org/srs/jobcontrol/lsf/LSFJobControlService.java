@@ -12,7 +12,6 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -71,7 +70,6 @@ class LSFJobControlService extends JobControlService
          String ip = RemoteServer.getClientHost();
          logger.info("submitting: "+job.getCommand()+" from "+ip);
          checkPermission(ip);
-         
          String id = submitInternal(job);
          logger.fine("job "+id+" submitted");
          nSubmitted.incrementAndGet();
@@ -97,6 +95,7 @@ class LSFJobControlService extends JobControlService
          throw t;
       }
    }
+   
    private String submitInternal(Job job) throws JobSubmissionException, JobControlException
    {
       String command = job.getCommand();
@@ -230,39 +229,6 @@ class LSFJobControlService extends JobControlService
    {
       return (seconds+59)/60;
    }
-   private void checkPermission(String ip) throws SecurityException
-   {
-      if (!ip.startsWith("134.79") && !ip.startsWith("198.129")) throw new SecurityException();
-   }
-   public JobStatus status(String jobID) throws NoSuchJobException, JobControlException
-   {
-      try
-      {
-         String ip = RemoteServer.getClientHost();
-         logger.info("status: "+jobID+" from "+ip);
-         checkPermission(ip);
-         
-         Map<String,JobStatus> statii = lsfStatus.getStatus();
-         JobStatus result = statii.get(jobID);
-         if (result == null) throw new NoSuchJobException("Job id "+jobID);
-         return result;
-      }
-      catch (ServerNotActiveException t)
-      {
-         logger.log(Level.SEVERE,"Unexpected error",t);
-         throw new JobControlException("Unexpected error",t);
-      }
-      catch (NoSuchJobException t)
-      {
-         logger.log(Level.SEVERE,"job status failed",t);
-         throw t;
-      }
-      catch (JobControlException t)
-      {
-         logger.log(Level.SEVERE,"job status failed",t);
-         throw t;
-      }
-   }
    
    public void cancel(String jobID) throws NoSuchJobException, JobControlException
    {
@@ -318,32 +284,9 @@ class LSFJobControlService extends JobControlService
          throw new JobControlException("InterruptedException while killing job "+jobID,x);
       }
    }
-      
-   public String getStatus()
-   {
-      try
-      {
-         lsfStatus.getStatus();
-         return "OK";
-      }
-      catch (JobControlException x)
-      {
-         logger.log(Level.SEVERE,"Error getting status",x);
-         return "Bad "+(x.getMessage());
-      }
-   }
    
-   public Map<String, Integer> getJobCounts()
-   {
-      try
-      {
-         return computeJobCounts(lsfStatus.getStatus());
-      }
-      catch (JobControlException x)
-      {
-         logger.log(Level.SEVERE,"Error getting job counts",x);
-         return null;
-      }
-   }
-   
+    @Override
+    public Map<String, JobStatus> getCurrentStatus() throws JobControlException{
+        return lsfStatus.getStatus();
+    }
 }

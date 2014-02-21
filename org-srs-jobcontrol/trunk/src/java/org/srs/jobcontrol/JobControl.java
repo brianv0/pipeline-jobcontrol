@@ -6,6 +6,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
 /**
@@ -16,6 +18,7 @@ public interface JobControl extends Remote
 {
    String submit(Job job) throws RemoteException, JobSubmissionException, JobControlException;
    JobStatus status(String jobID) throws RemoteException, NoSuchJobException, JobControlException;
+   Map<String,JobStatus> arrayStatus(List<String> jobID) throws RemoteException, JobControlException;
    String getFile(String sp_id, File workingDir, String fileName) 
            throws RemoteException, FileNotFoundException, TimeoutException, JobControlException;
    RemoteInputStream getFileStream(String spID, File workingDir, String fileName)

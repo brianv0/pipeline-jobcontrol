@@ -20,25 +20,22 @@ import org.srs.jobcontrol.*;
 import org.srs.jobcontrol.common.CommonJobStatus;
 class LSFStatus
 {
-   private final static long CACHE_TIME = 60*1000; // Needed to avoid excessive calls to bjobs
    private final static String STATUS_COMMAND = System.getProperty("org.srs.jobcontrol.lsf.statusCommand", "/usr/local/bin/bjobs -W -a -p -u");
    private final static Pattern pattern = Pattern.compile("(\\d+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(.*)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\d+)\\s+(\\d+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s*");
    private final static Pattern timePattern = Pattern.compile("(\\d+):(\\d+):(\\d+).(\\d+)");
    private final static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss");
    private final static Logger logger = Logger.getLogger("org.srs.jobcontrol.LSFStatus");
-   
-   private Map<String,JobStatus> map;
-   private long timeStamp;
-   
+      
    /** Creates a new instance of LSFStatus */
    LSFStatus()
    {
    }
    
-   private void updateStatus() throws JobControlException
-   {
+   public Map<String, JobStatus> getStatus() throws JobControlException{
       try
       {
+         long now = System.currentTimeMillis();
+         logger.fine( "status: now=" + now + " timeStamp=" );
          String command = STATUS_COMMAND + " " + System.getProperty("user.name");
          List<String> commands = new ArrayList<String>(Arrays.asList(command.split("\\s+")));
          ProcessBuilder builder = new ProcessBuilder();
@@ -97,13 +94,8 @@ class LSFStatus
                   x.printStackTrace();
                }
             }
-            //else System.err.println("NoMatch: \""+result.get(i)+"\"");
          }
-         synchronized (this)
-         {
-            this.map = map;
-            this.timeStamp = System.currentTimeMillis();
-         }
+        return map;
       }
       catch (IOException x)
       {
@@ -114,6 +106,7 @@ class LSFStatus
          throw new JobControlException("Job submission interrupted",x);
       }
    }
+   
    private Date toDate(String date) throws ParseException
    {
       if (date.equals("-")) return null;
@@ -123,6 +116,7 @@ class LSFStatus
       Date d = dateFormat.parse(year+"/"+date);
       return d;
    }
+   
    private int toTime(String date) throws ParseException
    {
       Matcher match = timePattern.matcher(date);
@@ -135,6 +129,7 @@ class LSFStatus
       }
       else return 0;
    }
+   
    private JobStatus.Status toStatus(String status)
    {
       if      ("DONE".equals(status)) return JobStatus.Status.DONE;
@@ -145,15 +140,5 @@ class LSFStatus
       else if ("SUSP".contains(status)) return JobStatus.Status.SUSPENDED;
       else return JobStatus.Status.UNKNOWN;
    }
-   Map<String, JobStatus> getStatus() throws JobControlException
-   {
-      synchronized (this)
-      {
-         long now = System.currentTimeMillis();
-         boolean updateNeeded = now-timeStamp > CACHE_TIME;
-         logger.fine("status: now="+now+" timeStamp="+timeStamp+" cache="+CACHE_TIME+" update needed: "+updateNeeded);
-         if (updateNeeded) updateStatus();
-      }
-      return map;
-   }
+   
 }

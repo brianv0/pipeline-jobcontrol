@@ -41,8 +41,7 @@ class DIRACStatus
    {
    }
    
-   private void updateStatus() throws JobControlException
-   {
+   public Map<String, JobStatus> getStatus() throws JobControlException{
       try
       {
          String command = STATUS_COMMAND;
@@ -113,14 +112,8 @@ class DIRACStatus
              }
             map.put(job_id,stat); 
          }
-         //System.out.println("*INFO* statuses found=" + map);
-   
-	 synchronized (this)
-         {
-            this.map = map;
-            this.timeStamp = System.currentTimeMillis();
-         }
-         }
+         return map;
+      }
       catch (IOException x)
       {
          throw new JobControlException("IOException during job submission",x);
@@ -180,17 +173,5 @@ class DIRACStatus
            return JobStatus.Status.UNKNOWN;
       }
    }
-   Map<String, JobStatus> getStatus() throws JobControlException
-   {
-      synchronized (this)
-      {
-         long now = System.currentTimeMillis();
-         boolean updateNeeded = now-timeStamp > CACHE_TIME;
-         logger.log(Level.FINE, "status: now={0} timeStamp={1} cache={2} update needed: {3}", new Object[]{now, timeStamp, CACHE_TIME, updateNeeded});
-         if (updateNeeded) {
-              updateStatus();
-          }
-      }
-      return map;
-   }
+   
 }

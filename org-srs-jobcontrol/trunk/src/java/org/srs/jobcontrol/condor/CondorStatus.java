@@ -22,18 +22,16 @@ import org.srs.jobcontrol.common.CommonJobStatus;
  */
 class CondorStatus {
 
-    private final static long CACHE_TIME = 60 * 1000; // Needed to avoid excessive calls to condor_q
     private final static String STATUS_COMMAND = "condor_q -long -format \\n\\nid=%d ClusterId -format \\nrh=%s RemoteHost -format \\nlrh=%s LastRemoteHost -format \\nstatus=%s JobStatus -format \\nrc=%d ExitStatus -format \\nend=%d CompletionDate -format \\nstart=%d JobStartDate -format \\nsubmit=%d QDate -format \\nuser=%s Owner -format \\ncomment=%s HoldReason -submitter ";
     private final static Pattern pattern = Pattern.compile("(\\S+)=(\\S+)");
     private final static Logger logger = Logger.getLogger(CondorStatus.class.getName());
-    private Map<String, JobStatus> map;
-    private long timeStamp;
+    
 
     /** Creates a new instance of LSFStatus */
     CondorStatus() {
     }
 
-    private void updateStatus() throws JobControlException {
+    Map<String, JobStatus> getStatus() throws JobControlException {
         try {
             String user = System.getProperty("user.name");
             String command = STATUS_COMMAND + user;
@@ -60,7 +58,7 @@ class CondorStatus {
             }
             logger.info("Status returned " + result.size() + " lines");
 
-            Map<String, JobStatus> currentMap = new HashMap<String, JobStatus>();
+            Map<String, JobStatus> map = new HashMap<String, JobStatus>();
 
             CommonJobStatus stat = null;
             for (int i = 0; i < result.size(); i++) {
@@ -101,17 +99,14 @@ class CondorStatus {
                         x.printStackTrace();
                     }
                 } else if (stat != null) {
-                    currentMap.put(stat.getId(), stat);
+                    map.put(stat.getId(), stat);
                     stat = null;
                 }
             }
             if (stat != null) {
-                currentMap.put(stat.getId(), stat);
+                map.put(stat.getId(), stat);
             }
-            synchronized (this) {
-                this.map = currentMap;
-                this.timeStamp = System.currentTimeMillis();
-            }
+            return map;
         } catch (IOException x) {
             throw new JobControlException("IOException during job submission", x);
         } catch (InterruptedException x) {
@@ -142,15 +137,4 @@ class CondorStatus {
         }
     }
 
-    Map<String, JobStatus> getStatus() throws JobControlException {
-        synchronized (this) {
-            long now = System.currentTimeMillis();
-            boolean updateNeeded = now - timeStamp > CACHE_TIME;
-            logger.fine("status: now=" + now + " timeStamp=" + timeStamp + " cache=" + CACHE_TIME + " update needed: " + updateNeeded);
-            if (updateNeeded) {
-                updateStatus();
-            }
-        }
-        return map;
-    }
 }

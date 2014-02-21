@@ -1,7 +1,4 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package org.srs.jobcontrol.gridEngine;
 
 import java.io.IOException;
@@ -9,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -26,20 +22,16 @@ import org.srs.jobcontrol.gridEngine.qstat.*;
  */
 class gridEngineStatus
 {
-   private final static long CACHE_TIME = 60*1000; // Needed to avoid excessive calls to bjobs
    private final static String STATUS_COMMAND = "qstat -s az -xml -ext"; 
    private final static Logger logger = Logger.getLogger("org.srs.jobcontrol.gridEngineStatus");
    
-   private Map<String,JobStatus> map;
-   private long timeStamp;
    
    /** Creates a new instance of gridEngineStatus */
    gridEngineStatus()
    {
    }
    
-   private void updateStatus() throws JobControlException, JAXBException
-   {
+   public Map<String, JobStatus> getStatus() throws JobControlException {
       try
       {
          String command = STATUS_COMMAND;
@@ -59,16 +51,12 @@ class gridEngineStatus
               throw new JobControlException("Process failed, rc="+rc);
           }
          
-         Map<String,JobStatus> newMap = new HashMap<String,JobStatus>();
+         Map<String,JobStatus> map = new HashMap<String,JobStatus>();
          // use a HashMap to assign the jobstatus with each job
-        evaluateList( (List<JobListT>) ji.getQueueInfo().get( 0 ).getJobList(), newMap );
-        evaluateList( ji.getJobInfo().get( 0 ).getJobList(), newMap );
+        evaluateList( (List<JobListT>) ji.getQueueInfo().get( 0 ).getJobList(), map );
+        evaluateList( ji.getJobInfo().get( 0 ).getJobList(), map );
    
-	 synchronized (this)
-         {
-            this.map = newMap;
-            this.timeStamp = System.currentTimeMillis();
-         }
+        return map;
       }
       catch (IOException x)
       {
@@ -78,9 +66,9 @@ class gridEngineStatus
       {
          throw new JobControlException("Job submission interrupted",x);
       }
-      catch (JAXBException e) 
+      catch (JAXBException ex) 
       {
-           e.printStackTrace ();
+         throw new JobControlException("Error with JAXB deserialization, format changed?",ex);
       }
    }
    
@@ -138,18 +126,5 @@ class gridEngineStatus
       else if ("zombie".equals(status)) return JobStatus.Status.DONE;
       else return JobStatus.Status.UNKNOWN;
    }
-   
-   Map<String, JobStatus> getStatus() throws JobControlException, JAXBException
-   {
-      synchronized (this)
-      {
-         long now = System.currentTimeMillis();
-         boolean updateNeeded = now-timeStamp > CACHE_TIME;
-         logger.fine("status: now="+now+" timeStamp="+timeStamp+" cache="+CACHE_TIME+" update needed: "+updateNeeded);
-         if (updateNeeded) updateStatus();
-      }
-      return map;
-   }
-   
-   
+      
 }

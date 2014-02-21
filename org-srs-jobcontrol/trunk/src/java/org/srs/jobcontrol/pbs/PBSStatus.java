@@ -24,7 +24,6 @@ import org.srs.jobcontrol.common.CommonJobStatus;
  * @author zimmer
  */
 public class PBSStatus {
-    private final static long CACHE_TIME = 60*1000; // Needed to avoid excessive calls to bjobs
    //private final static String STATUS_COMMAND = "/usr/local/bin/bjobs -W -a -p -u";
    private final static String STATUS_COMMAND = "qstat"; // change to new mapping
    //jobname   uname   status     worker            worker             qtime               stime               etime               cputime     cur_mem     cur_scratch
@@ -49,17 +48,14 @@ public class PBSStatus {
    private final static Pattern timePattern = Pattern.compile("(\\d+):(\\d+):(\\d+).(\\d+)");
    private final static SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy-HH:mm:ss");
    private final static Logger logger = Logger.getLogger("org.srs.jobcontrol.PBSStatus");
-   
-   private Map<String,JobStatus> map;
-   private long timeStamp;
-   
+      
    /** Creates a new instance of PBSStatus */
    PBSStatus()
    {
    }
    
-   private void updateStatus() throws JobControlException
-   {
+    Map<String, JobStatus> getStatus() throws JobControlException
+    {
       try
       {
          String command = STATUS_COMMAND;
@@ -208,11 +204,7 @@ public class PBSStatus {
 	        logger.info("No Match either normal nor queued pattern");
 	    }     
          }
-         synchronized (this)
-         {
-            this.map = map;
-            this.timeStamp = System.currentTimeMillis();
-         }
+         return map;
       }
       catch (IOException x)
       {
@@ -257,16 +249,5 @@ public class PBSStatus {
       else if ("DELETED".contains(status)) return JobStatus.Status.FAILED;
       else if ("KILLED".contains(status)) return JobStatus.Status.FAILED;
       else return JobStatus.Status.UNKNOWN;
-   }
-   Map<String, JobStatus> getStatus() throws JobControlException
-   {
-      synchronized (this)
-      {
-         long now = System.currentTimeMillis();
-         boolean updateNeeded = now-timeStamp > CACHE_TIME;
-         logger.fine("status: now="+now+" timeStamp="+timeStamp+" cache="+CACHE_TIME+" update needed: "+updateNeeded);
-         if (updateNeeded) updateStatus();
-      }
-      return map;
    }
 }

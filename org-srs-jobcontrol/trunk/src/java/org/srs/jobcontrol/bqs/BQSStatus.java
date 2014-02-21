@@ -21,7 +21,6 @@ import org.srs.jobcontrol.common.CommonJobStatus;
  */
 class BQSStatus
 {
-   private final static long CACHE_TIME = 60*1000; // Needed to avoid excessive calls to bjobs
    //private final static String STATUS_COMMAND = "/usr/local/bin/bjobs -W -a -p -u";
    private final static String STATUS_COMMAND = "qselect -e -u glastpro jobname uname status worker worker qtime stime etime cputime cur_mem cur_scratch";
    //jobname   uname   status     worker            worker             qtime               stime               etime               cputime     cur_mem     cur_scratch
@@ -31,20 +30,16 @@ class BQSStatus
 	    
    private final static Pattern pattern = Pattern.compile("(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)");
    private final static Pattern patternQueued = Pattern.compile("(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\W)\\s+(\\W)\\s+(\\S+)\\s+(\\W)\\s+(\\W)\\s+(\\W)\\s+(\\W)\\s+(\\W)");
-
-   private final static Pattern timePattern = Pattern.compile("(\\d+):(\\d+):(\\d+).(\\d+)");
    private final static SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy-HH:mm:ss");
    private final static Logger logger = Logger.getLogger("org.srs.jobcontrol.BQSStatus");
-   
-   private Map<String,JobStatus> map;
-   private long timeStamp;
+
    
    /** Creates a new instance of BQSStatus */
    BQSStatus()
    {
    }
    
-   private void updateStatus() throws JobControlException
+   Map<String, JobStatus> getStatus() throws JobControlException
    {
       try
       {
@@ -194,11 +189,7 @@ class BQSStatus
 	        logger.info("No Match either normal nor queued pattern");
 	    }     
          }
-         synchronized (this)
-         {
-            this.map = map;
-            this.timeStamp = System.currentTimeMillis();
-         }
+         return map;
       }
       catch (IOException x)
       {
@@ -219,18 +210,7 @@ class BQSStatus
       Date d = dateFormat.parse(date);
       return d;
    }
-   private int toTime(String date) throws ParseException
-   {
-      Matcher match = timePattern.matcher(date);
-      if (match.matches())
-      {
-         int hour = Integer.parseInt(match.group(1));
-         int minute = Integer.parseInt(match.group(2));
-         int second = Integer.parseInt(match.group(3));
-         return (hour*60+minute)*60+second;
-      }
-      else return 0;
-   }
+
    private JobStatus.Status toStatus(String status)
    {
       System.out.println("status found=" + status);
@@ -244,15 +224,5 @@ class BQSStatus
       else if ("KILLED".contains(status)) return JobStatus.Status.FAILED;
       else return JobStatus.Status.UNKNOWN;
    }
-   Map<String, JobStatus> getStatus() throws JobControlException
-   {
-      synchronized (this)
-      {
-         long now = System.currentTimeMillis();
-         boolean updateNeeded = now-timeStamp > CACHE_TIME;
-         logger.fine("status: now="+now+" timeStamp="+timeStamp+" cache="+CACHE_TIME+" update needed: "+updateNeeded);
-         if (updateNeeded) updateStatus();
-      }
-      return map;
-   }
+   
 }

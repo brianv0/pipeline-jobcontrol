@@ -33,12 +33,13 @@ import org.srs.jobcontrol.JobSubmissionException;
 import org.srs.jobcontrol.NoSuchJobException;
 import org.srs.jobcontrol.OutputProcessor;
 import org.srs.jobcontrol.common.JobControlService;
+
 /**
  *
  * @author zimmer
  * TODO: handle creation of archive folders
  */
-public class DIRACJobControlService extends JobControlService{
+public class DIRACJobControlService extends JobControlService {
     private final static String SUBMIT_COMMAND = System.getProperty("org.srs.jobcontrol.DIRACsubmitCommand","dirac-glast-pipeline-submit");
     private final static String KILL_COMMAND = System.getProperty("org.srs.jobcontrol.DIRACkillCommand","dirac-wms-job-kill");
     private final static Pattern pattern = Pattern.compile("Your job (\\w+)*");
@@ -92,6 +93,7 @@ public class DIRACJobControlService extends JobControlService{
             throw t;
         }
     }
+    
     private String submitInternal(Job job) throws JobSubmissionException, JobControlException {
         //TODO: implement env as dict object in file (serialized)
         //logger.info("BEGIN submitInternal");
@@ -250,49 +252,12 @@ public class DIRACJobControlService extends JobControlService{
         double f = 1.0;
         return (int)f*seconds;
     }
-    private void checkPermission(String ip) throws SecurityException {
-        //if (!ip.startsWith("134.79") && !ip.startsWith("198.129")) throw new SecurityException();
-        if (!ip.startsWith("134.158") && !ip.startsWith("134.79")) {
-            throw new SecurityException();
-        }
-	else {
-            System.out.println("Permission OK");
-        }
-    }
-    public JobStatus status(String jobID) throws NoSuchJobException, JobControlException {
-        try {
-            System.out.println("in DIRACJobControlService.status");
-            String ip = RemoteServer.getClientHost();
-            //logger.info("status: "+jobID+" from "+ip);
-            System.out.println("status: "+jobID+" from "+ip);
-            checkPermission(ip);
-            
-            Map<String,JobStatus> statii;
-            statii = DIRACStatus.getStatus();
-            //System.out.println("status: "+jobID+" :"+statii.toString()+" from "+ip);
-            JobStatus result = statii.get(jobID);
-            if (result == null) {
-                throw new NoSuchJobException("Job id "+jobID);
-            }
-            return result;
-        } catch (ServerNotActiveException t) {
-            logger.log(Level.SEVERE,"Unexpected error",t);
-            throw new JobControlException("Unexpected error",t);
-        } catch (NoSuchJobException t) {
-            logger.log(Level.SEVERE,"job status failed",t);
-            throw t;
-        } catch (JobControlException t) {
-            logger.log(Level.SEVERE,"job status failed",t);
-            throw t;
-        }
-    }
     
     public void cancel(String jobID) throws NoSuchJobException, JobControlException {
         try {
             String ip = RemoteServer.getClientHost();
             logger.log(Level.INFO, "killing: {0} from {1}", new Object[]{jobID, ip});
             checkPermission(ip);
-            
             cancelInternal(jobID);
             logger.log(Level.FINE, "job {0} cancelled", jobID);
         } catch (ServerNotActiveException t) {
@@ -306,6 +271,7 @@ public class DIRACJobControlService extends JobControlService{
             throw t;
         }
     }
+    
     private void cancelInternal(String jobID) throws NoSuchJobException, JobControlException {
         try {
             List<String> commands = new ArrayList<String>();
@@ -331,33 +297,9 @@ public class DIRACJobControlService extends JobControlService{
             throw new JobControlException("InterruptedException while killing job "+jobID,x);
         }
     }
-   
-   public String getStatus()
-   {
-      try
-      {
-         DIRACStatus.getStatus();
-         return "OK";
-      }
-      catch (JobControlException x)
-      {
-         logger.log(Level.SEVERE,"Error getting status",x);
-         return "Bad "+(x.getMessage());
-      }
-   }
-   
-   public Map<String, Integer> getJobCounts()
-   {
-      try
-      {
-         return computeJobCounts(DIRACStatus.getStatus());
-      }
-      catch (JobControlException x)
-      {
-         logger.log(Level.SEVERE,"Error getting job counts",x);
-         return null;
-      }
-   }
-    
+
+    @Override
+    public Map<String, JobStatus> getCurrentStatus() throws JobControlException{
+        return DIRACStatus.getStatus();
+    }
 }
-//

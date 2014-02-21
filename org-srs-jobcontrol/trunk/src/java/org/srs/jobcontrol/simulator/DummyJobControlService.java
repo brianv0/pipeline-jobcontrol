@@ -17,6 +17,8 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.concurrent.Callable;
@@ -75,19 +77,22 @@ public class DummyJobControlService implements JobControl {
         if (job == null) {
             throw new NoSuchJobException(id);
         }
-        synchronized (job) {
-           CommonJobStatus status = new CommonJobStatus();
-           status.setComment("");
-           status.setHost("dummyHost");
-           status.setSubmitted(job.getSubmitted());
-           status.setStarted(job.getStarted());
-           status.setEnded(job.getEnded());
-           status.setUser(job.getUser());
-           status.setStatus(job.getStatus());
-           return status;
+        return newStatus(job);
+    }
+    
+    private CommonJobStatus newStatus(FakeJob job){
+        synchronized(job) {
+            CommonJobStatus status = new CommonJobStatus();
+            status.setComment( "" );
+            status.setHost( "dummyHost" );
+            status.setSubmitted( job.getSubmitted() );
+            status.setStarted( job.getStarted() );
+            status.setEnded( job.getEnded() );
+            status.setUser( job.getUser() );
+            status.setStatus( job.getStatus() );
+            return status;
         }
     }
-
     @Override
     public void cancel(String id) throws RemoteException, NoSuchJobException, JobControlException {
         throw new UnsupportedOperationException("Not supported yet.");
@@ -210,6 +215,19 @@ public class DummyJobControlService implements JobControl {
         } finally {
             try {spid_rd.close();} catch (Exception e){}
         }
+    }
+
+    public Map<String, JobStatus> arrayStatus(List<String> jobIDs) throws RemoteException, JobControlException{
+        LinkedHashMap<String, JobStatus> map = new LinkedHashMap<String, JobStatus>();
+        for(String jobID: jobIDs){
+            FakeJob job = jobs.get(jobID);
+            if(job == null){
+                map.put( jobID, null );
+            } else {
+                map.put( jobID, newStatus( job ));
+            }
+        }
+        return map;
     }
 
 }

@@ -14,9 +14,12 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.rmi.server.RemoteServer;
+import java.rmi.server.ServerNotActiveException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -34,6 +37,7 @@ import org.srs.jobcontrol.JobControl;
 import org.srs.jobcontrol.JobControlException;
 import org.srs.jobcontrol.JobStatus;
 import org.srs.jobcontrol.JobSubmissionException;
+import org.srs.jobcontrol.NoSuchJobException;
 
 /**
  *
@@ -49,6 +53,9 @@ public abstract class JobControlService implements JobControl, JobControlService
    protected AtomicInteger nSubmitted = new AtomicInteger();
    protected long lastSuccessfulJobSubmissionTime;
    protected long lastFailedJobSubmissionTime;
+   Map<String,JobStatus> cacheMap = new HashMap<String,JobStatus>();
+   private long timeStamp;
+   private final static long CACHE_TIME = 60*1000; // Needed to avoid excessive calls to bjobs
    
    /** Creates a new instance of JobControlService */
    protected JobControlService()
@@ -311,4 +318,73 @@ public abstract class JobControlService implements JobControl, JobControlService
    {
       return new Date(lastFailedJobSubmissionTime);
    }
+   
+    public Map<String, Integer> getJobCounts() {
+        try {
+            return computeJobCounts( getCachedStatus() );
+        } catch (JobControlException x) {
+            logger.log(Level.SEVERE, "Error getting job counts", x);
+            return null;
+        }
+    }
+   
+    public abstract Map<String, JobStatus> getCurrentStatus() throws JobControlException;
+
+    public Map<String, JobStatus> getCachedStatus() throws JobControlException{
+        synchronized(this) {
+            long now = System.currentTimeMillis();
+            boolean updateNeeded = now - timeStamp > CACHE_TIME;
+            logger.log( Level.FINE, "status: now={0} timeStamp={1} cache={2} update needed: {3}",
+                    new Object[]{now, timeStamp, CACHE_TIME, updateNeeded} );
+            if(updateNeeded){
+                this.cacheMap = getCurrentStatus();
+                this.timeStamp = System.currentTimeMillis();
+            }
+        }
+        return cacheMap;
+    }
+    
+    public Map<String, JobStatus> arrayStatus(List<String> jobIDs) throws JobControlException{
+        LinkedHashMap<String, JobStatus> statii = new LinkedHashMap<String, JobStatus>();
+        for(String jobID: jobIDs){
+            statii.put( jobID, getCachedStatus().get( jobID) );
+        }
+        return statii;
+    }
+    
+    public String getStatus(){
+        try {
+            getCachedStatus();
+            return "OK";
+        } catch(JobControlException x) {
+            logger.log( Level.SEVERE, "Error getting status", x );
+            return "Bad " + (x.getMessage());
+        }
+    }
+    
+   protected void checkPermission(String ip) throws SecurityException {
+      if (!ip.startsWith("134.79") && !ip.startsWith("198.129")) throw new SecurityException();
+   }
+   
+    public JobStatus status(String jobID) throws NoSuchJobException, JobControlException {
+        logger.log(Level.FINEST, "In ".concat(getClass().getCanonicalName()) );
+        try {
+            String ip = RemoteServer.getClientHost();
+            logger.log(Level.INFO, "status: "+jobID+" from "+ip);
+            checkPermission(ip);
+            JobStatus result = getCachedStatus().get(jobID);
+            if (result == null) throw new NoSuchJobException("Job id "+jobID);
+            return result;
+           
+        } catch (ServerNotActiveException t) {
+            logger.log(Level.SEVERE,"Unexpected error",t);
+            throw new JobControlException("Unexpected error",t);
+        } catch (NoSuchJobException t) {
+            logger.log(Level.SEVERE,"job status failed",t);
+            throw t;
+        } catch (JobControlException t) {
+            logger.log(Level.SEVERE,"job status failed",t);
+            throw t;
+        }
+    }
 }

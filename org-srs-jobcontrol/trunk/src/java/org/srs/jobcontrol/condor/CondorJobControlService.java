@@ -256,38 +256,6 @@ class CondorJobControlService extends JobControlService {
         }
     }
 
-    private void checkPermission(String ip) throws SecurityException {
-        //FIXME: Do something better
-        if (!ip.startsWith("134.79") && !ip.startsWith("198.129")) {
-            throw new SecurityException();
-        }
-    }
-
-    @Override
-    public JobStatus status(String jobID) throws NoSuchJobException, JobControlException {
-        try {
-            String ip = RemoteServer.getClientHost();
-            logger.info("status: " + jobID + " from " + ip);
-            checkPermission(ip);
-
-            Map<String, JobStatus> statii = status.getStatus();
-            JobStatus result = statii.get(jobID);
-            if (result == null) {
-                throw new NoSuchJobException("Job id " + jobID);
-            }
-            return result;
-        } catch (ServerNotActiveException t) {
-            logger.log(Level.SEVERE, "Unexpected error", t);
-            throw new JobControlException("Unexpected error", t);
-        } catch (NoSuchJobException t) {
-            logger.log(Level.SEVERE, "job status failed", t);
-            throw t;
-        } catch (JobControlException t) {
-            logger.log(Level.SEVERE, "job status failed", t);
-            throw t;
-        }
-    }
-
     @Override
     public void cancel(String jobID) throws NoSuchJobException, JobControlException {
         try {
@@ -335,23 +303,8 @@ class CondorJobControlService extends JobControlService {
     }
 
     @Override
-    public String getStatus() {
-        try {
-            status.getStatus();
-            return "OK";
-        } catch (JobControlException x) {
-            logger.log(Level.SEVERE, "Error getting status", x);
-            return "Bad " + (x.getMessage());
-        }
+    public Map<String, JobStatus> getCurrentStatus() throws JobControlException{
+        return status.getStatus();
     }
-
-    @Override
-    public Map<String, Integer> getJobCounts() {
-        try {
-            return computeJobCounts(status.getStatus());
-        } catch (JobControlException x) {
-            logger.log(Level.SEVERE, "Error getting job counts", x);
-            return null;
-        }
-    }
+    
 }
