@@ -20,12 +20,14 @@ public class JobControlTest
    {
       if (args.length < 1) usage();
       String command = args[0];
-      List<String> arguments = new ArrayList<String>();
-      for (int i=2; i<args.length; i++) arguments.add(args[i]);
+      StringBuilder extraArgs = new StringBuilder();
+      for (int i=2; i < args.length; i++) {
+          extraArgs.append( args[i] ).append( " " );
+      }
      
       Job job = new Job();
       job.setCommand(command);
-      job.setArguments(arguments);
+      job.setExtraOptions( extraArgs.toString() );
       JobControlClient client = new JobControlClient();
       String id = client.submit(job);
       System.out.println("Job "+id+" submitted");

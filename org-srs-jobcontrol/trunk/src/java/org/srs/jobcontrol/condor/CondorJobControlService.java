@@ -193,12 +193,6 @@ class CondorJobControlService extends JobControlService {
                     undoList.add(new DeleteFile(file));
                     writer.println("#!/bin/bash");
                     writer.print(command);
-                    if (job.getArguments() != null) {
-                        for (String argument : job.getArguments()) {
-                            writer.print(' ');
-                            writer.print(argument);
-                        }
-                    }
                     writer.close();
                     file.setExecutable(true);
                 }

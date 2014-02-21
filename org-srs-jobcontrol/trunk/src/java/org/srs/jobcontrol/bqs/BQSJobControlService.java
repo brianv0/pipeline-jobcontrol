@@ -142,9 +142,7 @@ class BQSJobControlService extends JobControlService {
            bqs_script.append("cd ").append(job.getWorkingDirectory()).append('\n');
         }
         bqs_script.append(command);
-        if (job.getArguments() != null) {
-            for (String arg : job.getArguments()) { bqs_script.append(" \""+arg+"\""); }
-        }
+        
         bqs_script.append('\n');
         job.getFiles().put("bqs_script",bqs_script.toString());
         String fullCommand = toFullCommand(qsub);
