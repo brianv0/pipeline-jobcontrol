@@ -21,6 +21,7 @@ public class JobControlClient
    private final String host; 
    private final String serviceName;
    private final int port;
+   private JobControl service;
    
    public JobControlClient()
    {
@@ -45,12 +46,16 @@ public class JobControlClient
       this.port = port;
       this.serviceName = serviceName == null ? "JobControlService" : serviceName;
    }
+   
    private JobControl getJobControl() throws NotBoundException, RemoteException
    {
-      
-      Registry registry = LocateRegistry.getRegistry(host,port);
-      return (JobControl) registry.lookup(serviceName+"-"+user);
+      if(service == null){
+          Registry registry = LocateRegistry.getRegistry(host,port);
+          service = (JobControl) registry.lookup(serviceName+"-"+user);
+      }
+      return service;
    }
+
     /**
      * Submit a job.
      * @param job The job to be submitted
@@ -69,6 +74,7 @@ public class JobControlClient
       }
       catch (RemoteException x)
       {
+         this.service = null;
          throw new JobControlException("Remote Exception during job submission",x.getCause());
       }
    }
@@ -91,6 +97,7 @@ public class JobControlClient
       }
       catch (RemoteException x)
       {
+         this.service = null;
          throw new JobControlException("Remote Exception getting job status",x.getCause());
       }
    }
@@ -112,6 +119,7 @@ public class JobControlClient
          return getJobControl().getFile( spID, workingDir, fileName );
       }
       catch (RemoteException x) {
+         this.service = null;
          throw new JobControlException( "Remote Exception getting job status", x.getCause());
       }
       catch (NotBoundException x) {
@@ -136,6 +144,7 @@ public class JobControlClient
                  getJobControl().getFileStream( spID, workingDir, fileName ) );
       }
       catch (RemoteException x) { 
+         this.service = null;
          throw new JobControlException( "Remote Exception getting remote file stream", x.getCause());
       }
       catch (NotBoundException x) {
@@ -158,6 +167,7 @@ public class JobControlClient
       }
       catch (RemoteException x)
       {
+         this.service = null;
          throw new JobControlException("Remote Exception killing job",x.getCause());
       }
    }
