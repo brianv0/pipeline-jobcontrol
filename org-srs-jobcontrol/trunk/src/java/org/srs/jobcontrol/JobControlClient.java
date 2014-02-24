@@ -9,6 +9,8 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
 /**
@@ -76,6 +78,29 @@ public class JobControlClient
       {
          this.service = null;
          throw new JobControlException("Remote Exception during job submission",x.getCause());
+      }
+   }
+   
+    /**
+     * Get a map of statuses from a list of jobs of interest
+     * @param jobIDs List of all jobIDs we are interested in.
+     * @throws org.srs.jobcontrol.NoSuchJobException Thrown if the specified ID is unknown, or if any other error occurs.
+     * @return The jobs status
+     */
+   public Map<String, JobStatus> arrayStatus(List<String> jobIDs) throws NoSuchJobException, JobControlException
+   {
+      try
+      {
+         return getJobControl().arrayStatus( jobIDs );
+      }
+      catch (NotBoundException x)
+      {
+         throw new JobControlException("Server not running while getting job status",x);
+      }
+      catch (RemoteException x)
+      {
+         this.service = null;
+         throw new JobControlException("Remote Exception getting job status",x.getCause());
       }
    }
    
