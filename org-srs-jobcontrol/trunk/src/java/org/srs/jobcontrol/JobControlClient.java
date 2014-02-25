@@ -23,6 +23,7 @@ public class JobControlClient
    private final String host; 
    private final String serviceName;
    private final int port;
+   private JobControl jcReference;
    
    public JobControlClient()
    {
@@ -48,10 +49,12 @@ public class JobControlClient
       this.serviceName = serviceName == null ? "JobControlService" : serviceName;
    }
    
-   private JobControl getJobControl() throws NotBoundException, RemoteException
-   {
-      Registry registry = LocateRegistry.getRegistry( host, port );
-      return (JobControl) registry.lookup( serviceName + "-" + user );      
+   private JobControl getJobControlRef() throws NotBoundException, RemoteException {
+      if(jcReference == null){
+          Registry registry = LocateRegistry.getRegistry( host, port );
+          jcReference =  (JobControl) registry.lookup( serviceName + "-" + user );
+      }
+      return jcReference;
    }
 
     /**
@@ -61,20 +64,18 @@ public class JobControlClient
      * @return The job ID
      * @throws org.srs.jobcontrol.JobControlException
      */
-   public String submit(Job job) throws JobSubmissionException, JobControlException
-   {
-      try
-      {
-         return getJobControl().submit(job);
-      }
-      catch (NotBoundException x)
-      {
-         throw new JobControlException("Server not running during job submission",x);
-      }
-      catch (RemoteException x)
-      {  
-         throw new JobControlException("Remote Exception during job submission",x.getCause());
-      }
+   public String submit(Job job) throws JobSubmissionException, JobControlException {
+       String jobId = null;
+       for(int retry = 0; retry < 2; retry++){
+           try {
+               jobId = getJobControlRef().submit( job );
+           } catch(RemoteException ex) {
+               checkException( ex, retry );
+           } catch(NotBoundException ex) {
+               checkException( ex, retry );
+           }
+       }
+       return jobId;
    }
    
     /**
@@ -84,21 +85,19 @@ public class JobControlClient
      * @return The jobs status
      * @throws org.srs.jobcontrol.JobControlException
      */
-   public Map<String, JobStatus> arrayStatus(List<String> jobIDs) throws NoSuchJobException, JobControlException
-   {
-      try
-      {
-         return getJobControl().arrayStatus( jobIDs );
-      }
-      catch (NotBoundException x)
-      {
-         throw new JobControlException("Server not running while getting job status",x);
-      }
-      catch (RemoteException x)
-      {
-         throw new JobControlException("Remote Exception getting job status",x.getCause());
-      }
-   }
+    public Map<String, JobStatus> arrayStatus(List<String> jobIDs) throws NoSuchJobException, JobControlException{
+        Map<String, JobStatus> smap = null;
+        for(int retry = 0; retry < 2; retry++){
+            try {
+                smap = getJobControlRef().arrayStatus( jobIDs );
+            } catch(RemoteException ex) {
+                checkException( ex, retry );
+            } catch(NotBoundException ex) {
+                checkException( ex, retry );
+            }
+        }
+        return smap;
+    }
    
     /**
      * Get the status of a job.
@@ -109,18 +108,17 @@ public class JobControlClient
      */
    public JobStatus status(String jobID) throws NoSuchJobException, JobControlException
    {
-      try
-      {
-         return getJobControl().status(jobID);
-      }
-      catch (NotBoundException x)
-      {
-         throw new JobControlException("Server not running while getting job status",x);
-      }
-      catch (RemoteException x)
-      {
-         throw new JobControlException("Remote Exception getting job status",x.getCause());
-      }
+       JobStatus stat = null;
+       for(int retry = 0; retry < 2; retry++){
+           try {
+               stat = getJobControlRef().status( jobID );
+           } catch(RemoteException ex) {
+               checkException( ex, retry );
+           } catch(NotBoundException ex) {
+               checkException( ex, retry );
+           }
+       }
+       return stat;
    }
    
     /**
@@ -136,15 +134,17 @@ public class JobControlClient
    public String getFile(String spID, File workingDir, String fileName) 
            throws FileNotFoundException, TimeoutException, JobControlException
    {
-      try {
-         return getJobControl().getFile( spID, workingDir, fileName );
-      }
-      catch (RemoteException x) {
-         throw new JobControlException( "Remote Exception getting job status", x.getCause());
-      }
-      catch (NotBoundException x) {
-         throw new JobControlException("Server not running while getting job status",x);
-      }
+       String fContent = null;
+       for(int retry = 0; retry < 2; retry++){
+           try {
+               fContent = getJobControlRef().getFile( spID, workingDir, fileName );
+           } catch(RemoteException ex) {
+               checkException( ex, retry );
+           } catch(NotBoundException ex) {
+               checkException( ex, retry );
+           }
+       }
+      return fContent;
    }
    
     /**
@@ -159,18 +159,19 @@ public class JobControlClient
      * @throws org.srs.jobcontrol.JobControlException
      */
    public InputStream getFileStream(String spID, File workingDir, String fileName) 
-           throws IOException, JobControlException
-   {
-      try {
-         return RemoteInputStreamClient.wrap( 
-                 getJobControl().getFileStream( spID, workingDir, fileName ) );
-      }
-      catch (RemoteException x) { 
-         throw new JobControlException( "Remote Exception getting remote file stream", x.getCause());
-      }
-      catch (NotBoundException x) {
-         throw new JobControlException("Server not running while getting remote file stream",x);
-      }
+           throws IOException, JobControlException {
+       InputStream is = null;
+       for(int retry = 0; retry < 2; retry++){
+           try {
+               is = RemoteInputStreamClient.wrap(
+                       getJobControlRef().getFileStream( spID, workingDir, fileName ) );
+           } catch(RemoteException ex) {
+               checkException( ex, retry );
+           } catch(NotBoundException ex) {
+               checkException( ex, retry );
+           }
+       }
+       return is;
    }
    
    /**
@@ -178,19 +179,35 @@ public class JobControlClient
      * @param jobID
      * @throws org.srs.jobcontrol.NoSuchJobException
     */
-   public void cancel(String jobID) throws NoSuchJobException, JobControlException
-   {
-      try
-      {
-         getJobControl().cancel(jobID);
-      }
-      catch (NotBoundException x)
-      {
-         throw new JobControlException("Server not running while killing job",x);
-      }
-      catch (RemoteException x)
-      {
-         throw new JobControlException("Remote Exception killing job",x.getCause());
-      }
+    public void cancel(String jobID) throws NoSuchJobException, JobControlException {
+        for(int retry = 0; retry < 2; retry++){
+            try {
+                getJobControlRef().cancel( jobID );
+            } catch(RemoteException ex) {
+                checkException( ex, retry );
+            } catch(NotBoundException ex) {
+                checkException( ex, retry );
+            }
+            return;
+        }
+   }
+    
+   /*
+      Check the exception. If it's appropriate, throw it. If not, refresh the reference so we
+      can try again.
+    */
+   private void checkException(Exception ex, int retry) throws JobControlException {
+       if(ex instanceof NotBoundException){
+           throw new JobControlException("Server not running while",ex);
+       } else if(ex instanceof RemoteException){
+           try{
+               // Reset the reference, try to get the reference again.
+               jcReference = null;
+               getJobControlRef(); 
+           } catch(Exception e){}
+           if(retry == 1){
+               throw new JobControlException("Remote Exception performing operation", ex.getCause());
+           }
+       }
    }
 }
