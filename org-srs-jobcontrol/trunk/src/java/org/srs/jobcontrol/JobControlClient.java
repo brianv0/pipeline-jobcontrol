@@ -23,7 +23,6 @@ public class JobControlClient
    private final String host; 
    private final String serviceName;
    private final int port;
-   private JobControl service;
    
    public JobControlClient()
    {
@@ -51,11 +50,8 @@ public class JobControlClient
    
    private JobControl getJobControl() throws NotBoundException, RemoteException
    {
-      if(service == null){
-          Registry registry = LocateRegistry.getRegistry(host,port);
-          service = (JobControl) registry.lookup(serviceName+"-"+user);
-      }
-      return service;
+      Registry registry = LocateRegistry.getRegistry( host, port );
+      return (JobControl) registry.lookup( serviceName + "-" + user );      
    }
 
     /**
@@ -63,6 +59,7 @@ public class JobControlClient
      * @param job The job to be submitted
      * @throws org.srs.jobcontrol.JobSubmissionException Thrown if an error occurs during job submission
      * @return The job ID
+     * @throws org.srs.jobcontrol.JobControlException
      */
    public String submit(Job job) throws JobSubmissionException, JobControlException
    {
@@ -75,8 +72,7 @@ public class JobControlClient
          throw new JobControlException("Server not running during job submission",x);
       }
       catch (RemoteException x)
-      {
-         this.service = null;
+      {  
          throw new JobControlException("Remote Exception during job submission",x.getCause());
       }
    }
@@ -86,6 +82,7 @@ public class JobControlClient
      * @param jobIDs List of all jobIDs we are interested in.
      * @throws org.srs.jobcontrol.NoSuchJobException Thrown if the specified ID is unknown, or if any other error occurs.
      * @return The jobs status
+     * @throws org.srs.jobcontrol.JobControlException
      */
    public Map<String, JobStatus> arrayStatus(List<String> jobIDs) throws NoSuchJobException, JobControlException
    {
@@ -99,7 +96,6 @@ public class JobControlClient
       }
       catch (RemoteException x)
       {
-         this.service = null;
          throw new JobControlException("Remote Exception getting job status",x.getCause());
       }
    }
@@ -109,6 +105,7 @@ public class JobControlClient
      * @param jobID The jobID for which status should be returned
      * @throws org.srs.jobcontrol.NoSuchJobException Thrown if the specified ID is unknown, or if any other error occurs.
      * @return The jobs status
+     * @throws org.srs.jobcontrol.JobControlException
      */
    public JobStatus status(String jobID) throws NoSuchJobException, JobControlException
    {
@@ -122,7 +119,6 @@ public class JobControlClient
       }
       catch (RemoteException x)
       {
-         this.service = null;
          throw new JobControlException("Remote Exception getting job status",x.getCause());
       }
    }
@@ -144,7 +140,6 @@ public class JobControlClient
          return getJobControl().getFile( spID, workingDir, fileName );
       }
       catch (RemoteException x) {
-         this.service = null;
          throw new JobControlException( "Remote Exception getting job status", x.getCause());
       }
       catch (NotBoundException x) {
@@ -160,6 +155,8 @@ public class JobControlClient
      * @param workingDir Working dir of this process instance
      * @param fileName name of file relative to workingDir
      * @return A InputStream to a remote file
+     * @throws java.io.IOException
+     * @throws org.srs.jobcontrol.JobControlException
      */
    public InputStream getFileStream(String spID, File workingDir, String fileName) 
            throws IOException, JobControlException
@@ -169,7 +166,6 @@ public class JobControlClient
                  getJobControl().getFileStream( spID, workingDir, fileName ) );
       }
       catch (RemoteException x) { 
-         this.service = null;
          throw new JobControlException( "Remote Exception getting remote file stream", x.getCause());
       }
       catch (NotBoundException x) {
@@ -179,6 +175,8 @@ public class JobControlClient
    
    /**
     * Cancels a job. If the job is already running it will be killed.
+     * @param jobID
+     * @throws org.srs.jobcontrol.NoSuchJobException
     */
    public void cancel(String jobID) throws NoSuchJobException, JobControlException
    {
@@ -192,7 +190,6 @@ public class JobControlClient
       }
       catch (RemoteException x)
       {
-         this.service = null;
          throw new JobControlException("Remote Exception killing job",x.getCause());
       }
    }
