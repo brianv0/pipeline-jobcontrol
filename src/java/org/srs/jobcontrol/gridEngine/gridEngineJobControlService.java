@@ -31,7 +31,7 @@ import org.srs.jobcontrol.JobStatus;
 import org.srs.jobcontrol.JobSubmissionException;
 import org.srs.jobcontrol.NoSuchJobException;
 import org.srs.jobcontrol.OutputProcessor;
-import org.srs.jobcontrol.common.JobControlService;
+import org.srs.jobcontrol.common.CLIJobControlService;
 import org.srs.jobcontrol.common.JobControlService.DeleteFile;
 
 /**
@@ -39,7 +39,7 @@ import org.srs.jobcontrol.common.JobControlService.DeleteFile;
  * @author zimmer
  */
 
-class gridEngineJobControlService extends JobControlService {
+class gridEngineJobControlService extends CLIJobControlService {
     private final static String GROUP = System.getProperty("org.srs.jobcontrol.ge.group","P_glast"); // the default group for the submit command
     private String default_submit = "/opt/sge/bin/lx24-amd64/qsub -P "+GROUP;
     private String SUBMIT_COMMAND = System.getProperty("org.srs.jobcontrol.ge.submitCommand",default_submit);

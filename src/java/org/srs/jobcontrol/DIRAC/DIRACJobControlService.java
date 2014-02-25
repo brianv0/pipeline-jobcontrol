@@ -32,14 +32,14 @@ import org.srs.jobcontrol.JobStatus;
 import org.srs.jobcontrol.JobSubmissionException;
 import org.srs.jobcontrol.NoSuchJobException;
 import org.srs.jobcontrol.OutputProcessor;
-import org.srs.jobcontrol.common.JobControlService;
+import org.srs.jobcontrol.common.CLIJobControlService;
 
 /**
  *
  * @author zimmer
  * TODO: handle creation of archive folders
  */
-public class DIRACJobControlService extends JobControlService {
+public class DIRACJobControlService extends CLIJobControlService {
     private final static String SUBMIT_COMMAND = System.getProperty("org.srs.jobcontrol.DIRACsubmitCommand","dirac-glast-pipeline-submit");
     private final static String KILL_COMMAND = System.getProperty("org.srs.jobcontrol.DIRACkillCommand","dirac-wms-job-kill");
     private final static Pattern pattern = Pattern.compile("Your job (\\w+)*");

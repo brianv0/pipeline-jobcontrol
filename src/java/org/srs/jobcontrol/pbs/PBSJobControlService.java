@@ -34,14 +34,14 @@ import org.srs.jobcontrol.JobStatus;
 import org.srs.jobcontrol.JobSubmissionException;
 import org.srs.jobcontrol.NoSuchJobException;
 import org.srs.jobcontrol.OutputProcessor;
-import org.srs.jobcontrol.common.JobControlService;
+import org.srs.jobcontrol.common.CLIJobControlService;
 import org.srs.jobcontrol.common.JobControlService.DeleteFile;
 
 /**
  *
  * @author zimmer
  */
-public class PBSJobControlService extends JobControlService{
+public class PBSJobControlService extends CLIJobControlService {
     private final static String GROUP = System.getProperty("org.srs.jobcontrol.ge.group","P_glast"); // the default group for the submit command
     private String default_submit = "qsub PBS.submit";
     private String SUBMIT_COMMAND = System.getProperty("org.srs.jobcontrol.pbs.submitCommand",default_submit);
