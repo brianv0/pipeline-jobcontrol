@@ -12,6 +12,8 @@ import java.rmi.registry.Registry;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * This is the main class clients should use to interact with the job submission system.
@@ -19,6 +21,7 @@ import java.util.concurrent.TimeoutException;
  */
 public class JobControlClient
 {
+   protected static final Logger logger = Logger.getLogger("org.srs.jobcontrol");
    private final String user;
    private final String host; 
    private final String serviceName;
@@ -203,7 +206,8 @@ public class JobControlClient
            try{
                // Reset the reference, try to get the reference again.
                jcReference = null;
-               getJobControlRef(); 
+               logger.log( Level.FINE, "Reference to Service likely died. Attempting to renew ref", ex);
+               getJobControlRef();
            } catch(Exception e){}
            if(retry == 1){
                throw new JobControlException("Remote Exception performing operation", ex.getCause());
