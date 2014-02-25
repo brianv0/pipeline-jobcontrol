@@ -31,14 +31,14 @@ import org.srs.jobcontrol.JobStatus;
 import org.srs.jobcontrol.JobSubmissionException;
 import org.srs.jobcontrol.NoSuchJobException;
 import org.srs.jobcontrol.OutputProcessor;
-import org.srs.jobcontrol.common.JobControlService;
+import org.srs.jobcontrol.common.CLIJobControlService;
 import org.srs.jobcontrol.common.JobControlService.DeleteFile;
 
 /**
  * The main class for the LSF job control server.
  * @author Tony Johnson
  */
-class CondorJobControlService extends JobControlService {
+class CondorJobControlService extends CLIJobControlService {
 
     private final static String SUBMIT_COMMAND = "condor_submit condor.submit";
     private final static String KILL_COMMAND = "condor_rm";

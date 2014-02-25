@@ -28,14 +28,14 @@ import org.srs.jobcontrol.JobStatus;
 import org.srs.jobcontrol.JobSubmissionException;
 import org.srs.jobcontrol.NoSuchJobException;
 import org.srs.jobcontrol.OutputProcessor;
-import org.srs.jobcontrol.common.JobControlService;
+import org.srs.jobcontrol.common.CLIJobControlService;
 import org.srs.jobcontrol.common.JobControlService.DeleteFile;
 
 /**
  * The main class for the job control server.
  * @author Tony Johnson
  */
-class BQSJobControlService extends JobControlService {
+class BQSJobControlService extends CLIJobControlService {
     private final static String SUBMIT_COMMAND = System.getProperty("org.srs.jobcontrol.bqs.submitCommand","/usr/local/bin/qsub -l platform=LINUX");
     private final static String KILL_COMMAND = System.getProperty("org.srs.jobcontrol.bqs.killCommand","/usr/local/bin/qdel");
     private final static Pattern pattern = Pattern.compile("job (\\w+) submitted.*");
