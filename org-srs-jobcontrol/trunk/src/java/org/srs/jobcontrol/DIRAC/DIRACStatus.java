@@ -13,10 +13,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import org.srs.jobcontrol.*;
@@ -29,21 +27,16 @@ import org.srs.jobcontrol.JobStatus.Status;
  */
 class DIRACStatus
 {
-   private final static long CACHE_TIME = 60*1000; // Needed to avoid excessive calls to bjobs
    private final static String STATUS_COMMAND = System.getProperty("org.srs.jobcontrol.DIRACstatusCommand","dirac-glast-pipeline-status -p xml=True");
    private final static Logger logger = Logger.getLogger("org.srs.jobcontrol.DIRACStatus");
    
-   private Map<String,JobStatus> map = new HashMap<String,JobStatus>();
-   private long timeStamp;
-   
    /** Creates a new instance of DIRACStatus */
-   DIRACStatus()
-   {
-   }
+   DIRACStatus(){}
    
    public Map<String, JobStatus> getStatus() throws JobControlException{
       try
       {
+         Map<String,JobStatus> map = new HashMap<String,JobStatus>();
          String command = STATUS_COMMAND;
          List<String> commands = new ArrayList<String>(Arrays.asList(command.split("\\s+")));
          ProcessBuilder builder = new ProcessBuilder();
