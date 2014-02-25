@@ -228,35 +228,9 @@ public class PBSJobControlService extends JobControlService{
             OutputProcessor output = new OutputProcessor(process.getInputStream(), logger);
             process.waitFor();
             output.join();
-            List<String> result = output.getResult();
-            int rc = process.exitValue();
-            if (rc != 0) {
-                StringBuilder message = new StringBuilder("Process failed rc=" + rc);
-                if (!result.isEmpty()) {
-                    message.append(" output was:");
-                }
-                for (String line : result) {
-                    message.append('\n').append(line);
-                }
-                throw new JobControlException(message.toString());
-            }
-
-            if (output.getStatus() != null) {
-                throw output.getStatus();
-            }
-
-            if (result.size() == 0) {
-                throw new JobControlException("Unexpected output length " + result.size());
-            }
-            for (String line : result) {
-                Matcher matcher = pattern.matcher(line);
-                boolean ok = matcher.find();
-                if (ok) {
-                    undoList.clear();
-                    return matcher.group(1);
-                }
-            }
-            throw new JobControlException("Could not find job number in output");
+            String jobId = processSubmittedJobOutput( output, process.exitValue() );
+            undoList.clear();
+            return jobId;
         } catch (IOException x) {
             throw new JobControlException("IOException during job submission", x);
         } catch (InterruptedException x) {
@@ -314,4 +288,17 @@ public class PBSJobControlService extends JobControlService{
     public Map<String, JobStatus> getCurrentStatus() throws JobControlException{
         return pbsStatus.getStatus();
     }
+
+    @Override
+    public String extractJobId(List<String> result) throws JobSubmissionException{
+        for(String line: result){
+            Matcher matcher = pattern.matcher( line );
+            boolean ok = matcher.find();
+            if(ok){
+                return matcher.group( 1 );
+            }
+        }
+        throw new JobSubmissionException( "Could not find job number in output" );
+    }
+    
 }

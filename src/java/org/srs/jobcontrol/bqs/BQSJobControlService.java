@@ -197,41 +197,13 @@ class BQSJobControlService extends JobControlService {
 	    
             builder.redirectErrorStream(true);
             Process process = builder.start();
-            OutputProcessor output = new OutputProcessor(process.getInputStream(),logger);
-
+            OutputProcessor output = new OutputProcessor(process.getInputStream(), logger);
             process.waitFor();
-            output.join();
-            
-            List<String> result = output.getResult();
+            output.join();            
             int rc = process.exitValue();
-            logger.info("process.exitValue=" + rc);
-            if (rc != 0) {
-               StringBuilder message = new StringBuilder("Process failed rc="+rc);
-               if (!result.isEmpty()) message.append(" output was:");
-               for (String line : result)
-               {
-                  message.append('\n').append(line);
-               }
-               throw new JobControlException(message.toString());
-            }
-            
-            if (output.getStatus() != null) throw output.getStatus();
-
-            if (result.size() == 0) throw new JobControlException("Unexpected output length "+result.size());
-            for (String line : result) {
-	    
-	        logger.info("line:" + line);
-                Matcher matcher = pattern.matcher(line);
-		  
-                boolean ok = matcher.find();
-
-                //if (ok) return Integer.parseInt(matcher.group(1));
-		if (ok)  {
-                   undoList.clear();
-                   return matcher.group(1);
-                }
-            }
-            throw new JobControlException("Could not find job number in output");
+            String jobId = processSubmittedJobOutput( output, rc );
+            undoList.clear();
+            return jobId;
         } catch (IOException x) {
             throw new JobControlException("IOException during job submission",x);
         } catch (InterruptedException x) {
@@ -292,6 +264,19 @@ class BQSJobControlService extends JobControlService {
     @Override
     public Map<String, JobStatus> getCurrentStatus() throws JobControlException{
         return bqsStatus.getStatus();
+    }
+
+    @Override
+    public String extractJobId(List<String> result) throws JobSubmissionException{
+        for(String line: result){
+            logger.info( "line:" + line );
+            Matcher matcher = pattern.matcher( line );
+            boolean ok = matcher.find();
+            if(ok){
+                return matcher.group( 1 );
+            }
+        }
+        throw new JobSubmissionException("Unable to get job ID in output");
     }
     
 }
