@@ -14,14 +14,23 @@ import java.util.concurrent.TimeoutException;
  * The interface to be implemented by the job control server
  * @author tonyj
  */
-public interface JobControl extends Remote
-{
-   String submit(Job job) throws RemoteException, JobSubmissionException, JobControlException;
-   JobStatus status(String jobID) throws RemoteException, NoSuchJobException, JobControlException;
-   Map<String,JobStatus> arrayStatus(List<String> jobID) throws RemoteException, JobControlException;
-   String getFile(String sp_id, File workingDir, String fileName) 
+public interface JobControl extends Remote {
+
+   public String submit(Job job) 
+           throws RemoteException, JobSubmissionException, JobControlException;
+   
+   public JobStatus status(String jobID) 
+           throws RemoteException, NoSuchJobException, JobControlException;
+   
+   public Map<String,JobStatus> arrayStatus(List<String> jobID) 
+           throws RemoteException, JobControlException;
+   
+   public String getFile(String sp_id, File workingDir, String fileName) 
            throws RemoteException, FileNotFoundException, TimeoutException, JobControlException;
-   RemoteInputStream getFileStream(String spID, File workingDir, String fileName)
+   
+   public RemoteInputStream getFileStream(String spID, File workingDir, String fileName)
             throws IOException, JobControlException;
-   void cancel(String jobID) throws RemoteException, NoSuchJobException, JobControlException;
+   
+   public void cancel(String jobID) 
+           throws RemoteException, NoSuchJobException, JobControlException;
 }
