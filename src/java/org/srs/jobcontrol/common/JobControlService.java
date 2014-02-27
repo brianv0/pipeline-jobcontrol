@@ -38,7 +38,6 @@ import org.srs.jobcontrol.JobControlException;
 import org.srs.jobcontrol.JobStatus;
 import org.srs.jobcontrol.JobSubmissionException;
 import org.srs.jobcontrol.NoSuchJobException;
-import org.srs.jobcontrol.OutputProcessor;
 
 /**
  *
@@ -351,6 +350,7 @@ public abstract class JobControlService implements JobControl, JobControlService
     }
     
     public Map<String, JobStatus> arrayStatus(List<String> jobIDs) throws JobControlException{
+        logger.log(Level.INFO, "auery to arrayStatus");
         LinkedHashMap<String, JobStatus> statii = new LinkedHashMap<String, JobStatus>();
         for(String jobID: jobIDs){
             statii.put( jobID, getCachedStatus().get( jobID) );
