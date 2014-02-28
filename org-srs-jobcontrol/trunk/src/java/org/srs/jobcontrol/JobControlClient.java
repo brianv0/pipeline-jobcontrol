@@ -72,6 +72,7 @@ public class JobControlClient
        for(int retry = 0; retry < 2; retry++){
            try {
                jobId = getJobControlRef().submit( job );
+               break;
            } catch(RemoteException ex) {
                checkException( ex, retry );
            } catch(NotBoundException ex) {
@@ -93,6 +94,7 @@ public class JobControlClient
         for(int retry = 0; retry < 2; retry++){
             try {
                 smap = getJobControlRef().arrayStatus( jobIDs );
+                break;
             } catch(RemoteException ex) {
                 checkException( ex, retry );
             } catch(NotBoundException ex) {
@@ -115,6 +117,7 @@ public class JobControlClient
        for(int retry = 0; retry < 2; retry++){
            try {
                stat = getJobControlRef().status( jobID );
+               break;
            } catch(RemoteException ex) {
                checkException( ex, retry );
            } catch(NotBoundException ex) {
@@ -141,6 +144,7 @@ public class JobControlClient
        for(int retry = 0; retry < 2; retry++){
            try {
                fContent = getJobControlRef().getFile( spID, workingDir, fileName );
+               break;
            } catch(RemoteException ex) {
                checkException( ex, retry );
            } catch(NotBoundException ex) {
@@ -168,6 +172,7 @@ public class JobControlClient
            try {
                is = RemoteInputStreamClient.wrap(
                        getJobControlRef().getFileStream( spID, workingDir, fileName ) );
+               break;
            } catch(RemoteException ex) {
                checkException( ex, retry );
            } catch(NotBoundException ex) {
@@ -186,6 +191,7 @@ public class JobControlClient
         for(int retry = 0; retry < 2; retry++){
             try {
                 getJobControlRef().cancel( jobID );
+                break;
             } catch(RemoteException ex) {
                 checkException( ex, retry );
             } catch(NotBoundException ex) {
