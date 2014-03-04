@@ -68,6 +68,8 @@
                             <goal>single</goal>
                         </goals>
                         <configuration>
+                            <appendAssemblyId>true</appendAssemblyId>
+                            <!-- <finalName>${project.artifactId}-${project.version}</finalName> -->
                             <ignoreMissingDescriptor>true</ignoreMissingDescriptor>
                             <descriptorRefs>
                                 <descriptorRef>jar-with-dependencies</descriptorRef>
