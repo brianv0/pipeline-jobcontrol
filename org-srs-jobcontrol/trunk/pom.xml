@@ -37,7 +37,7 @@
     </scm>
 
     <build>
-        <finalName>${project.artifactId}-${project.version}-no-deps</finalName>
+        <finalName>${project.artifactId}-${project.version}</finalName>
         <sourceDirectory>src/java</sourceDirectory>
         <resources>
             <resource>
@@ -69,7 +69,7 @@
                         </goals>
                         <configuration>
                             <appendAssemblyId>false</appendAssemblyId>
-                            <finalName>${project.artifactId}-${project.version}</finalName>
+                            <finalName>${project.artifactId}-${project.version}-dist</finalName>
                             <ignoreMissingDescriptor>true</ignoreMissingDescriptor>
                             <descriptorRefs>
                                 <descriptorRef>jar-with-dependencies</descriptorRef>
