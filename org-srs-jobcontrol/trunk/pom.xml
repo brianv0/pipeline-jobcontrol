@@ -62,14 +62,13 @@
                 <version>2.4</version>
                 <executions>
                     <execution>
-                        <id>distribution</id>
+                        <id>make-assembly</id>
                         <phase>package</phase>
                         <goals>
                             <goal>single</goal>
                         </goals>
                         <configuration>
                             <appendAssemblyId>true</appendAssemblyId>
-                            <!-- <finalName>${project.artifactId}-${project.version}</finalName> -->
                             <ignoreMissingDescriptor>true</ignoreMissingDescriptor>
                             <descriptorRefs>
                                 <descriptorRef>jar-with-dependencies</descriptorRef>
