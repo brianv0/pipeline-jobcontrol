@@ -1,0 +1,190 @@
+<?xml version="1.0" ?>
+<joblist>
+	<job CPUMHz="2200.000" CPUNormalizationFactor="6.8" CPUScalingFactor="8.748" CacheSizekB="512KB" Ended="2012-10-30 13:02:06" HostName="n2wn23" JobID="1679840" JobPath="JobPath,JobSanity,JobScheduling,TaskQueue" JobSanityCheck="Job: 1679840 JDL: OK,InputData: No input LFNs,  Input Sandboxes: 1, OK." JobWrapperPID="1789" LocalAccount="glast025" LocalBatchID="" LocalJobID="13409594" MemorykB="13822304kB" MinorStatus="Execution Complete" ModelName="AMDOpteron(tm)Processor6174" NormCPUTimes="14.348" OK="True" OutputSandboxMissingFiles="std.err" PayloadPID="1796" PilotAgent="DIRAC v6r5p1" Pilot_Reference="https://prod-lb-01.pd.infn.it:9000/EjijRvaE7rDGtcmmJhxRsw" ScaledCPUTime="0.0" Site="LCG.PISA.it" Started="2012-10-30 13:01:54" Status="Done" Submitted="2012-10-30 12:54:29" TotalCPUTimes="2.11">
+		<StandardOutput>
+			
+==================================================================================
+Last 2 lines of application output from JobWrapper on 2012-10-30 13:02:05.241499 :
+CPU Total: 00:00:02 (h:m:s) Normalized CPU Total 14.3 s @ HEP'06
+==================================================================================
+2012-10-30 13:01:56 UTC dirac-jobexec  INFO: JobID: 1679840 
+2012-10-30 13:01:56 UTC dirac-jobexec  INFO: DIRAC JobID 1679840 is running at site LCG.PISA.it 
+		</StandardOutput>
+	</job>
+	<job CPUMHz="2200.000" CPUNormalizationFactor="7.2" CPUScalingFactor="8.748" CacheSizekB="512KB" Ended="2012-10-30 13:08:18" HostName="n2wn4" JobID="1679853" JobPath="JobPath,JobSanity,JobScheduling,TaskQueue" JobSanityCheck="Job: 1679853 JDL: OK,InputData: No input LFNs,  Input Sandboxes: 1, OK." JobWrapperPID="30988" LocalAccount="glast025" LocalBatchID="" LocalJobID="13409601" MemorykB="13541580kB" MinorStatus="Execution Complete" ModelName="AMDOpteron(tm)Processor6174" NormCPUTimes="14.76" OK="True" OutputSandboxMissingFiles="std.err" PayloadPID="32399" PilotAgent="DIRAC v6r5p1" Pilot_Reference="https://prod-lb-01.pd.infn.it:9000/8bhHhv2_kY1njU_DFGSkng" ScaledCPUTime="0.0" Site="LCG.PISA.it" Started="2012-10-30 13:08:06" Status="Done" Submitted="2012-10-30 13:07:33" TotalCPUTimes="2.05">
+		<StandardOutput>
+			
+==================================================================================
+Last 2 lines of application output from JobWrapper on 2012-10-30 13:08:17.464024 :
+CPU Total: 00:00:02 (h:m:s) Normalized CPU Total 14.8 s @ HEP'06
+==================================================================================
+2012-10-30 13:08:10 UTC dirac-jobexec  INFO: JobID: 1679853 
+2012-10-30 13:08:10 UTC dirac-jobexec  INFO: DIRAC JobID 1679853 is running at site LCG.PISA.it 
+		</StandardOutput>
+	</job>
+	<job CPUMHz="800.000" CPUNormalizationFactor="7.0" CPUScalingFactor="8.748" CacheSizekB="512KB" Ended="2012-10-30 13:14:40" HostName="n2wn15" JobID="1679854" JobPath="JobPath,JobSanity,JobScheduling,TaskQueue" JobSanityCheck="Job: 1679854 JDL: OK,InputData: No input LFNs,  Input Sandboxes: 1, OK." JobWrapperPID="30240" LocalAccount="glast025" LocalBatchID="" LocalJobID="13409834" MemorykB="13319864kB" MinorStatus="Execution Complete" ModelName="AMDOpteron(tm)Processor6174" NormCPUTimes="14.91" OK="True" OutputSandboxMissingFiles="std.err" PayloadPID="31997" PilotAgent="DIRAC v6r5p1" Pilot_Reference="https://prod-lb-01.pd.infn.it:9000/tEBQ9v1-57NPn7JgFLa1PQ" ScaledCPUTime="0.0" Site="LCG.PISA.it" Started="2012-10-30 13:14:27" Status="Done" Submitted="2012-10-30 13:07:59" TotalCPUTimes="2.13">
+		<StandardOutput>
+			
+==================================================================================
+Last 2 lines of application output from JobWrapper on 2012-10-30 13:14:38.681469 :
+CPU Total: 00:00:02 (h:m:s) Normalized CPU Total 14.9 s @ HEP'06
+==================================================================================
+2012-10-30 13:14:30 UTC dirac-jobexec  INFO: JobID: 1679854 
+2012-10-30 13:14:30 UTC dirac-jobexec  INFO: DIRAC JobID 1679854 is running at site LCG.PISA.it 
+		</StandardOutput>
+	</job>
+	<job CPUMHz="2200.000" CPUNormalizationFactor="7.2" CPUScalingFactor="8.748" CacheSizekB="512KB" Ended="2012-10-30 13:13:54" HostName="n2wn14" JobID="1679855" JobPath="JobPath,JobSanity,JobScheduling,TaskQueue" JobSanityCheck="Job: 1679855 JDL: OK,InputData: No input LFNs,  Input Sandboxes: 1, OK." JobWrapperPID="13938" LocalAccount="glast005" LocalBatchID="" LocalJobID="13409826" MemorykB="8553368kB" MinorStatus="Execution Complete" ModelName="AMDOpteron(tm)Processor6174" NormCPUTimes="14.832" OK="True" OutputSandboxMissingFiles="std.err" PayloadPID="14723" PilotAgent="DIRAC v6r5p1" Pilot_Reference="https://prod-lb-01.pd.infn.it:9000/VL4DFtKVXNSYx5xikFwMmA" ScaledCPUTime="0.0" Site="LCG.PISA.it" Started="2012-10-30 13:13:41" Status="Done" Submitted="2012-10-30 13:08:32" TotalCPUTimes="2.06">
+		<StandardOutput>
+			
+==================================================================================
+Last 2 lines of application output from JobWrapper on 2012-10-30 13:13:52.741888 :
+CPU Total: 00:00:02 (h:m:s) Normalized CPU Total 14.8 s @ HEP'06
+==================================================================================
+2012-10-30 13:13:44 UTC dirac-jobexec  INFO: JobID: 1679855 
+2012-10-30 13:13:44 UTC dirac-jobexec  INFO: DIRAC JobID 1679855 is running at site LCG.PISA.it 
+		</StandardOutput>
+	</job>
+	<job CPUMHz="2494.210" CPUNormalizationFactor="8.8" CPUScalingFactor="8.748" CacheSizekB="6144KB" Ended="2012-10-30 14:03:24" HostName="no1wn21" JobID="1680497" JobPath="JobPath,JobSanity,JobScheduling,TaskQueue" JobSanityCheck="Job: 1680497 JDL: OK,InputData: No input LFNs,  Input Sandboxes: 1, OK." JobWrapperPID="14525" LocalAccount="glast005" LocalBatchID="" LocalJobID="13411014" MemorykB="3132532kB" MinorStatus="Execution Complete" ModelName="Intel(R)Xeon(R)CPUE5420@2.50GHz" NormCPUTimes="14.08" OK="True" OutputSandboxMissingFiles="std.err" PayloadPID="14532" PilotAgent="DIRAC v6r5p1" Pilot_Reference="https://gridrb.fe.infn.it:9000/XG0aDSDnNcp3gOrPiLYMTQ" ScaledCPUTime="0.0" Site="LCG.PISA.it" Started="2012-10-30 14:03:08" Status="Done" Submitted="2012-10-30 13:56:48" TotalCPUTimes="1.6">
+		<StandardOutput>
+			
+==================================================================================
+Last 2 lines of application output from JobWrapper on 2012-10-30 14:03:21.376144 :
+CPU Total: 00:00:01 (h:m:s) Normalized CPU Total 14.1 s @ HEP'06
+==================================================================================
+2012-10-30 14:03:12 UTC dirac-jobexec  INFO: JobID: 1680497 
+2012-10-30 14:03:12 UTC dirac-jobexec  INFO: DIRAC JobID 1680497 is running at site LCG.PISA.it 
+		</StandardOutput>
+	</job>
+	<job CPUMHz="2401.000" CPUNormalizationFactor="5.8" CPUScalingFactor="8.748" CacheSizekB="12288KB" Ended="2012-10-30 14:22:18" HostName="s1wn10" JobID="1680527" JobPath="JobPath,JobSanity,JobScheduling,TaskQueue" JobSanityCheck="Job: 1680527 JDL: OK,InputData: No input LFNs,  Input Sandboxes: 1, OK." JobWrapperPID="5796" LocalAccount="glast005" LocalBatchID="" LocalJobID="13411236" MemorykB="10158820kB" MinorStatus="Execution Complete" ModelName="Intel(R)Xeon(R)CPUE5645@2.40GHz" NormCPUTimes="14.326" OK="True" OutputSandboxMissingFiles="std.err" PayloadPID="6481" PilotAgent="DIRAC v6r5p1" Pilot_Reference="https://gridrb.fe.infn.it:9000/o7kw-Ce50BiPVO8hJUtLVg" ScaledCPUTime="0.0" Site="LCG.PISA.it" Started="2012-10-30 14:22:03" Status="Done" Submitted="2012-10-30 14:14:28" TotalCPUTimes="2.47">
+		<StandardOutput>
+			
+==================================================================================
+Last 2 lines of application output from JobWrapper on 2012-10-30 14:22:15.698100 :
+CPU Total: 00:00:02 (h:m:s) Normalized CPU Total 14.3 s @ HEP'06
+==================================================================================
+2012-10-30 14:22:07 UTC dirac-jobexec  INFO: JobID: 1680527 
+2012-10-30 14:22:07 UTC dirac-jobexec  INFO: DIRAC JobID 1680527 is running at site LCG.PISA.it 
+		</StandardOutput>
+	</job>
+	<job CPUMHz="2401.000" CPUNormalizationFactor="5.5" CPUScalingFactor="8.748" CacheSizekB="12288KB" Ended="2012-10-30 14:20:44" HostName="s1wn19" JobID="1680528" JobPath="JobPath,JobSanity,JobScheduling,TaskQueue" JobSanityCheck="Job: 1680528 JDL: OK,InputData: No input LFNs,  Input Sandboxes: 1, OK." JobWrapperPID="14311" LocalAccount="glast005" LocalBatchID="" LocalJobID="13411244" MemorykB="14024352kB" MinorStatus="Execution Complete" ModelName="Intel(R)Xeon(R)CPUE5645@2.40GHz" NormCPUTimes="13.31" OK="True" OutputSandboxMissingFiles="std.err" PayloadPID="14318" PilotAgent="DIRAC v6r5p1" Pilot_Reference="https://gridrb.fe.infn.it:9000/jT9WJCH1vylaxfKmg2Ep4w" ScaledCPUTime="0.0" Site="LCG.PISA.it" Started="2012-10-30 14:20:30" Status="Done" Submitted="2012-10-30 14:14:30" TotalCPUTimes="2.42">
+		<StandardOutput>
+			
+==================================================================================
+Last 6 lines of application output from JobWrapper on 2012-10-30 14:20:42.481423 :
+CPU Total: 00:00:02 (h:m:s) Normalized CPU Total 13.3 s @ HEP'06
+==================================================================================
+Error while handshaking [(&quot;Remote certificate hasn't been accepted&quot;, 'SSL routines', 'SSL3_READ_BYTES', 'sslv3 alert certificate expired')]
+Error while handshaking [(&quot;Remote certificate hasn't been accepted&quot;, 'SSL routines', 'SSL3_READ_BYTES', 'sslv3 alert certificate expired')]
+Error while handshaking [(&quot;Remote certificate hasn't been accepted&quot;, 'SSL routines', 'SSL3_READ_BYTES', 'sslv3 alert certificate expired')]
+Can't update from server Error while updating from dips://ui.grid.creatis.insa-lyon.fr:9135/Configuration/Server: Can't connect to dips://ui.grid.creatis.insa-lyon.fr:9135/Configuration/Server: {'Message': 'Error while handshaking', 'OK': False}
+2012-10-30 14:20:36 UTC dirac-jobexec  INFO: JobID: 1680528 
+2012-10-30 14:20:36 UTC dirac-jobexec  INFO: DIRAC JobID 1680528 is running at site LCG.PISA.it 
+		</StandardOutput>
+	</job>
+	<job CPUMHz="2401.000" CPUNormalizationFactor="5.3" CPUScalingFactor="8.748" CacheSizekB="12288KB" Ended="2012-10-30 14:21:41" HostName="s1wn41" JobID="1680529" JobPath="JobPath,JobSanity,JobScheduling,TaskQueue" JobSanityCheck="Job: 1680529 JDL: OK,InputData: No input LFNs,  Input Sandboxes: 1, OK." JobWrapperPID="8990" LocalAccount="glast025" LocalBatchID="" LocalJobID="13411234" MemorykB="17429744kB" MinorStatus="Execution Complete" ModelName="Intel(R)Xeon(R)CPUE5645@2.40GHz" NormCPUTimes="12.773" OK="True" OutputSandboxMissingFiles="std.err" PayloadPID="8998" PilotAgent="DIRAC v6r5p1" Pilot_Reference="https://gridrb.fe.infn.it:9000/G6RisnChKSGXaRZ5_7bY1w" ScaledCPUTime="0.0" Site="LCG.PISA.it" Started="2012-10-30 14:21:25" Status="Done" Submitted="2012-10-30 14:14:32" TotalCPUTimes="2.41">
+		<StandardOutput>
+			
+==================================================================================
+Last 2 lines of application output from JobWrapper on 2012-10-30 14:21:37.703789 :
+CPU Total: 00:00:02 (h:m:s) Normalized CPU Total 12.8 s @ HEP'06
+==================================================================================
+2012-10-30 14:21:29 UTC dirac-jobexec  INFO: JobID: 1680529 
+2012-10-30 14:21:29 UTC dirac-jobexec  INFO: DIRAC JobID 1680529 is running at site LCG.PISA.it 
+		</StandardOutput>
+	</job>
+	<job CPUMHz="2200.000" CPUNormalizationFactor="7.1" CPUScalingFactor="8.748" CacheSizekB="512KB" Ended="2012-10-30 14:20:18" HostName="n2wn8" JobID="1680530" JobPath="JobPath,JobSanity,JobScheduling,TaskQueue" JobSanityCheck="Job: 1680530 JDL: OK,InputData: No input LFNs,  Input Sandboxes: 1, OK." JobWrapperPID="11547" LocalAccount="glast005" LocalBatchID="" LocalJobID="13411237" MemorykB="12847536kB" MinorStatus="Execution Complete" ModelName="AMDOpteron(tm)Processor6174" NormCPUTimes="13.987" OK="True" OutputSandboxMissingFiles="std.err" PayloadPID="11668" PilotAgent="DIRAC v6r5p1" Pilot_Reference="https://gridrb.fe.infn.it:9000/eHpwXNonASJdkyS_JUErrA" ScaledCPUTime="0.0" Site="LCG.PISA.it" Started="2012-10-30 14:20:04" Status="Done" Submitted="2012-10-30 14:14:34" TotalCPUTimes="1.97">
+		<StandardOutput>
+			
+==================================================================================
+Last 2 lines of application output from JobWrapper on 2012-10-30 14:20:16.089658 :
+CPU Total: 00:00:01 (h:m:s) Normalized CPU Total 14.0 s @ HEP'06
+==================================================================================
+2012-10-30 14:20:07 UTC dirac-jobexec  INFO: JobID: 1680530 
+2012-10-30 14:20:07 UTC dirac-jobexec  INFO: DIRAC JobID 1680530 is running at site LCG.PISA.it 
+		</StandardOutput>
+	</job>
+	<job CPUMHz="2401.000" CPUNormalizationFactor="6.1" CPUScalingFactor="8.748" CacheSizekB="12288KB" Ended="2012-10-30 14:21:43" HostName="s1wn8" JobID="1680531" JobPath="JobPath,JobSanity,JobScheduling,TaskQueue" JobSanityCheck="Job: 1680531 JDL: OK,InputData: No input LFNs,  Input Sandboxes: 1, OK." JobWrapperPID="32621" LocalAccount="glast005" LocalBatchID="" LocalJobID="13411235" MemorykB="19252620kB" MinorStatus="Execution Complete" ModelName="Intel(R)Xeon(R)CPUE5645@2.40GHz" NormCPUTimes="14.152" OK="True" OutputSandboxMissingFiles="std.err" PayloadPID="470" PilotAgent="DIRAC v6r5p1" Pilot_Reference="https://gridrb.fe.infn.it:9000/gdqIMLIclvMAq-zXfO54Cg" ScaledCPUTime="0.0" Site="LCG.PISA.it" Started="2012-10-30 14:21:29" Status="Done" Submitted="2012-10-30 14:14:36" TotalCPUTimes="2.32">
+		<StandardOutput>
+			
+==================================================================================
+Last 6 lines of application output from JobWrapper on 2012-10-30 14:21:41.365545 :
+CPU Total: 00:00:02 (h:m:s) Normalized CPU Total 14.2 s @ HEP'06
+==================================================================================
+Error while handshaking [(&quot;Remote certificate hasn't been accepted&quot;, 'SSL routines', 'SSL3_READ_BYTES', 'sslv3 alert certificate expired')]
+Error while handshaking [(&quot;Remote certificate hasn't been accepted&quot;, 'SSL routines', 'SSL3_READ_BYTES', 'sslv3 alert certificate expired')]
+Error while handshaking [(&quot;Remote certificate hasn't been accepted&quot;, 'SSL routines', 'SSL3_READ_BYTES', 'sslv3 alert certificate expired')]
+Can't update from server Error while updating from dips://ui.grid.creatis.insa-lyon.fr:9135/Configuration/Server: Can't connect to dips://ui.grid.creatis.insa-lyon.fr:9135/Configuration/Server: {'Message': 'Error while handshaking', 'OK': False}
+2012-10-30 14:21:34 UTC dirac-jobexec  INFO: JobID: 1680531 
+2012-10-30 14:21:34 UTC dirac-jobexec  INFO: DIRAC JobID 1680531 is running at site LCG.PISA.it 
+		</StandardOutput>
+	</job>
+	<job CPUMHz="800.000" CPUNormalizationFactor="7.2" CPUScalingFactor="8.748" CacheSizekB="512KB" Ended="2012-10-30 14:21:26" HostName="n2wn12" JobID="1680532" JobPath="JobPath,JobSanity,JobScheduling,TaskQueue" JobSanityCheck="Job: 1680532 JDL: OK,InputData: No input LFNs,  Input Sandboxes: 1, OK." JobWrapperPID="14703" LocalAccount="glast025" LocalBatchID="" LocalJobID="13411239" MemorykB="12501772kB" MinorStatus="Execution Complete" ModelName="AMDOpteron(tm)Processor6174" NormCPUTimes="15.984" OK="True" OutputSandboxMissingFiles="std.err" PayloadPID="15491" PilotAgent="DIRAC v6r5p1" Pilot_Reference="https://gridrb.fe.infn.it:9000/-bCz3mLLUVPy5mPaVYJFRQ" ScaledCPUTime="0.0" Site="LCG.PISA.it" Started="2012-10-30 14:21:12" Status="Done" Submitted="2012-10-30 14:14:38" TotalCPUTimes="2.22">
+		<StandardOutput>
+			
+==================================================================================
+Last 2 lines of application output from JobWrapper on 2012-10-30 14:21:24.231356 :
+CPU Total: 00:00:02 (h:m:s) Normalized CPU Total 16.0 s @ HEP'06
+==================================================================================
+2012-10-30 14:21:16 UTC dirac-jobexec  INFO: JobID: 1680532 
+2012-10-30 14:21:16 UTC dirac-jobexec  INFO: DIRAC JobID 1680532 is running at site LCG.PISA.it 
+		</StandardOutput>
+	</job>
+	<job CPUMHz="2500.000" CPUNormalizationFactor="7.9" CPUScalingFactor="8.748" CacheSizekB="512KB" Ended="2012-10-30 14:20:07" HostName="no1wn22" JobID="1680533" JobPath="JobPath,JobSanity,JobScheduling,TaskQueue" JobSanityCheck="Job: 1680533 JDL: OK,InputData: No input LFNs,  Input Sandboxes: 1, OK." JobWrapperPID="18401" LocalAccount="glast025" LocalBatchID="" LocalJobID="13411232" MemorykB="3002840kB" MinorStatus="Execution Complete" ModelName="Quad-CoreAMDOpteron(tm)Processor2380" NormCPUTimes="17.696" OK="True" OutputSandboxMissingFiles="std.err" PayloadPID="18408" PilotAgent="DIRAC v6r5p1" Pilot_Reference="https://gridrb.fe.infn.it:9000/CN2ZQLURCwDyLoJvXJO5Uw" ScaledCPUTime="0.0" Site="LCG.PISA.it" Started="2012-10-30 14:19:52" Status="Done" Submitted="2012-10-30 14:14:40" TotalCPUTimes="2.24">
+		<StandardOutput>
+			
+==================================================================================
+Last 6 lines of application output from JobWrapper on 2012-10-30 14:20:04.773841 :
+CPU Total: 00:00:02 (h:m:s) Normalized CPU Total 17.7 s @ HEP'06
+==================================================================================
+Error while handshaking [(&quot;Remote certificate hasn't been accepted&quot;, 'SSL routines', 'SSL3_READ_BYTES', 'sslv3 alert certificate expired')]
+Error while handshaking [(&quot;Remote certificate hasn't been accepted&quot;, 'SSL routines', 'SSL3_READ_BYTES', 'sslv3 alert certificate expired')]
+Error while handshaking [(&quot;Remote certificate hasn't been accepted&quot;, 'SSL routines', 'SSL3_READ_BYTES', 'sslv3 alert certificate expired')]
+Can't update from server Error while updating from dips://ui.grid.creatis.insa-lyon.fr:9135/Configuration/Server: Can't connect to dips://ui.grid.creatis.insa-lyon.fr:9135/Configuration/Server: {'Message': 'Error while handshaking', 'OK': False}
+2012-10-30 14:19:57 UTC dirac-jobexec  INFO: JobID: 1680533 
+2012-10-30 14:19:57 UTC dirac-jobexec  INFO: DIRAC JobID 1680533 is running at site LCG.PISA.it 
+		</StandardOutput>
+	</job>
+	<job CPUMHz="800.000" CPUNormalizationFactor="7.0" CPUScalingFactor="8.748" CacheSizekB="512KB" Ended="2012-10-30 14:36:48" HostName="n2wn25" JobID="1680541" JobPath="JobPath,JobSanity,JobScheduling,TaskQueue" JobSanityCheck="Job: 1680541 JDL: OK,InputData: No input LFNs,  Input Sandboxes: 1, OK." JobWrapperPID="17109" LocalAccount="glast005" LocalBatchID="" LocalJobID="13411595" MemorykB="13167824kB" MinorStatus="Execution Complete" ModelName="AMDOpteron(tm)Processor6174" NormCPUTimes="14.91" OK="True" OutputSandboxMissingFiles="std.err" PayloadPID="18434" PilotAgent="DIRAC v6r5p1" Pilot_Reference="https://gridrb.fe.infn.it:9000/uX0AZgHJ7JkPcby6VC9o7w" ScaledCPUTime="0.0" Site="LCG.PISA.it" Started="2012-10-30 14:36:34" Status="Done" Submitted="2012-10-30 14:30:34" TotalCPUTimes="2.13">
+		<StandardOutput>
+			
+==================================================================================
+Last 2 lines of application output from JobWrapper on 2012-10-30 14:36:46.124441 :
+CPU Total: 00:00:02 (h:m:s) Normalized CPU Total 14.9 s @ HEP'06
+==================================================================================
+2012-10-30 14:36:38 UTC dirac-jobexec  INFO: JobID: 1680541 
+2012-10-30 14:36:38 UTC dirac-jobexec  INFO: DIRAC JobID 1680541 is running at site LCG.PISA.it 
+		</StandardOutput>
+	</job>
+	<job CPUMHz="2200.000" CPUNormalizationFactor="6.9" CPUScalingFactor="8.748" CacheSizekB="512KB" Ended="2012-10-30 14:37:00" HostName="n2wn1" JobID="1680542" JobPath="JobPath,JobSanity,JobScheduling,TaskQueue" JobSanityCheck="Job: 1680542 JDL: OK,InputData: No input LFNs,  Input Sandboxes: 1, OK." JobWrapperPID="20537" LocalAccount="glast005" LocalBatchID="" LocalJobID="13411597" MemorykB="16123352kB" MinorStatus="Execution Complete" ModelName="AMDOpteron(tm)Processor6174" NormCPUTimes="13.938" OK="True" OutputSandboxMissingFiles="std.err" PayloadPID="21122" PilotAgent="DIRAC v6r5p1" Pilot_Reference="https://gridrb.fe.infn.it:9000/YA-b81cDVlXYo_wvjYgaYA" ScaledCPUTime="0.0" Site="LCG.PISA.it" Started="2012-10-30 14:36:46" Status="Done" Submitted="2012-10-30 14:30:36" TotalCPUTimes="2.02">
+		<StandardOutput>
+			
+==================================================================================
+Last 6 lines of application output from JobWrapper on 2012-10-30 14:36:58.426387 :
+CPU Total: 00:00:02 (h:m:s) Normalized CPU Total 13.9 s @ HEP'06
+==================================================================================
+Error while handshaking [(&quot;Remote certificate hasn't been accepted&quot;, 'SSL routines', 'SSL3_READ_BYTES', 'sslv3 alert certificate expired')]
+Error while handshaking [(&quot;Remote certificate hasn't been accepted&quot;, 'SSL routines', 'SSL3_READ_BYTES', 'sslv3 alert certificate expired')]
+Error while handshaking [(&quot;Remote certificate hasn't been accepted&quot;, 'SSL routines', 'SSL3_READ_BYTES', 'sslv3 alert certificate expired')]
+Can't update from server Error while updating from dips://ui.grid.creatis.insa-lyon.fr:9135/Configuration/Server: Can't connect to dips://ui.grid.creatis.insa-lyon.fr:9135/Configuration/Server: {'Message': 'Error while handshaking', 'OK': False}
+2012-10-30 14:36:52 UTC dirac-jobexec  INFO: JobID: 1680542 
+2012-10-30 14:36:52 UTC dirac-jobexec  INFO: DIRAC JobID 1680542 is running at site LCG.PISA.it 
+		</StandardOutput>
+	</job>
+	<job CPUMHz="1994.893" CPUNormalizationFactor="6.2" CPUScalingFactor="8.748" CacheSizekB="512KB" Ended="-" HostName="ne1wn3" JobID="1680551" JobPath="JobPath,JobSanity,JobScheduling,TaskQueue" JobSanityCheck="Job: 1680551 JDL: OK,InputData: No input LFNs,  Input Sandboxes: 1, OK." JobWrapperPID="29829" LocalAccount="glast025" LocalBatchID="" LocalJobID="13411784" MemorykB="5774152kB" MinorStatus="Application Finished With Errors" ModelName="Quad-CoreAMDOpteron(tm)Processor8350HE" NormCPUTimes="14.012" OK="True" OutputSandboxMissingFiles="std.err" PayloadPID="29846" PilotAgent="DIRAC v6r5p1" Pilot_Reference="https://gridrb.fe.infn.it:9000/lrY-8kUytV4-YYsdJQ-QKg" Site="LCG.PISA.it" Started="2012-10-30 14:53:02" Status="Failed" Submitted="2012-10-30 14:47:13" TotalCPUTimes="2.26">
+		<StandardOutput>
+			
+==================================================================================
+Last 7 lines of application output from JobWrapper on 2012-10-30 14:53:10.625940 :
+CPU Total: 00:00:02 (h:m:s) Normalized CPU Total 14.0 s @ HEP'06
+==================================================================================
+2012-10-30 14:53:02 UTC dirac-jobexec  INFO: JobID: 1680551 
+2012-10-30 14:53:02 UTC dirac-jobexec  INFO: DIRAC JobID 1680551 is running at site LCG.PISA.it 
+Executing StepInstance RunScriptStep1 of type ScriptStep1 ['ScriptStep1']
+2012-10-30 14:53:02 UTC dirac-jobexec/Script  INFO: Script Module Instance Name: ls 
+2012-10-30 14:53:02 UTC dirac-jobexec/Script  INFO: Command is: /home/glast025/home_cream_643651419/CREAM643651419/1680551/ls /totot 
+2012-10-30 14:53:02 UTC dirac-jobexec/Script ERROR: Non-zero status 1 while executing /home/glast025/home_cream_643651419/CREAM643651419/1680551/ls /totot 
+2012-10-30 14:53:02 UTC dirac-jobexec/Script  INFO: Output written to Script1_ls.log, execution complete. 
+		</StandardOutput>
+	</job>
+</joblist>
+

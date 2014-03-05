@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/m aven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>srs</groupId>
+        <artifactId>org-srs-maven-project-jar</artifactId>
+        <version>4.1</version>
+    </parent>
+
+
+    <groupId>srs</groupId>
+    <artifactId>org-srs-jobcontrol</artifactId>
+    <name>SRS Job Control Library</name>
+    <version>2.1.0</version>
+    <description>SRS Job Control</description>
+
+    <repositories>
+        <repository>
+            <id>srs-maven2-public</id>
+            <name>SRS Maven 2 central repository</name>
+            <url>http://srs.slac.stanford.edu/nexus/content/groups/srs-maven2-public/</url>
+        </repository>
+    </repositories>
+
+    <distributionManagement>
+        <site>
+            <id>srs-site</id>
+            <name>SRS Maven2 centreal site repository</name>
+            <url>dav:http://srs.slac.stanford.edu/nexus/content/sites/srs-site/${project.artifactId}</url>
+        </site>
+    </distributionManagement>
+
+    <scm>
+        <connection>scm:svn:file:///nfs/slac/g/srs/subversion/org-srs-jobcontrol/tags/org-srs-jobcontrol-2.1.0</connection>
+        <url>http://java.freehep.org/svn/repos/srs/list/org-srs-jobcontrol/tags/org-srs-jobcontrol-2.1.0</url>
+    </scm>
+
+    <build>
+        <finalName>${project.artifactId}-${project.version}</finalName>
+        <sourceDirectory>src/java</sourceDirectory>
+        <resources>
+            <resource>
+                <directory>src/resource</directory>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.4</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <useUniqueVersions>false</useUniqueVersions>
+                        </manifest>
+                    </archive>         
+                </configuration>
+            </plugin>
+            
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.4</version>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <appendAssemblyId>true</appendAssemblyId>
+                            <ignoreMissingDescriptor>true</ignoreMissingDescriptor>
+                            <descriptorRefs>
+                                <descriptorRef>jar-with-dependencies</descriptorRef>
+                            </descriptorRefs>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+    
+    <dependencies>
+        <dependency>
+            <groupId>javax.mail</groupId>
+            <artifactId>mail</artifactId>
+            <version>1.4.1</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20090211</version>
+        </dependency>
+        <dependency>
+            <groupId>com.healthmarketscience.rmiio</groupId>
+            <artifactId>rmiio</artifactId>
+            <version>2.0.3</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-cli</groupId>
+            <artifactId>commons-cli</artifactId>
+            <version>1.2</version>
+            <type>jar</type>
+        </dependency>
+    </dependencies>   
+</project>
+
