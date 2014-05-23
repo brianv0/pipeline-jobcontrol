@@ -191,6 +191,7 @@ public class DIRACJobControlService extends CLIJobControlService {
                   break;
                }
                builder.directory(dir);
+               logger.log( Level.FINE, "Storing files for job" + dir.getAbsolutePath());
                storeFiles(dir, job.getFiles(), undoList);
             }
             builder.redirectErrorStream(true);

@@ -33,6 +33,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.srs.jobcontrol.Job;
 import org.srs.jobcontrol.JobControl;
 import org.srs.jobcontrol.JobControlException;
 import org.srs.jobcontrol.JobStatus;
@@ -250,6 +251,7 @@ public abstract class JobControlService implements JobControl, JobControlService
       }
       public void run()
       {
+         logger.log( Level.WARNING, "Deleting job file: " + file.getAbsolutePath());
          file.delete();
       }
    }
@@ -257,6 +259,7 @@ public abstract class JobControlService implements JobControl, JobControlService
    
    protected void storeFiles(final File dir, final Map<String, String> files, final List<Runnable> undoList) throws JobSubmissionException, IOException
    {
+      logger.log( Level.FINE, "Storing files in dir " + dir.getAbsolutePath());
       if (files != null)
       {
          for(Map.Entry<String, String> entry : files.entrySet())
@@ -273,6 +276,7 @@ public abstract class JobControlService implements JobControl, JobControlService
                   throw new JobSubmissionException("File "+file+" already exists, not replaced");
                }
             }
+            logger.log( Level.FINE, "Writing file: " + file.getAbsolutePath());
             PrintWriter writer = new PrintWriter(new FileWriter(file));
             undoList.add(new DeleteFile(file));
             writer.print(entry.getValue());
