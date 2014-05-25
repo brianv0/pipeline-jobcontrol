@@ -59,39 +59,35 @@ public abstract class JobControlService implements JobControl, JobControlService
    private final static long CACHE_TIME = 60*1000; // Needed to avoid excessive calls to bjobs
    
    /** Creates a new instance of JobControlService */
-   protected JobControlService()
-   {
-   }
+   protected JobControlService() { }
    
-   protected void archiveOldWorkingDir(final File dir, final String archivePrefix, List<Runnable> undoList) throws JobSubmissionException
-   {
+   protected void archiveOldWorkingDir(final File dir, final String archivePrefix, 
+           List<Runnable> undoList) throws JobSubmissionException {
       File[] oldFiles = dir.listFiles();
-      if (oldFiles.length > 0)
-      {
+      if (oldFiles.length > 0) {
+         logger.log( Level.FINE, "Archiving old files in " + dir.getAbsolutePath());
          File archiveDir = new File(dir,"archive/"+archivePrefix);
-         if (!archiveDir.exists())
-         {
+         if (!archiveDir.exists()) {
             boolean rc = archiveDir.mkdirs();
             if (!rc) throw new JobSubmissionException("Could not create archive directory "+archiveDir);
             undoList.add(new DeleteFile(archiveDir));
          }
          
-         for(final File oldFile : oldFiles)
-         {
-            if (!oldFile.getName().startsWith("archive") || !oldFile.isDirectory())
-            {
+         for(final File oldFile : oldFiles) {
+            if (!oldFile.getName().startsWith("archive") || !oldFile.isDirectory()) {
                final File newFile = new File(archiveDir,oldFile.getName());
+               logger.log( Level.FINE, "Moving file " + oldFile.getAbsolutePath() + " to " + newFile.getAbsolutePath());
                boolean rc = oldFile.renameTo(newFile);
                if (!rc) throw new JobSubmissionException("Could not move file to archive directory: "+oldFile);
-               undoList.add(new Runnable()
-               {
-                  public void run()
-                  { 
+               undoList.add(new Runnable() {
+                  public void run() { 
                      newFile.renameTo(oldFile);
                   }
                });
             }
          }
+      } else {
+          logger.log(Level.WARNING, "No previous files found to archive");
       }
    }
    
@@ -232,25 +228,23 @@ public abstract class JobControlService implements JobControl, JobControlService
    }
    
    
-   protected List<String> tokenizeExtraOption(String string)
-   {
+   protected List<String> tokenizeExtraOption(String string) {
       List<String> result = new ArrayList<String>();
       Matcher matcher = tokenizer.matcher(string);
-      while (matcher.find())
-      {
+      while (matcher.find()) {
          result.add(matcher.group(2) == null ? matcher.group(1) : matcher.group(2));
       }
       return result;
    }
-   public static class DeleteFile implements Runnable
-   {
+   
+   public static class DeleteFile implements Runnable {
       private File file;
-      public DeleteFile(File file)
-      {
+      
+      public DeleteFile(File file) {
          this.file = file;
       }
-      public void run()
-      {
+      
+      public void run() {
          logger.log( Level.WARNING, "Deleting job file: " + file.getAbsolutePath());
          file.delete();
       }
@@ -260,19 +254,13 @@ public abstract class JobControlService implements JobControl, JobControlService
    protected void storeFiles(final File dir, final Map<String, String> files, final List<Runnable> undoList) throws JobSubmissionException, IOException
    {
       logger.log( Level.FINE, "Storing files in dir " + dir.getAbsolutePath());
-      if (files != null)
-      {
-         for(Map.Entry<String, String> entry : files.entrySet())
-         {
+      if (files != null) {
+         for(Map.Entry<String, String> entry : files.entrySet()) {
             File file = new File(dir,entry.getKey());
-            if (file.exists())
-            {
-               if (obliterate)
-               {
+            if (file.exists()) {
+               if (obliterate) {
                   logger.log(Level.WARNING,"File "+file+" obliterated");
-               }
-               else
-               {
+               } else {
                   throw new JobSubmissionException("File "+file+" already exists, not replaced");
                }
             }
