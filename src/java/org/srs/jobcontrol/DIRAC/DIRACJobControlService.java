@@ -155,43 +155,31 @@ public class DIRACJobControlService extends CLIJobControlService {
                 System.out.println("*DEBUG* work dir \n"+job.getWorkingDirectory().toString());
             }
           
-            if (job.getWorkingDirectory() != null)
-                
-            {
+            if (job.getWorkingDirectory() != null) {
                File dir = new File(job.getWorkingDirectory());
-               for (int retry : retryDelays)
-               {
-                  if (!dir.exists())
-                  {
+               for (int retry : retryDelays) {
+                  if (!dir.exists()) {
                      // This occasionally fails due to NFS/automount problems, so retry a few times
                      boolean rc = dir.mkdirs();
-                     if (!rc) 
-                     {
-                        if (retry > 0)
-                        {
+                     if (!rc) {
+                        if (retry > 0) {
                            Thread.sleep(retry);
                            continue;
+                        } else {
+                            throw new JobSubmissionException("Could not create working directory "+dir);
                         }
-                        else {
-                             throw new JobSubmissionException("Could not create working directory "+dir);
-                         }
-                     }
-                     else 
-                     {
+                     } else {
                         undoList.add(new DeleteFile(dir));
                      }
-                  }
-                  else if (!dir.isDirectory()) {
-                       throw new JobSubmissionException("Working directory is not a directory "+dir);
-                   }
-                  else if (job.getArchiveOldWorkingDir() != null)
-                  {
+                  } else if (!dir.isDirectory()){
+                      throw new JobSubmissionException("Working directory is not a directory "+dir);
+                  } else if (job.getArchiveOldWorkingDir() != null) {
                      archiveOldWorkingDir(dir, job.getArchiveOldWorkingDir(),undoList);
                   }
                   break;
                }
                builder.directory(dir);
-               logger.log( Level.FINE, "Storing files for job" + dir.getAbsolutePath());
+               logger.log( Level.FINE, "Storing files for job: " + dir.getAbsolutePath());
                storeFiles(dir, job.getFiles(), undoList);
             }
             builder.redirectErrorStream(true);
