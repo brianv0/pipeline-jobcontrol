@@ -212,9 +212,9 @@ public class JobControlClient
        } else if(ex instanceof RemoteException){
            try{
                // Reset the reference, try to get the reference again.
+               logger.log( Level.WARNING, "Reference to Service likely died. Attempting to renew ref", ex);
                synchronized(this){
                    jcReference = null;
-                   logger.log( Level.WARNING, "Reference to Service likely died. Attempting to renew ref", ex);
                    getJobControlRef();
                }
            } catch(NotBoundException e){} catch(RemoteException e) {}
