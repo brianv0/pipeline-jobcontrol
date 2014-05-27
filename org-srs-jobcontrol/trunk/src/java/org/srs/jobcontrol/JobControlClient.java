@@ -53,6 +53,7 @@ public class JobControlClient
    }
    
    private JobControl getJobControlRef() throws NotBoundException, RemoteException {
+      logger.log( Level.INFO, "Connecting to job control service " + serviceName + " at " + host);
       if(jcReference == null){
           Registry registry = LocateRegistry.getRegistry( host, port );
           jcReference =  (JobControl) registry.lookup( serviceName + "-" + user );
@@ -212,10 +213,11 @@ public class JobControlClient
            try{
                // Reset the reference, try to get the reference again.
                jcReference = null;
-               logger.log( Level.FINE, "Reference to Service likely died. Attempting to renew ref", ex);
+               logger.log( Level.WARNING, "Reference to Service likely died. Attempting to renew ref", ex);
                getJobControlRef();
-           } catch(Exception e){}
+           } catch(NotBoundException e){} catch(RemoteException e) {}
            if(retry == 1){
+               logger.log( Level.SEVERE, "Unable to contact job control daemon", ex.getCause());
                throw new JobControlException("Remote Exception performing operation", ex.getCause());
            }
        }
