@@ -2,6 +2,7 @@ package org.srs.jobcontrol.slurm;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -80,7 +81,7 @@ public class SlurmScriptJobBuilder {
         Path basePath = Paths.get(job.getWorkingDirectory());
         for(String name: files.keySet()){
             Path target = basePath.resolve(name);
-            try (BufferedWriter writer = Files.newBufferedWriter(target, StandardOpenOption.CREATE_NEW)){
+            try (BufferedWriter writer = Files.newBufferedWriter(target, Charset.forName("UTF-8"), StandardOpenOption.CREATE_NEW)){
                 writer.write(files.get(name));
                 undoList.add(new DeleteFile(target.toFile()));
             }
