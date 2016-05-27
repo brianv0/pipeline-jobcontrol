@@ -60,18 +60,14 @@ public class SlurmScriptJobBuilder {
     }
 
     public void processArchiveOldWorkingDir(Job job) throws IOException{
-        if(LOGGER.isLoggable(Level.FINER)){
-            LOGGER.log(Level.FINER, "Checking if we need to archive...");
-        }
+        LOGGER.log(Level.FINER, "Checking if we need to archive...");
         if(job.getArchiveOldWorkingDir() != null){
             doArchiveOldWorkingDir(job);
         }
     }
 
     public void processEnv(Job job){
-        if(LOGGER.isLoggable(Level.FINER)){
-            LOGGER.log(Level.FINER, "Building Environment");
-        }
+        LOGGER.log(Level.FINER, "Building Environment");
         Map<String, String> env = job.getEnv();
         for(String key: env.keySet()){
             script.append(String.format("export %s=\"%s\"\n", key, env.get(key)));
@@ -91,9 +87,7 @@ public class SlurmScriptJobBuilder {
         Path basePath = Paths.get(job.getWorkingDirectory());
         for(String name: files.keySet()){
             Path target = basePath.resolve(name);
-            if(LOGGER.isLoggable(Level.FINER)){
-                LOGGER.log(Level.FINER, "Processing file " + target.toString());
-            }
+            LOGGER.log(Level.FINER, "Processing file " + target.toString());
             try (BufferedWriter writer = Files.newBufferedWriter(target, Charset.forName("UTF-8"), StandardOpenOption.CREATE_NEW)){
                 writer.write(files.get(name));
                 undoList.add(new DeleteFile(target.toFile()));
@@ -141,24 +135,18 @@ public class SlurmScriptJobBuilder {
     }
     
     private void doArchiveOldWorkingDir(Job job) throws IOException{
-        if(LOGGER.isLoggable(Level.FINER)){
-            LOGGER.log(Level.FINER, "Archiving previous working directory");
-        }
+        LOGGER.log(Level.FINER, "Archiving previous working directory");
         Path workingDir = Paths.get(job.getWorkingDirectory());
         Path archiveDir = Paths.get(job.getArchiveOldWorkingDir());
         Files.createDirectories(archiveDir);
         for(Path file : Files.newDirectoryStream(workingDir)){
-            if(LOGGER.isLoggable(Level.FINEST)){
-                LOGGER.log(Level.FINEST, String.format("Checking " + file.toString()));
-            }
+            LOGGER.log(Level.FINEST, String.format("Checking " + file.toString()));
             // Don't move archive root
             if(!file.equals(archiveDir.getParent())){
-                if(LOGGER.isLoggable(Level.FINEST)){
-                    LOGGER.log(Level.FINEST, 
-                            String.format("Archiving %s to %s", file.toString(), 
-                                    archiveDir.resolve(file.getFileName()))
-                    );
-                }
+                LOGGER.log(Level.FINEST, 
+                        String.format("Archiving %s to %s", file.toString(), 
+                                archiveDir.resolve(file.getFileName()))
+                );
                 Files.move(file, archiveDir.resolve(file.getFileName()));
             }
         }        
