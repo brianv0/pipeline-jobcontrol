@@ -184,7 +184,7 @@ public class SlurmJobControlService extends CLIJobControlService {
 
     @Override
     public String extractJobId(List<String> result) throws JobSubmissionException{
-        return result.get(0).substring("Submitted batch job ".length());   // jobid at end of this string
+        return result.get(result.size()-1).substring("Submitted batch job ".length());   // jobid at end of this string
     }
 
 }

@@ -44,7 +44,7 @@ public class SlurmScriptJobBuilder {
             processMaxCPU(job);
             processMaxMemory(job);
             processExtraOptions(job);
-            addSlurmDirective("-rn"); // Not re-runnable
+            addSlurmDirective("--no-requeue"); // Not re-runnable
             processEnv(job);
             script.append("\n");
             script.append("bash pipeline_wrapper\n");
