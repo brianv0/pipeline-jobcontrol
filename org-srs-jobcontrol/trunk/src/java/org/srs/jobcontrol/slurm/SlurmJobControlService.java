@@ -4,6 +4,7 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Supplier;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
+import java.nio.file.Paths;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -99,6 +100,7 @@ public class SlurmJobControlService extends CLIJobControlService {
         commands.add(command);
         
         ProcessBuilder builder = new ProcessBuilder();
+        builder.directory(Paths.get(job.getWorkingDirectory()).toFile());
         builder.redirectErrorStream(true);
         builder.command(commands);
         
@@ -113,7 +115,6 @@ public class SlurmJobControlService extends CLIJobControlService {
                 logger.log(Level.INFO, "Error submitting job:\n", Joiner.on("\n").join(output.getResult()));
                 throw new JobControlException("Command failed rc=" + rc,
                     new RuntimeException(Joiner.on("\n").join(output.getResult())));
-                
             }
             return extractJobId(output.getResult());
         } catch(IOException | InterruptedException ex) {
