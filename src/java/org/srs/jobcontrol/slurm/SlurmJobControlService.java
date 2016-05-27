@@ -43,17 +43,17 @@ public class SlurmJobControlService extends CLIJobControlService {
      * 
      * @param username Slurm user name
      */
-    private SlurmJobControlService(String username){ 
-        statii = new SlurmStatusSupplier(username);
+    private SlurmJobControlService(){ 
+        statii = new SlurmStatusSupplier(System.getProperty("user.name"));
     }
     
     public static void main(String[] args) throws RemoteException, JMException{
         String user = System.getProperty("user.name");
-        SlurmJobControlService service = new SlurmJobControlService(user);
+        SlurmJobControlService service = new SlurmJobControlService();
         JobControl stub = (JobControl) UnicastRemoteObject.exportObject(service, 1097);
         // Bind the remote object's stub in the registry
         Registry registry = LocateRegistry.getRegistry();
-        registry.rebind("PBSJobControlService-" + user, stub);
+        registry.rebind(service.getClass().getSimpleName() + "-" + user, stub);
         SlurmJobControlService.logger.log(Level.INFO, "Server ready, user {0}", user);
 
         // Register the JMX bean
