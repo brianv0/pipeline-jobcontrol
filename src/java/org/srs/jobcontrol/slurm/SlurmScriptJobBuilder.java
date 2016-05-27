@@ -57,6 +57,9 @@ public class SlurmScriptJobBuilder {
     }
 
     public void processArchiveOldWorkingDir(Job job) throws IOException{
+        if(LOGGER.isLoggable(Level.FINER)){
+            LOGGER.log(Level.FINER, "Checking if we need to archive...");
+        }
         if(job.getArchiveOldWorkingDir() != null){
             doArchiveOldWorkingDir(job);
         }
