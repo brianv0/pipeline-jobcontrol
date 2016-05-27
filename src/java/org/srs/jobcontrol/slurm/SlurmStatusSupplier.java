@@ -3,11 +3,15 @@ package org.srs.jobcontrol.slurm;
 
 import com.google.common.base.Supplier;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.srs.jobcontrol.JobControlException;
 import org.srs.jobcontrol.JobStatus;
@@ -86,8 +90,10 @@ public class SlurmStatusSupplier implements Supplier<Map<String, JobStatus>> {
     }    
 
     public static HashMap<String, JobStatus> parseSacctOutput(List<String> lines){
+        DateFormat df1 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
         HashMap<String, JobStatus> jobStatii = new HashMap<>();
         for(int i = 1; i < lines.size(); i++){
+            
             String line = lines.get(i);
             String[] fields = line.split("\\|");
             CommonJobStatus qs = new CommonJobStatus();
@@ -95,11 +101,23 @@ public class SlurmStatusSupplier implements Supplier<Map<String, JobStatus>> {
             qs.setHost(fields[StatusField.NODELIST]);
             qs.setComment(fields[StatusField.JOBNAME]);
             qs.setStatus(getStatus(fields[StatusField.STATE]));
+            
+            try {
+                if(!fields[StatusField.SUBMIT].isEmpty()){
+                    qs.setSubmitted(df1.parse(fields[StatusField.SUBMIT]));
+                }
+                if(!fields[StatusField.START].isEmpty()){
+                    qs.setStarted(df1.parse(fields[StatusField.START]));
+                }
+                if(!fields[StatusField.END].isEmpty()){
+                    qs.setEnded(df1.parse(fields[StatusField.END]));
+                }
+            } catch(ParseException ex) { /* Swallow */ }
+            
             try {
                 qs.setCpuUsed(Integer.parseInt(fields[StatusField.CPUTIMERAW]));
-            } catch (NumberFormatException ex){
-                qs.setCpuUsed(-1);
-            }
+            } catch (NumberFormatException ex){ /* swallow */ }
+            
             jobStatii.put(qs.getId(), qs);
         }
         return jobStatii;
