@@ -106,11 +106,14 @@ public class SlurmJobControlService extends CLIJobControlService {
         try {
             process = builder.start();
             OutputProcessor output = new OutputProcessor(process.getInputStream(), logger);
+            OutputProcessor error = new OutputProcessor(process.getErrorStream(), logger);
             process.waitFor();
             output.join();
+            error.join();
             int rc = process.exitValue();
             if(rc != 0){
-                throw new JobControlException("Command failed rc=" + rc);
+                throw new JobControlException("Command failed rc=" + rc,
+                new RuntimeException(Joiner.on("\n").join(error.getResult())));
             }
             return extractJobId(output.getResult());
         } catch(IOException | InterruptedException ex) {
