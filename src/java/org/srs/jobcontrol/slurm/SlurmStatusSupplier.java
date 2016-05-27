@@ -29,7 +29,7 @@ public class SlurmStatusSupplier implements Supplier<Map<String, JobStatus>> {
             "-u"
     );
     
-    private final static Logger LOGGER = Logger.getLogger("org.srs.jobcontrol.slurm.SlurmStatusSupplier");
+    private final static Logger LOGGER = Logger.getLogger("org.srs.jobcontrol");
             
     public static class StatusField {
         public static int JOBNAME = 0;
