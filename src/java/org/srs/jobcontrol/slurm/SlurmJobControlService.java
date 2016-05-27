@@ -94,7 +94,7 @@ public class SlurmJobControlService extends CLIJobControlService {
         List<String> commands = new ArrayList<>();
         commands.add(SUBMIT_COMMAND);
         
-        String command = "pipeline_wrapper"; // normally would do job.getCommand(), but that won't work here
+        String command = "slurm_pilot"; // normally would do job.getCommand(), but that won't work here
         commands.add(command);
         
         ProcessBuilder builder = new ProcessBuilder();
