@@ -101,8 +101,9 @@ public class SlurmScriptJobBuilder {
 
     public void processLogFile(Job job){
         String logFileName = job.getLogFile() == null ? "logFile.log" : sanitize(job.getLogFile());
-        addSlurmDirective(String.format("-o %s", logFileName));
-        job.getEnv().put("JOBCONTROL_LOGFILE", logFileName);
+        Path logPath = Paths.get(job.getWorkingDirectory()).resolve(logFileName);
+        addSlurmDirective(String.format("-o %s", logPath.toString()));
+        job.getEnv().put("JOBCONTROL_LOGFILE", logPath.toString());
     }
 
     public void processMaxCPU(Job job){
