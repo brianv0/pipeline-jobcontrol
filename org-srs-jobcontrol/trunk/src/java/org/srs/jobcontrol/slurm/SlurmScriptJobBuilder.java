@@ -25,8 +25,7 @@ public class SlurmScriptJobBuilder {
     private static final String SHEBANG = "#!/bin/bash\n";
     private final StringBuilder script;
     private final List<Runnable> undoList;
-    private final static Logger LOGGER = 
-            Logger.getLogger("org.srs.jobcontrol.slurm.SlurmScriptJobBuilder");
+    private final static Logger LOGGER = Logger.getLogger("org.srs.jobcontrol");
 
     SlurmScriptJobBuilder(){
         script = new StringBuilder(SHEBANG);
