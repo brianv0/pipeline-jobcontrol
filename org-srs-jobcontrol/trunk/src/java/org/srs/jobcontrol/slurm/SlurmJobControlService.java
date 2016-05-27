@@ -159,11 +159,10 @@ public class SlurmJobControlService extends CLIJobControlService {
             output.join();
             
             int rc = process.exitValue();
-            if(rc == 255){
-                throw new NoSuchJobException("No such job, id=" + jobID);
-            } else if(rc != 0){
-                throw new JobControlException("Command failed rc=" + rc, 
-                        new RuntimeException(Joiner.on("\n").join(output.getResult())));
+            if(rc != 0){
+                throw new JobControlException(
+                    "Command failed rc=" + rc + ":\n" + Joiner.on("\n").join(output.getResult())
+                );
             }
         } catch(IOException x) {
             throw new JobControlException("IOException while killing job " + jobID, x);
