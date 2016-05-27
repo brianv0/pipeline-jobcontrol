@@ -106,14 +106,14 @@ public class SlurmJobControlService extends CLIJobControlService {
         try {
             process = builder.start();
             OutputProcessor output = new OutputProcessor(process.getInputStream(), logger);
-            OutputProcessor error = new OutputProcessor(process.getErrorStream(), logger);
             process.waitFor();
             output.join();
-            error.join();
             int rc = process.exitValue();
             if(rc != 0){
+                logger.log(Level.INFO, "Error submitting job:\n", Joiner.on("\n").join(output.getResult()));
                 throw new JobControlException("Command failed rc=" + rc,
-                new RuntimeException(Joiner.on("\n").join(error.getResult())));
+                    new RuntimeException(Joiner.on("\n").join(output.getResult())));
+                
             }
             return extractJobId(output.getResult());
         } catch(IOException | InterruptedException ex) {
@@ -149,17 +149,15 @@ public class SlurmJobControlService extends CLIJobControlService {
             builder.command(commands);
             Process process = builder.start();
             OutputProcessor output = new OutputProcessor(process.getInputStream(), logger);
-            OutputProcessor error = new OutputProcessor(process.getErrorStream(), logger);
             process.waitFor();
             output.join();
-            error.join();
             
             int rc = process.exitValue();
             if(rc == 255){
                 throw new NoSuchJobException("No such job, id=" + jobID);
             } else if(rc != 0){
                 throw new JobControlException("Command failed rc=" + rc, 
-                        new RuntimeException(Joiner.on("\n").join(error.getResult())));
+                        new RuntimeException(Joiner.on("\n").join(output.getResult())));
             }
         } catch(IOException x) {
             throw new JobControlException("IOException while killing job " + jobID, x);
