@@ -41,10 +41,6 @@ public class SlurmJobControlService extends CLIJobControlService {
     
     private final Supplier<Map<String, JobStatus>> statii;
 
-    /**
-     * 
-     * @param username Slurm user name
-     */
     private SlurmJobControlService(){ 
         statii = new SlurmStatusSupplier(System.getProperty("user.name"));
     }

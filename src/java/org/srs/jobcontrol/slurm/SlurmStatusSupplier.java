@@ -11,7 +11,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.srs.jobcontrol.JobControlException;
 import org.srs.jobcontrol.JobStatus;
@@ -57,16 +56,14 @@ public class SlurmStatusSupplier implements Supplier<Map<String, JobStatus>> {
     @Override
     public Map<String, JobStatus> get(){
 
-        List<String> commands = new ArrayList<>();
-
-        commands.addAll(STATUS_COMMAND);
+        List<String> commands = new ArrayList<>(STATUS_COMMAND);
         commands.add(username);
 
-        ProcessBuilder builder = new ProcessBuilder();
-        builder.redirectErrorStream(true);
-        builder.command(commands);
         Process process;
         try {
+            ProcessBuilder builder = new ProcessBuilder();
+            builder.redirectErrorStream(true);
+            builder.command(commands);
             process = builder.start();
             OutputProcessor output = new OutputProcessor(process.getInputStream(), LOGGER);
             process.waitFor();
@@ -79,14 +76,10 @@ public class SlurmStatusSupplier implements Supplier<Map<String, JobStatus>> {
                 throw output.getStatus();
             }
 
-            List<String> result = output.getResult();
-
-            return parseSacctOutput(result);
+            return parseSacctOutput(output.getResult());
         } catch(IOException | InterruptedException ex) {
             throw new RuntimeException(new JobControlException("Unable to query jobs", ex));
-        }
-        
-        
+        }        
     }    
 
     public static HashMap<String, JobStatus> parseSacctOutput(List<String> lines){
