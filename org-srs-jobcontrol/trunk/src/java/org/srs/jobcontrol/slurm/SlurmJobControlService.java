@@ -93,31 +93,32 @@ public class SlurmJobControlService extends CLIJobControlService {
         if(logger.isLoggable(Level.FINEST)){
             logger.log(Level.FINEST, "Building job:\n" + job.toString());
         }
-        SlurmScriptJobBuilder jobBuilder = new SlurmScriptJobBuilder();
-        jobBuilder.build(job);
-        // submit
-        List<String> commands = new ArrayList<>();
-        commands.add(SUBMIT_COMMAND);
-        
-        String command = "slurm_pilot"; // normally would do job.getCommand(), but that won't work here
-        commands.add(command);
-        
-        ProcessBuilder builder = new ProcessBuilder();
-        builder.directory(Paths.get(job.getWorkingDirectory()).toFile());
-        builder.redirectErrorStream(true);
-        builder.command(commands);
-        
         Process process;
+        SlurmScriptJobBuilder jobBuilder = new SlurmScriptJobBuilder();
         try {
+            String command = "slurm_pilot"; // normally would do job.getCommand(), but that won't work here
+            List<String> commands = new ArrayList<>();
+            commands.add(SUBMIT_COMMAND);
+            commands.add(command);
+            
+            // Build job and process
+            jobBuilder.build(job);
+            ProcessBuilder builder = new ProcessBuilder();
+            builder.directory(Paths.get(job.getWorkingDirectory()).toFile());
+            builder.redirectErrorStream(true);
+            builder.command(commands);
+
+            // submit
             process = builder.start();
             OutputProcessor output = new OutputProcessor(process.getInputStream(), logger);
             process.waitFor();
             output.join();
             int rc = process.exitValue();
             if(rc != 0){
-                logger.log(Level.INFO, "Error submitting job:\n", Joiner.on("\n").join(output.getResult()));
-                throw new JobControlException("Command failed rc=" + rc,
-                    new RuntimeException(Joiner.on("\n").join(output.getResult())));
+                String error = Joiner.on("\n").join(output.getResult());
+                logger.log(Level.INFO, "Error submitting job:\n", error);
+                jobBuilder.rollback();
+                throw new JobControlException(String.format("Command failed rc=%d, error:%s", rc, error));
             }
             return extractJobId(output.getResult());
         } catch(IOException | InterruptedException ex) {
