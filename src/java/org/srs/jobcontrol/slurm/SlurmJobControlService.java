@@ -90,6 +90,9 @@ public class SlurmJobControlService extends CLIJobControlService {
     }
 
     private String submitInternal(Job job) throws JobSubmissionException, JobControlException{
+        if(logger.isLoggable(Level.FINEST)){
+            logger.log(Level.FINEST, "Building job:\n" + job.toString());
+        }
         SlurmScriptJobBuilder jobBuilder = new SlurmScriptJobBuilder();
         jobBuilder.build(job);
         // submit
