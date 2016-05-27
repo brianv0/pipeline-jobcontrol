@@ -40,19 +40,16 @@ public class SlurmScriptJobBuilder {
             processExtraOptions(job);
             addSlurmDirective("-rn"); // Not re-runnable
             processEnv(job);
-            processFiles(job);
             script.append("\n");
             script.append("bash pipeline_wrapper\n");
+            job.getFiles().put("slurm_pilot", script.toString());
+            processFiles(job);
         } catch (IOException ex){
             for(Runnable undoItem: undoList){
                 undoItem.run();
             }
             throw new JobSubmissionException("Unable to build job", ex);
         }
-    }
-
-    public String getPBSScript(){
-        return script.toString();
     }
 
     public void processArchiveOldWorkingDir(Job job) throws IOException{
