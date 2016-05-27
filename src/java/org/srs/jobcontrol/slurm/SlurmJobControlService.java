@@ -1,5 +1,6 @@
 package org.srs.jobcontrol.slurm;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.Supplier;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
@@ -145,14 +146,17 @@ public class SlurmJobControlService extends CLIJobControlService {
             builder.command(commands);
             Process process = builder.start();
             OutputProcessor output = new OutputProcessor(process.getInputStream(), logger);
+            OutputProcessor error = new OutputProcessor(process.getErrorStream(), logger);
             process.waitFor();
             output.join();
+            error.join();
             
             int rc = process.exitValue();
             if(rc == 255){
                 throw new NoSuchJobException("No such job, id=" + jobID);
             } else if(rc != 0){
-                throw new JobControlException("Command failed rc=" + rc);
+                throw new JobControlException("Command failed rc=" + rc, 
+                        new RuntimeException(Joiner.on("\n").join(error.getResult())));
             }
         } catch(IOException x) {
             throw new JobControlException("IOException while killing job " + jobID, x);

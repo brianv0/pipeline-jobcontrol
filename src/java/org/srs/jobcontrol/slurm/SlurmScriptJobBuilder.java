@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.srs.jobcontrol.Job;
 import org.srs.jobcontrol.JobSubmissionException;
 import org.srs.jobcontrol.common.JobControlService.DeleteFile;
@@ -23,6 +25,8 @@ public class SlurmScriptJobBuilder {
     private static final String SHEBANG = "#!/bin/bash\n";
     private final StringBuilder script;
     private final List<Runnable> undoList;
+    private final static Logger LOGGER = 
+            Logger.getLogger("org.srs.jobcontrol.slurm.SlurmScriptJobBuilder");
 
     SlurmScriptJobBuilder(){
         script = new StringBuilder(SHEBANG);
@@ -59,6 +63,9 @@ public class SlurmScriptJobBuilder {
     }
 
     public void processEnv(Job job){
+        if(LOGGER.isLoggable(Level.FINER)){
+            LOGGER.log(Level.FINER, "Building Environment");
+        }
         Map<String, String> env = job.getEnv();
         for(String key: env.keySet()){
             script.append(String.format("export %s=\"%s\"\n", key, env.get(key)));
@@ -78,6 +85,9 @@ public class SlurmScriptJobBuilder {
         Path basePath = Paths.get(job.getWorkingDirectory());
         for(String name: files.keySet()){
             Path target = basePath.resolve(name);
+            if(LOGGER.isLoggable(Level.FINER)){
+                LOGGER.log(Level.FINER, "Processing file " + target.toString());
+            }
             try (BufferedWriter writer = Files.newBufferedWriter(target, Charset.forName("UTF-8"), StandardOpenOption.CREATE_NEW)){
                 writer.write(files.get(name));
                 undoList.add(new DeleteFile(target.toFile()));
@@ -125,12 +135,24 @@ public class SlurmScriptJobBuilder {
     }
     
     private void doArchiveOldWorkingDir(Job job) throws IOException{
+        if(LOGGER.isLoggable(Level.FINER)){
+            LOGGER.log(Level.FINER, "Archiving previous working directory");
+        }
         Path workingDir = Paths.get(job.getWorkingDirectory());
         Path archiveDir = Paths.get(job.getArchiveOldWorkingDir());
         Files.createDirectories(archiveDir);
         for(Path file : Files.newDirectoryStream(workingDir)){
+            if(LOGGER.isLoggable(Level.FINEST)){
+                LOGGER.log(Level.FINEST, String.format("Checking " + file.toString()));
+            }
             // Don't move archive root
             if(!file.equals(archiveDir.getParent())){
+                if(LOGGER.isLoggable(Level.FINEST)){
+                    LOGGER.log(Level.FINEST, 
+                            String.format("Archiving %s to %s", file.toString(), 
+                                    archiveDir.resolve(file.getFileName()))
+                    );
+                }
                 Files.move(file, archiveDir.resolve(file.getFileName()));
             }
         }        
