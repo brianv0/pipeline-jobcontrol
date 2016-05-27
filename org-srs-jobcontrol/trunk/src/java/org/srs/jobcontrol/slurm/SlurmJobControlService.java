@@ -122,6 +122,7 @@ public class SlurmJobControlService extends CLIJobControlService {
             return extractJobId(output.getResult());
         } catch(IOException | InterruptedException ex) {
             logger.log(Level.SEVERE, "Unkown error submitting job", ex);
+            jobBuilder.rollback();
             throw new JobControlException("Error submitting job", ex);
         }
     }

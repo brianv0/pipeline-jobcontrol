@@ -52,10 +52,14 @@ public class SlurmScriptJobBuilder {
             processFiles(job);
         } catch (IOException ex){
             LOGGER.log(Level.INFO, "Error building job, removing files...", ex);
-            for(Runnable undoItem: undoList){
-                undoItem.run();
-            }
+            rollback();
             throw new JobSubmissionException("Unable to build job", ex);
+        }
+    }
+    
+    public void rollback(){
+        for(Runnable undoItem: undoList){
+            undoItem.run();
         }
     }
 
