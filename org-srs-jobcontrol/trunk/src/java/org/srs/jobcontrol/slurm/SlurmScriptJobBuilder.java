@@ -35,6 +35,9 @@ public class SlurmScriptJobBuilder {
 
     public void build(Job job) throws JobSubmissionException{
         try {
+            if(LOGGER.isLoggable(Level.FINER)){
+                LOGGER.log(Level.FINER, "Building Job");
+            }
             processWorkingDirectory(job);
             processArchiveOldWorkingDir(job);
             processName(job);
@@ -49,6 +52,7 @@ public class SlurmScriptJobBuilder {
             job.getFiles().put("slurm_pilot", script.toString());
             processFiles(job);
         } catch (IOException ex){
+            LOGGER.log(Level.INFO, "Error building job, removing files...", ex);
             for(Runnable undoItem: undoList){
                 undoItem.run();
             }
