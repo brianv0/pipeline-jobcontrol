@@ -91,7 +91,7 @@ public class SlurmScriptJobBuilder {
         Path basePath = Paths.get(job.getWorkingDirectory());
         for(String name: files.keySet()){
             Path target = basePath.resolve(name);
-            LOGGER.log(Level.FINER, "Processing file " + target.toString());
+            LOGGER.log(Level.FINER, "Processing file {0}", target.toString());
             try (BufferedWriter writer = Files.newBufferedWriter(target, Charset.forName("UTF-8"), StandardOpenOption.CREATE_NEW)){
                 writer.write(files.get(name));
                 undoList.add(new DeleteFile(target.toFile()));

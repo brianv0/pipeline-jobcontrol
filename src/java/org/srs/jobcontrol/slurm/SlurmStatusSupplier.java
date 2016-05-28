@@ -47,8 +47,6 @@ public class SlurmStatusSupplier implements Supplier<Map<String, JobStatus>> {
         public static int EXITCODE = 9;
     };
     
-    
-    
     public SlurmStatusSupplier(String username){
         this.username = username;
     }
