@@ -25,9 +25,9 @@ public class SlurmStatusSupplier implements Supplier<Map<String, JobStatus>> {
     
     private final String username;
     private final static List<String> STATUS_COMMAND = Arrays.asList(
-            "/opt/slurm/default/bin/sacct",
+            "sacct",
             "-o",
-            "jobname,state,jobid,submit,start,end,nodelist,cputimeraw,maxvmsize,exitcode",
+            "jobname%32,state,jobid%12,submit,start,end,nodelist,cputimeraw,maxvmsize,exitcode",
             "-P",
             "-u"
     );
