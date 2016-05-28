@@ -142,7 +142,7 @@ public class SlurmScriptJobBuilder {
     private void doArchiveOldWorkingDir(Job job) throws IOException{
         LOGGER.log(Level.FINER, "Archiving previous working directory");
         Path workingDir = Paths.get(job.getWorkingDirectory());
-        Path archiveDir = Paths.get(job.getArchiveOldWorkingDir());
+        Path archiveDir = workingDir.resolve(job.getArchiveOldWorkingDir());
         Files.createDirectories(archiveDir);
         for(Path file : Files.newDirectoryStream(workingDir)){
             LOGGER.log(Level.FINEST, String.format("Checking " + file.toString()));
