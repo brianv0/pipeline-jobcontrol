@@ -72,7 +72,7 @@ public class SlurmJobControlService extends CLIJobControlService {
             logger.log(Level.FINE, "job {0} submitted", jobName);
             nSubmitted.incrementAndGet();
             lastSuccessfulJobSubmissionTime = System.currentTimeMillis();
-            logger.info("END PBS JobControlService submit");
+            logger.info("END slurm JobControlService submit");
             return jobName;
         } catch(ServerNotActiveException ex) {
             logger.log(Level.SEVERE, "Unexpected error", ex);
@@ -87,7 +87,7 @@ public class SlurmJobControlService extends CLIJobControlService {
 
     private String submitInternal(Job job) throws JobSubmissionException, JobControlException{
         if(logger.isLoggable(Level.FINEST)){
-            logger.log(Level.FINEST, "Building job:\n" + job.toString());
+            logger.log(Level.FINEST, "Building job:\n{0}", job.toString());
         }
         Process process;
         SlurmScriptJobBuilder jobBuilder = new SlurmScriptJobBuilder();
