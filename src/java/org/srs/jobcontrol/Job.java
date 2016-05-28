@@ -1,5 +1,6 @@
 package org.srs.jobcontrol;
 
+import com.google.common.base.MoreObjects;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
@@ -149,4 +150,22 @@ public class Job implements Serializable
    {
       this.archiveOldWorkingDir = archiveName;
    }
+
+   @Override
+   public String toString(){
+      return MoreObjects.toStringHelper(this.getClass())
+         .add("name", name)
+         .add("command", command)
+         .add("currentDirectory", currentDirectory)
+         .add("logFile", logFile)
+         .add("maxCPU", maxCPU)
+         .add("maxMemory", maxMemory)
+         .add("extraOptions", extraOptions)
+         .add("archiveOldWorkingDir", archiveOldWorkingDir)
+         .add("files", files)
+         .add("env", env)
+         .omitNullValues()
+         .toString();
+    }
+
 }
