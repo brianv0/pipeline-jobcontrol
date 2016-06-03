@@ -130,4 +130,57 @@
          <type>int</type>
       </attribute>
    </tag>
+   <tag>
+      <name>status</name>
+      <tag-class>org.srs.jobcontrol.web.taglib.RemoteFile</tag-class>
+      <body-content>empty</body-content>
+      <attribute>
+         <name>var</name>
+         <required>true</required>
+         <rtexprvalue>false</rtexprvalue>
+         <type>java.lang.String</type>
+      </attribute>
+      <attribute>
+         <name>stream</name>
+         <required>true</required>
+         <rtexprvalue>true</rtexprvalue>
+         <type>java.lang.String</type>
+      </attribute>
+      <attribute>
+         <name>processInstance</name>
+         <required>true</required>
+         <rtexprvalue>true</rtexprvalue>
+         <type>java.lang.String</type>
+      </attribute>
+      <attribute>
+         <name>filePath</name>
+         <required>true</required>
+         <rtexprvalue>true</rtexprvalue>
+         <type>java.lang.String</type>
+      </attribute>
+      <attribute>
+         <name>host</name>
+         <required>false</required>
+         <rtexprvalue>true</rtexprvalue>
+         <type>java.lang.String</type>
+      </attribute>
+      <attribute>
+         <name>serviceName</name>
+         <required>false</required>
+         <rtexprvalue>true</rtexprvalue>
+         <type>java.lang.String</type>
+      </attribute>
+      <attribute>
+         <name>user</name>
+         <required>false</required>
+         <rtexprvalue>true</rtexprvalue>
+         <type>java.lang.String</type>
+      </attribute>
+      <attribute>
+         <name>port</name>
+         <required>false</required>
+         <rtexprvalue>true</rtexprvalue>
+         <type>int</type>
+      </attribute>
+   </tag>
 </taglib>
