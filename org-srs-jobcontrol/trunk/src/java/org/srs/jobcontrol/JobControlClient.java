@@ -74,9 +74,7 @@ public class JobControlClient
            try {
                jobId = getJobControlRef().submit( job );
                break;
-           } catch(RemoteException ex) {
-               checkException( ex, retry );
-           } catch(NotBoundException ex) {
+           } catch(RemoteException | NotBoundException ex) {
                checkException( ex, retry );
            }
        }
@@ -96,9 +94,7 @@ public class JobControlClient
             try {
                 smap = getJobControlRef().arrayStatus( jobIDs );
                 break;
-            } catch(RemoteException ex) {
-                checkException( ex, retry );
-            } catch(NotBoundException ex) {
+            } catch(RemoteException | NotBoundException ex) {
                 checkException( ex, retry );
             }
         }
@@ -119,9 +115,7 @@ public class JobControlClient
            try {
                stat = getJobControlRef().status( jobID );
                break;
-           } catch(RemoteException ex) {
-               checkException( ex, retry );
-           } catch(NotBoundException ex) {
+           } catch(RemoteException | NotBoundException ex) {
                checkException( ex, retry );
            }
        }
@@ -146,9 +140,7 @@ public class JobControlClient
            try {
                fContent = getJobControlRef().getFile( spID, workingDir, fileName );
                break;
-           } catch(RemoteException ex) {
-               checkException( ex, retry );
-           } catch(NotBoundException ex) {
+           } catch(RemoteException | NotBoundException ex) {
                checkException( ex, retry );
            }
        }
@@ -174,9 +166,7 @@ public class JobControlClient
                is = RemoteInputStreamClient.wrap(
                        getJobControlRef().getFileStream( spID, workingDir, fileName ) );
                break;
-           } catch(RemoteException ex) {
-               checkException( ex, retry );
-           } catch(NotBoundException ex) {
+           } catch(RemoteException | NotBoundException ex) {
                checkException( ex, retry );
            }
        }
@@ -193,9 +183,7 @@ public class JobControlClient
             try {
                 getJobControlRef().cancel( jobID );
                 break;
-            } catch(RemoteException ex) {
-                checkException( ex, retry );
-            } catch(NotBoundException ex) {
+            } catch(RemoteException | NotBoundException ex) {
                 checkException( ex, retry );
             }
             return;
@@ -217,7 +205,7 @@ public class JobControlClient
                    jcReference = null;
                    getJobControlRef();
                }
-           } catch(NotBoundException e){} catch(RemoteException e) {}
+           } catch(NotBoundException | RemoteException e){}
            if(retry == 1){
                logger.log( Level.SEVERE, "Unable to contact job control daemon", ex.getCause());
                throw new JobControlException("Remote Exception performing operation", ex.getCause());
