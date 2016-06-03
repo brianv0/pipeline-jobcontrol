@@ -119,6 +119,7 @@ public abstract class JobControlService implements JobControl, JobControlService
      * @throws JobControlException
      * @throws IOException 
      */
+    @Override
     public RemoteInputStream getFileStream(String spID, File workingDir, String fileName)
             throws JobControlException, IOException {
         File targetFile = new File(workingDir, fileName);
@@ -200,7 +201,7 @@ public abstract class JobControlService implements JobControl, JobControlService
             if( !maybeChild.getCanonicalPath().startsWith( workingDir.getCanonicalPath() ) ){
                 throw new SecurityException("The filename is invalid");
             }
-        } catch (Exception ex) {
+        } catch (IOException | SecurityException ex) {
             throw new JobControlException("Unable to validate access to file", ex);
         } finally {
             try {spid_rd.close();} catch (Exception e){}
