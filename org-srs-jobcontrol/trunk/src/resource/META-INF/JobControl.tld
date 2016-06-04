@@ -131,7 +131,7 @@
       </attribute>
    </tag>
    <tag>
-      <name>status</name>
+      <name>remoteFile</name>
       <tag-class>org.srs.jobcontrol.web.taglib.RemoteFile</tag-class>
       <body-content>empty</body-content>
       <attribute>
