@@ -116,7 +116,9 @@ public class SlurmStatusSupplier implements Supplier<Map<String, JobStatus>> {
     
     public static JobStatus.Status getStatus(String status){
         JobStatus.Status stat;
-        switch(status.toUpperCase()){
+        String[] fullStatus = status.split(" ");
+        String statusString = fullStatus[0];
+        switch(statusString.toUpperCase()){
             case "PENDING":
                 stat = JobStatus.Status.WAITING;
                 break;
