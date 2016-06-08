@@ -142,17 +142,26 @@ public class SlurmScriptJobBuilder {
     private void doArchiveOldWorkingDir(Job job) throws IOException{
         LOGGER.log(Level.FINER, "Archiving previous working directory");
         Path workingDir = Paths.get(job.getWorkingDirectory());
-        Path archiveDir = workingDir.resolve(job.getArchiveOldWorkingDir());
+        Path archiveDir = workingDir.resolve("archive").resolve(job.getArchiveOldWorkingDir());
         Files.createDirectories(archiveDir);
-        for(Path file : Files.newDirectoryStream(workingDir)){
+        undoList.add(new DeleteFile(archiveDir.toFile()));
+        for(final Path file : Files.newDirectoryStream(workingDir)){
             LOGGER.log(Level.FINEST, String.format("Checking " + file.toString()));
             // Don't move archive root
             if(!file.equals(archiveDir.getParent())){
                 LOGGER.log(Level.FINEST, 
-                        String.format("Archiving %s to %s", file.toString(), 
-                                archiveDir.resolve(file.getFileName()))
+                        String.format("Archiving %s to %s", file.toString(), archiveDir.resolve(file.getFileName()))
                 );
+                final Path newFile = archiveDir.resolve(file.getFileName());
                 Files.move(file, archiveDir.resolve(file.getFileName()));
+                undoList.add(new Runnable() {
+                    @Override
+                    public void run(){
+                        try {
+                            Files.move(newFile, file);
+                        } catch(IOException ex) { /* swallow */}
+                    }
+                });
             }
         }        
     }
