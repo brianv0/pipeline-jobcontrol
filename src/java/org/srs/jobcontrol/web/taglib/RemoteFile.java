@@ -1,13 +1,10 @@
 
 package org.srs.jobcontrol.web.taglib;
 
-import com.google.common.base.Charsets;
-import com.google.common.io.CharStreams;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.concurrent.TimeoutException;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.SimpleTagSupport;
 import org.srs.jobcontrol.JobControlClient;
@@ -33,10 +30,9 @@ public class RemoteFile extends SimpleTagSupport {
         try {
             Path workingDir = filePath.getParent();
             JobControlClient client = new JobControlClient(user, host, port, serviceName);   
-            InputStream fileStream = client.getFileStream(spid, workingDir.toFile(), filePath.getFileName().toString());
-            String result = CharStreams.toString(new InputStreamReader(fileStream, Charsets.UTF_8));
+            String result = client.getFile(spid, workingDir.toFile(), filePath.getFileName().toString());
             getJspContext().setAttribute(var, result);
-        } catch(JobControlException | IOException ex) {
+        } catch(JobControlException | TimeoutException | IOException ex) {
             throw new JspException("Error getting status for id " + spid, ex);
         }
     }
